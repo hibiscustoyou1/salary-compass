@@ -6,23 +6,23 @@ const apiClient = axios.create({
   timeout: 5000,
 });
 
+// 请求拦截：注入 Token
 apiClient.interceptors.request.use((config) => {
-  const token = localStorage.getItem('salary_access_key');
+  const token = localStorage.getItem('salary_token'); // 改名 salary_token
   if (token) {
-    config.headers['x-access-key'] = token;
+    // ✅ 使用标准 Header
+    config.headers['Authorization'] = `Bearer ${token}`;
   }
   return config;
 });
 
+// 响应拦截：处理 401
 apiClient.interceptors.response.use(
   (response: AxiosResponse<ApiResponse>) => {
     const res = response.data;
-    
-    // [自动适配] 这里的 ApiCode.SUCCESS 现在就是 200
     if (res.code === ApiCode.SUCCESS) {
       return response;
     } else {
-      // [自动适配] 这里的 ApiCode.UNAUTHORIZED 现在就是 401
       if (res.code === ApiCode.UNAUTHORIZED) {
         handleLogout();
       }
@@ -30,27 +30,31 @@ apiClient.interceptors.response.use(
     }
   },
   (error) => {
-    if (error.response) {
-      // 兼容逻辑：HTTP 401 或 Body code 401 都会触发登出
-      if (error.response.status === 401 || error.response.data?.code === ApiCode.UNAUTHORIZED) {
-        handleLogout();
-      }
+    if (error.response?.status === 401 || error.response?.data?.code === ApiCode.UNAUTHORIZED) {
+      handleLogout();
     }
     return Promise.reject(error);
   }
 );
 
 function handleLogout() {
-  localStorage.removeItem('salary_access_key');
-  window.location.reload();
+  localStorage.removeItem('salary_token');
+  // 避免无限刷新，可增加判断
+  if (window.location.pathname !== '/login') {
+    window.location.reload();
+  }
 }
 
-export const verifyKey = async (key: string): Promise<boolean> => {
+// ✅ 修改：Verify 成功后返回 Token (string) 或 null
+export const verifyKey = async (key: string): Promise<string | null> => {
   try {
-    await apiClient.post<ApiResponse>('/verify', { key });
-    return true;
+    const res = await apiClient.post<ApiResponse<{ token: string }>>('/verify', { key });
+    if (res.data.code === ApiCode.SUCCESS && res.data.data?.token) {
+      return res.data.data.token;
+    }
+    return null;
   } catch (e) {
-    return false;
+    return null;
   }
 };
 

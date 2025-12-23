@@ -38,11 +38,10 @@
 
 <script setup lang="ts">
   import { ref } from 'vue';
-  import { verifyKey } from '../api/wageService.ts';
-  import { sha256 } from '../utils/crypto.ts'; // [新增] 引入工具
+  import { verifyKey } from '../api/wageService'; // 注意去除 .ts 后缀
+  import { sha256 } from '../utils/crypto';
 
   const emit = defineEmits(['login-success']);
-
   const inputKey = ref('');
   const loading = ref(false);
   const errorMsg = ref('');
@@ -54,14 +53,15 @@
     errorMsg.value = '';
 
     try {
-      // [安全升级] 先计算 Hash，再发送网络请求
-      // 这样网络上跑的、LocalStorage 里存的，都是乱码的 Hash 值
+      // 1. 依然计算 Hash 发送给后端验证 (Password -> Hash)
       const hashedKey = await sha256(inputKey.value);
 
-      const isValid = await verifyKey(hashedKey);
-      if (isValid) {
-        // 验证成功：存入 Hash 值
-        localStorage.setItem('salary_access_key', hashedKey);
+      // 2. 验证并获取 Token
+      const token = await verifyKey(hashedKey);
+
+      if (token) {
+        // ✅ 验证成功：存入 Token 而不是 Hash
+        localStorage.setItem('salary_token', token);
         emit('login-success');
       } else {
         errorMsg.value = '密钥错误，请重试';
