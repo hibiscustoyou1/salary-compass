@@ -33,8 +33,11 @@
     }
   },
   "scripts": {
-    "build": "tsup src/index.ts src/server/index.ts src/client/index.ts --format cjs,esm --dts --shims",
-    "dev": "tsup src/index.ts src/server/index.ts src/client/index.ts --format cjs,esm --dts --shims --watch"
+    "build:server": "tsup src/server/index.ts --format cjs,esm --dts --shims --out-dir dist/server",
+    "build:client": "tsup src/client/index.ts src/index.ts src/common/index.ts --format cjs,esm --dts",
+    "build": "pnpm clean && pnpm build:server && pnpm build:client",
+    "dev": "pnpm build:server && pnpm build:client",
+    "clean": "rm -rf dist"
   },
   "devDependencies": {
     "@types/node": "^24.10.4",

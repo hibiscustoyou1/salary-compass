@@ -4,10 +4,10 @@ import cors from 'cors';
 import path from 'path';
 import dotenv from 'dotenv';
 import { initRoutes } from '@/routes';
-import { PROJECT_ROOT_FOR_SERVER, CLIENT_DIST_PATH } from '@repo/shared/server';
+import { PROJECT_ROOT, CLIENT_DIST_PATH } from '@repo/shared/server';
 
 const app = express();
-dotenv.config({ path: path.resolve(PROJECT_ROOT_FOR_SERVER, '.env') });
+dotenv.config({ path: path.resolve(PROJECT_ROOT, '.env') });
 const PORT = process.env.PORT || 3000;
 
 app.use(cors());
@@ -32,6 +32,6 @@ if (clientDistPath) {
 }
 
 app.listen(PORT, () => {
-  console.log('env path:', path.resolve(PROJECT_ROOT_FOR_SERVER, '.env'));
+  console.log('env path:', path.resolve(PROJECT_ROOT, '.env'));
   console.log(`🚀 服务已启动: http://localhost:${PORT}`);
 });
