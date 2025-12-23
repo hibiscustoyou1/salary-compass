@@ -14,7 +14,7 @@ export interface ApiResponse<T = any> {
   msg: string;
 }
 
-export interface Wage {
+export interface WageData {
   id: number;
   year: number;
   month: number;

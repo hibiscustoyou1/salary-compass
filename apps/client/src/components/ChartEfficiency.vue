@@ -34,12 +34,12 @@
     {
       name: '到手率 %',
       series: props.data.map(i => i.grossPay ? Number(((i.netPay / i.grossPay) * 100).toFixed(1)) : 0),
-      type: 'line', color: '#10b981', smooth: true
+      type: 'line' as const, color: '#10b981', smooth: true
     },
     {
       name: '实际税率 %',
       series: props.data.map(i => i.grossPay ? Number(((i.tax / i.grossPay) * 100).toFixed(1)) : 0),
-      type: 'line', color: '#ef4444', smooth: true
+      type: 'line' as const, color: '#ef4444', smooth: true
     }
   ]);
 

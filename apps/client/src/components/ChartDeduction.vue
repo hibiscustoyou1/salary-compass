@@ -39,7 +39,10 @@
       { name: '医疗', values: [sumData('medical')], color: '#06b6d4' },
       { name: '年金', values: [sumData('annuity')], color: '#8b5cf6' },
       { name: '其他', values: [sumData('unemployment') + sumData('unionFee')], color: '#9ca3af' },
-    ].filter(i => i.values[0] > 0);
+    ].filter(i => {
+      const [val = -1] = i.values;
+      return val > 0;
+    });
   });
 
   const config = computed(() => {

@@ -1,5 +1,5 @@
 import axios, { type AxiosResponse } from 'axios';
-import { ApiCode, type ApiResponse, type Wage } from '@repo/shared';
+import { ApiCode, type ApiResponse, type WageData } from '@repo/shared';
 
 const apiClient = axios.create({
   baseURL: '/api',
@@ -54,9 +54,9 @@ export const verifyKey = async (key: string): Promise<boolean> => {
   }
 };
 
-export const getWageData = async (): Promise<Wage[]> => {
-  const response = await apiClient.get<ApiResponse<Wage[]>>('/wages');
+export const getWageData = async (): Promise<WageData[]> => {
+  const response = await apiClient.get<ApiResponse<WageData[]>>('/wages');
   return response.data.data;
 };
 
-export type { Wage };
+export type { WageData };

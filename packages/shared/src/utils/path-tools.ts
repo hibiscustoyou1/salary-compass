@@ -35,7 +35,7 @@ export function findProjectRoot(startDir: string): string {
  */
 export const resolveClientPath = (rootPath: string): string | null => {
   // 1. Prod: dist/client
-  const prodClient = path.join(rootPath, 'client');
+  const prodClient = path.join(rootPath, 'dist/client');
   if (fs.existsSync(prodClient) && fs.existsSync(path.join(prodClient, 'index.html'))) {
     return prodClient;
   }

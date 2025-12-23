@@ -34,12 +34,12 @@
     {
       name: '岗位工资',
       series: props.data.map(i => (i as any).baseSalary || 0),
-      type: 'line', useArea: true, color: '#6366f1'
+      type: 'line' as const, useArea: true, color: '#6366f1'
     },
     {
       name: '绩效奖金',
       series: props.data.map(i => ((i as any).meritPay || 0) + ((i as any).quarterlyBonus || 0) + ((i as any).annualBonus || 0)),
-      type: 'line', useArea: true, color: '#a855f7'
+      type: 'line' as const, useArea: true, color: '#a855f7'
     }
   ]);
 

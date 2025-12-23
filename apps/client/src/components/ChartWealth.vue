@@ -36,12 +36,12 @@
       {
         name: '累计到手现金',
         series: props.data.map(i => { cumCash += (i.netPay || 0); return cumCash; }),
-        type: 'line', useArea: true, color: '#10b981'
+        type: 'line' as const, useArea: true, color: '#10b981'
       },
       {
         name: '累计隐形资产',
         series: props.data.map(i => { cumAsset += ((i.housingFund || 0) + (i.annuity || 0)); return cumAsset; }),
-        type: 'line', useArea: true, color: '#3b82f6'
+        type: 'line' as const, useArea: true, color: '#3b82f6'
       }
     ];
   });

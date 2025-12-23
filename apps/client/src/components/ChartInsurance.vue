@@ -31,10 +31,10 @@
   const configKey = computed(() => `insurance-${isDark.value ? 'dark' : 'light'}`);
 
   const dataset = computed(() => [
-    { name: '养老', series: props.data.map(i => i.pension), type: 'bar', color: '#3b82f6' },
-    { name: '医疗', series: props.data.map(i => i.medical), type: 'bar', color: '#06b6d4' },
-    { name: '公积金', series: props.data.map(i => i.housingFund), type: 'bar', color: '#6366f1' },
-    { name: '个税', series: props.data.map(i => i.tax), type: 'bar', color: '#f97316' },
+    { name: '养老', series: props.data.map(i => i.pension), type: 'bar' as const, color: '#3b82f6' },
+    { name: '医疗', series: props.data.map(i => i.medical), type: 'bar' as const, color: '#06b6d4' },
+    { name: '公积金', series: props.data.map(i => i.housingFund), type: 'bar' as const, color: '#6366f1' },
+    { name: '个税', series: props.data.map(i => i.tax), type: 'bar' as const, color: '#f97316' },
   ]);
 
   const config = computed(() => {

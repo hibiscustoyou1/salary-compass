@@ -1,12 +1,16 @@
+// 文件: scripts/vault.ts
 import * as fs from 'fs';
 import * as crypto from 'crypto';
 import * as path from 'path';
-import { PROJECT_ROOT } from '@repo/shared/server';
+// [修改] 引入函数
+import { getServerPaths } from '@repo/shared/server';
 
 const ALGORITHM: string = 'aes-256-cbc';
-// ⚠️ 生产环境建议通过环境变量注入
 const PASSWORD = process.env.VAULT_PASS || 'default';
 const SALT = process.env.VAULT_SALT || 'bWeiWDslMrj$#$Zfk~If';
+
+// [新增] 获取路径 (注意：tsx 运行环境也有 __dirname)
+const { PROJECT_ROOT } = getServerPaths(__dirname);
 
 // 定义文件路径
 const envPath = path.resolve(PROJECT_ROOT, '.env');
