@@ -1,8 +1,17 @@
+// client/src/main.ts
 import { createApp } from 'vue'
 import './style.css'
 import App from './App.vue'
-import router from './router' // 引入 router
+
+// 引入 vue-data-ui 及其样式
+import { VueUiXy, VueUiDonut, VueUiHeatmap } from 'vue-data-ui'
+import 'vue-data-ui/style.css'
 
 const app = createApp(App)
-app.use(router) // 注册 router
+
+// 注册我们将要使用的核心组件
+app.component('VueUiXy', VueUiXy)
+app.component('VueUiDonut', VueUiDonut)
+app.component('VueUiHeatmap', VueUiHeatmap)
+
 app.mount('#app')

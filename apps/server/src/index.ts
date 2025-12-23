@@ -1,8 +1,9 @@
+// server/src/index.ts
 import express from 'express';
 import cors from 'cors';
 import path from 'path';
 import dotenv from 'dotenv';
-import routes from '@/routes';
+import { initRoutes } from '@/routes';
 import { PROJECT_ROOT, resolveClientPath } from '@repo/shared';
 
 const app = express();
@@ -12,25 +13,7 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
-// [新增] 验证接口 (用于前端登录页检测密码是否正确)
-app.post('/api/verify', (req, res) => {
-  const { key } = req.body;
-  if (key === process.env.ACCESS_KEY) {
-    res.json({ success: true });
-  } else {
-    res.status(401).json({ success: false });
-  }
-});
-
-// 1. API 路由 (使用自动导入的路由)
-app.use('/api', routes);
-app.all(/^\/api\/.*$/, (req, res) => {
-  console.warn(`⚠️ API 404: ${req.path}`);
-  res.status(404).json({
-    success: false,
-    error: 'API Endpoint Not Found'
-  });
-});
+initRoutes(app);
 
 const clientDistPath = resolveClientPath();
 console.log(`📂 静态资源托管路径: ${clientDistPath}`);

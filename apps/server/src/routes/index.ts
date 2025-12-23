@@ -1,10 +1,23 @@
-import { Router } from 'express';
+import { Express, Router } from 'express';
 
-import { helloRouter } from './hello.routes';
+import { wageRouter } from './wage.routes';
 
 const routes = Router();
 
-routes.use('/hello', helloRouter);
+routes.use('/api', wageRouter);
 
-// ✅ 3. 导出总路由
-export default routes;
+export const initRoutes = (app: Express) => {
+  app.post('/api/verify', (req, res) => {
+    const { key } = req.body;
+    if (key === process.env.ACCESS_KEY) {
+      res.json({ success: true });
+    } else {
+      res.status(401).json({ success: false });
+    }
+  });
+  app.use(routes);
+  app.all(/^\/api\/.*$/, (req, res) => {
+    console.warn(`⚠️ API 404: ${req.path}`);
+    res.status(404).json({ success: false, error: '未找到API端点' });
+  });
+};
