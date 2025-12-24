@@ -12,8 +12,11 @@
     "start": "pnpm vault:dec && cd dist && node server/index.js",
     "db:migrate": "dotenv -e .env -- pnpm --filter server prisma:migrate",
     "db:gen": "dotenv -e .env -- pnpm --filter server prisma:gen",
-    "vault:enc": "tsx scripts/vault.ts encrypt",
-    "vault:dec": "tsx scripts/vault.ts decrypt"
+    "vault:enc": "node scripts/vault.js encrypt",
+    "vault:dec": "node scripts/vault.js decrypt",
+    "docker:build": "pnpm build && docker build -t mywage .",
+    "docker:run": "pnpm docker:stop && docker run -d -p 30300:3030 --name mywage mywage",
+    "docker:stop": "docker rm -f mywage || true"
   },
   "devDependencies": {
     "@repo/shared": "workspace:*",
