@@ -13,25 +13,20 @@
   import { ref, onMounted } from 'vue';
   import SalaryDashboard from './views/dashboard/SalaryDashboard.vue';
   import LoginView from './views/LoginView.vue';
-  import { verifyKey } from './api/wageService';
 
   const isAuthenticated = ref(false);
   const isChecking = ref(true); // 初始加载状态
 
-  onMounted(async () => {
-    // 1. 检查本地是否有 key
-    const storedKey = localStorage.getItem('salary_access_key');
+  onMounted(() => {
+    // 1. [修复] 统一使用 salary_token
+    const token = localStorage.getItem('salary_token');
 
-    if (storedKey) {
-      // 2. 如果有，默默验证一下是否有效 (可选，为了安全建议验证)
-      const isValid = await verifyKey(storedKey);
-      if (isValid) {
-        isAuthenticated.value = true;
-      } else {
-        // key 失效或错误，清除
-        localStorage.removeItem('salary_access_key');
-      }
+    if (token) {
+      // 2. [优化] 只要有 Token，先视为已登录。
+      // 如果 Token 过期，SalaryDashboard 发起请求时会触发 401 拦截器自动登出。
+      isAuthenticated.value = true;
     }
+
     isChecking.value = false;
   });
 

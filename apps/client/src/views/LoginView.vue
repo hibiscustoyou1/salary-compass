@@ -38,7 +38,7 @@
 
 <script setup lang="ts">
   import { ref } from 'vue';
-  import { verifyKey } from '../api/wageService'; // 注意去除 .ts 后缀
+  import { verifyKey } from '../api/wageService';
   import { sha256 } from '../utils/crypto';
 
   const emit = defineEmits(['login-success']);
@@ -53,14 +53,14 @@
     errorMsg.value = '';
 
     try {
-      // 1. 依然计算 Hash 发送给后端验证 (Password -> Hash)
+      // 1. 计算 Hash
       const hashedKey = await sha256(inputKey.value);
 
       // 2. 验证并获取 Token
       const token = await verifyKey(hashedKey);
 
       if (token) {
-        // ✅ 验证成功：存入 Token 而不是 Hash
+        // 3. [关键] 存入 Token，Key 名称必须与 api/App.vue 保持一致
         localStorage.setItem('salary_token', token);
         emit('login-success');
       } else {

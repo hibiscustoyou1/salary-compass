@@ -8,9 +8,9 @@ const apiClient = axios.create({
 
 // 请求拦截：注入 Token
 apiClient.interceptors.request.use((config) => {
-  const token = localStorage.getItem('salary_token'); // 改名 salary_token
+  // [关键] 必须与 App.vue 和 LoginView.vue 使用相同的 Key
+  const token = localStorage.getItem('salary_token');
   if (token) {
-    // ✅ 使用标准 Header
     config.headers['Authorization'] = `Bearer ${token}`;
   }
   return config;
@@ -23,6 +23,7 @@ apiClient.interceptors.response.use(
     if (res.code === ApiCode.SUCCESS) {
       return response;
     } else {
+      // 业务逻辑层面的 401 (比如 Token 过期)
       if (res.code === ApiCode.UNAUTHORIZED) {
         handleLogout();
       }
@@ -30,6 +31,7 @@ apiClient.interceptors.response.use(
     }
   },
   (error) => {
+    // HTTP 层面的 401
     if (error.response?.status === 401 || error.response?.data?.code === ApiCode.UNAUTHORIZED) {
       handleLogout();
     }
@@ -39,13 +41,13 @@ apiClient.interceptors.response.use(
 
 function handleLogout() {
   localStorage.removeItem('salary_token');
-  // 避免无限刷新，可增加判断
+  // 如果当前不在登录页，则刷新跳转，触发 App.vue 的检查逻辑
   if (window.location.pathname !== '/login') {
     window.location.reload();
   }
 }
 
-// ✅ 修改：Verify 成功后返回 Token (string) 或 null
+// 验证接口：返回 Token
 export const verifyKey = async (key: string): Promise<string | null> => {
   try {
     const res = await apiClient.post<ApiResponse<{ token: string }>>('/verify', { key });
