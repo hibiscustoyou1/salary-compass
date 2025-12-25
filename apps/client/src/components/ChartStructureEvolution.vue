@@ -125,12 +125,16 @@
 
   // --- 4. Config 配置 ---
   const config = computed(() => {
+    // 基础颜色定义
     const bgColor = isDark.value ? '#1f2937' : '#ffffff';
     const textColor = isDark.value ? '#E5E7EB' : '#4B5563';
     const gridColor = isDark.value ? '#374151' : '#E5E7EB';
     const lineColor = isDark.value ? '#374151' : '#e5e7eb';
     const tooltipBg = isDark.value ? '#111827' : '#ffffff';
     const tooltipText = isDark.value ? '#f3f4f6' : '#333333';
+
+    // 弹窗特有颜色 (稍微深一点以区分层级)
+    const dialogBg = isDark.value ? '#111827' : '#ffffff';
 
     const xAxisValues = timelineMeta.value.map(t => t.label);
 
@@ -148,6 +152,48 @@
         chart: {
           backgroundColor: bgColor,
           color: textColor,
+
+          // 【修复重点】内层弹窗的深度配置
+          dialog: {
+            show: true,
+            backgroundColor: dialogBg, // 弹窗背景
+            color: textColor,
+            header: {
+              backgroundColor: dialogBg,
+              color: textColor
+            },
+            // 内嵌甜甜圈图的样式
+            donutChart: {
+              style: {
+                chart: {
+                  backgroundColor: dialogBg,
+                  color: textColor,
+                  legend: {
+                    backgroundColor: dialogBg,
+                    color: textColor
+                  },
+                  tooltip: {
+                    show: !props.isPrivacyMode,
+                    backgroundColor: tooltipBg, // 内层 Tooltip 背景
+                    color: tooltipText,         // 内层 Tooltip 文字
+                    borderRadius: 4,
+                    borderColor: gridColor,
+                    borderWidth: 1
+                  },
+                  layout: {
+                    labels: {
+                      percentage: { color: textColor },
+                      name: { color: textColor },
+                      hollow: {
+                        average: { color: textColor, value: { color: textColor } },
+                        total: { color: textColor, value: { color: textColor } }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
 
           layout: {
             height: 320,
@@ -174,7 +220,6 @@
             dataLabels: {
               show: !props.isPrivacyMode,
               fontSize: 10,
-              // 【修复 Bug 3】折线上的数字标签颜色
               color: textColor,
               filter: (val: number, total: number) => (val / total) * 100 > 0
             }
@@ -200,11 +245,14 @@
             backgroundColor: bgColor,
             color: textColor,
           },
+          // 外层 Tooltip 配置
           tooltip: {
             show: !props.isPrivacyMode,
             backgroundColor: tooltipBg,
+            background: tooltipBg,
             border: `1px solid ${gridColor}`,
-            color: tooltipText
+            color: tooltipText,
+            borderRadius: 4
           }
         },
         colors: ["#6366f1", "#a855f7", "#ec4899", "#f97316", "#9ca3af"]
