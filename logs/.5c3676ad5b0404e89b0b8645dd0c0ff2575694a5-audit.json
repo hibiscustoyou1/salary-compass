@@ -1,0 +1,15 @@
+{
+    "keep": {
+        "days": true,
+        "amount": 14
+    },
+    "auditLog": "/mnt/vdb/workshop/git/github/salary-compass/logs/.5c3676ad5b0404e89b0b8645dd0c0ff2575694a5-audit.json",
+    "files": [
+        {
+            "date": 1766655242469,
+            "name": "/mnt/vdb/workshop/git/github/salary-compass/logs/error-2025-12-25.log",
+            "hash": "9b96a68af463dff59066c58e15838e0bafeafdebd738860e56770002d9c006ae"
+        }
+    ],
+    "hashType": "sha256"
+}

@@ -4,6 +4,7 @@ import cors from 'cors';
 import path from 'path';
 import { initRoutes } from '@/routes';
 import { getServerPaths } from '@repo/shared/server';
+import { logger } from './utils/logger';
 
 const { CLIENT_DIST_PATH } = getServerPaths(__dirname);
 
@@ -30,6 +31,22 @@ if (clientDistPath) {
   console.warn('   - 如果是本地开发，请先在 client 目录下运行 npm run build');
   console.warn('   - API 接口依然可用，但访问主页将无法显示');
 }
+
+app.use((err: any, req: any, res: any, next: any) => {
+  // 记录到本地日志文件
+  logger.error(err.message, { stack: err.stack, path: req.path });
+  
+  // 返回给前端
+  res.status(500).json({
+    code: 500,
+    msg: '服务器内部错误',
+    data: null
+  });
+});
+
+process.on('unhandledRejection', (reason: any) => {
+  logger.error(`Unhandled Rejection: ${reason}`, { stack: reason?.stack });
+});
 
 app.listen(PORT, () => {
   console.log(`🚀 服务已启动: http://localhost:${PORT}`);

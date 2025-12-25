@@ -1,11 +1,13 @@
 import { Express, Router } from 'express';
 import { wageRouter } from './wage.routes';
+import { logRouter } from "./log.routes";
 import { Result } from '@/utils/result';
 import { ApiCode } from '@repo/shared';
 
 const routes = Router();
 
 routes.use('/api', wageRouter);
+routes.use('/api/log', logRouter);   // [新增] 日志上报
 
 export const initRoutes = (app: Express) => {
   app.use(routes);
