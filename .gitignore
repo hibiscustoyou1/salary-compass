@@ -8,6 +8,7 @@
 *.sw?
 
 *.log*
+logs
 
 **/node_modules
 .env
