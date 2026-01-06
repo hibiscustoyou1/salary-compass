@@ -31,7 +31,10 @@ WORKDIR /app
 
 COPY --from=builder /app/apps/server/dist ./server
 COPY --from=builder /app/.env.enc ./.env.enc
+
+# 拷贝前端产物并立即修改所有权为 www-data
 COPY --from=builder /app/apps/client/dist /usr/share/nginx/html
+RUN chown -R www-data:www-data /usr/share/nginx/html && chmod -R 755 /usr/share/nginx/html
 
 COPY docker/nginx.conf /etc/nginx/nginx.conf
 
