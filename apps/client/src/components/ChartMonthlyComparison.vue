@@ -69,7 +69,7 @@
       return {
         name: `${year}年`,
         series: seriesValues,
-        type: "line", // 指定为折线图
+        type: "line" as const, // 指定为折线图
         smooth: true, // 平滑曲线
         useArea: false, // 不填充区域
       };
@@ -133,7 +133,7 @@
               ],
               datetimeFormatter: {
                 enable: true,
-                locale: 'zh-cn',
+                locale: 'zh-cn' as const,
                 options: {
                   month: 'MMM'
                 }
