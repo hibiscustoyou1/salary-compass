@@ -1,15 +1,10 @@
-import { createApp } from 'vue';
+import { createApp } from 'vue'
 import { createPinia } from 'pinia';
-import App from './App.vue';
-import './style.css';
-import { initLogger } from './utils/logReporter'; // [新增]
-
-import 'vue-data-ui/style.css'
+import './style.css'
+import App from './App.vue'
+import router from './router'
 
 const app = createApp(App)
-
-// [新增] 初始化日志收集
-initLogger(app);
-
+app.use(router)
 app.use(createPinia());
-app.mount('#app');
+app.mount('#app')

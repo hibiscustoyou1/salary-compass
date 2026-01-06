@@ -1,13 +1,46 @@
-FROM node:22-alpine
+FROM node:20-slim AS builder
 
-RUN apk add --no-cache openssl
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+RUN corepack enable
 
 WORKDIR /app
-COPY dist ./
-COPY scripts/vault.js ./vault.js
 
-ENV PRISMA_QUERY_ENGINE_LIBRARY="/app/server/libquery_engine-linux-musl-openssl-3.0.x.so.node"
-ENV VAULT_PASS="bWeiWDslMrj"
+COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
+COPY apps/client/package.json apps/client/package.json
+COPY apps/server/package.json apps/server/package.json
+COPY packages/shared/package.json packages/shared/package.json
+COPY packages/tsconfig/package.json packages/tsconfig/package.json
 
-EXPOSE 3000
-CMD ["sh", "-c", "node vault.js decrypt && node server/index.js"]
+RUN pnpm config set registry https://registry.npmmirror.com/
+
+RUN pnpm install --frozen-lockfile
+
+COPY . .
+
+RUN pnpm db:gen
+
+RUN pnpm build
+
+FROM node:20-slim
+
+# 安装 Nginx
+RUN apt-get update && apt-get install -y nginx && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+COPY --from=builder /app/apps/server/dist ./server
+COPY --from=builder /app/.env.enc ./.env.enc
+COPY --from=builder /app/apps/client/dist /usr/share/nginx/html
+
+COPY docker/nginx.conf /etc/nginx/nginx.conf
+
+COPY docker/entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
+
+ENV NODE_ENV=production
+ENV PORT=3000
+
+EXPOSE 80
+
+ENTRYPOINT ["/app/entrypoint.sh"]

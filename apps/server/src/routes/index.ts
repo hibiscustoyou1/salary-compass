@@ -1,20 +1,15 @@
-import { Express, Router } from 'express';
-import { wageRouter } from './wage.routes';
-import { logRouter } from "./log.routes";
-import { Result } from '@/utils/result';
-import { ApiCode } from '@repo/shared';
+import { Router, Express } from 'express';
+
+import { helloRouter } from './hello.routes';
 
 const routes = Router();
 
-routes.use('/api', wageRouter);
-routes.use('/api/log', logRouter);   // [新增] 日志上报
+routes.use('/api', helloRouter);
 
 export const initRoutes = (app: Express) => {
   app.use(routes);
-  
-  // 全局 404 处理
   app.all(/^\/api\/.*$/, (req, res) => {
     console.warn(`⚠️ API 404: ${req.path}`);
-    Result.fail(res, `接口不存在: ${req.path}`, ApiCode.NOT_FOUND, 404);
+    res.status(404).json({ success: false, error: '未找到API端点' });
   });
 };
