@@ -1,3 +1,4 @@
+// [修改] 去掉中间的 00，使用标准 HTTP 状态码风格
 export enum ApiCode {
   SUCCESS = 200,        // 成功
   FAIL = 500,           // 服务器内部错误
@@ -6,14 +7,32 @@ export enum ApiCode {
   NOT_FOUND = 404,      // 资源不存在
 }
 
+// 统一响应结构 (保持不变)
 export interface ApiResponse<T = any> {
   code: ApiCode;
-  data?: T;
-  msg?: string;
+  data: T;
+  msg: string;
 }
 
-// 定义 Hello 接口的具体返回数据
-export interface HelloData {
-  message: string;
-  timestamp: number;
+export interface WageData {
+  id: number;
+  year: number;
+  month: number;
+  grossPay: number;
+  netPay: number;
+  tax: number;
+  pension: number;
+  medical: number;
+  unemployment: number;
+  housingFund: number;
+  annuity: number;
+  unionFee: number;
+  deductionTotal: number;
+  baseSalary: number;
+  meritPay: number;
+  quarterlyBonus: number;
+  annualBonus: number;
+  talentBonus: number;
+  subsidy: number;
+  otherBonus: number;
 }

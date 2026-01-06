@@ -11,7 +11,10 @@
     "db:migrate": "dotenv -e .env -- pnpm --filter server prisma:migrate",
     "db:gen": "dotenv -e .env -- pnpm --filter server prisma:gen",
     "vault:enc": "node scripts/vault.js encrypt",
-    "vault:dec": "node scripts/vault.js decrypt"
+    "vault:dec": "node scripts/vault.js decrypt",
+    "docker:build": "docker build --build-arg VAULT_PASS=$VAULT_PASS -t mywage .",
+    "docker:stop": "docker rm -f mywage | true",
+    "docker:run": "pnpm docker:stop && docker run -d -p 8030:80 -e VAULT_PASS=$VAULT_PASS --name mywage mywage"
   },
   "devDependencies": {
     "@repo/shared": "workspace:*",

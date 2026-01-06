@@ -1,17 +1,60 @@
 generator client {
   provider      = "prisma-client-js"
-  // 显式指定 OpenSSL 3.0 的 Alpine 版本
-  // "native" 保证本地(Mac/Win)运行，"linux-musl-openssl-3.0.x" 保证 Node 20/22 Alpine 能跑
-  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+  // "native" 保证本地(Mac/Win)能跑
+  // "linux-musl-openssl-3.0.x" 保证 Node 20/22 Alpine 能跑
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x", "debian-openssl-3.0.x"]
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
-model Temp {
-  id        Int      @id @default(autoincrement())
-  value     String
-  createdAt DateTime @default(now())
+model Wage {
+  // 基础信息
+  paymentDate String? @map("发放日期") // 建议后续清洗为 Date 类型，目前保持 text
+  year        Float   @map("年度")
+  month       Float   @map("期间") // 将"期间"映射为更直观的 month
+  employeeId  Float   @map("人员编码")
+  name        String? @map("姓名")
+
+  // 核心收入
+  grossPay   Float? @map("应发合计")
+  baseSalary Float? @map("岗位工资")
+  meritPay   Float? @map("月度绩效奖金")
+  subsidy    Float? @map("综合补贴")
+  otherBonus Float? @map("其他工资")
+
+  // 奖金类
+  talentBonus      Float? @map("人才特区专项奖金")
+  quarterlyBonus   Float? @map("季度绩效奖金")
+  annualBonus      Float? @map("年度绩效奖金")
+  specialIncentive Float? @map("专项激励")
+
+  // 扣减类
+  deductionTotal Float? @map("扣款合计")
+  unionFee       Float? @map("代扣工会费")
+
+  // 五险一金 (个人部分)
+  pension      Float? @map("基本养老保险（个人扣款）")
+  medical      Float? @map("基本医疗保险（个人扣款）")
+  unemployment Float? @map("失业保险（个人扣款）")
+  housingFund  Float? @map("住房公积金（个人扣款）")
+  annuity      Float? @map("企业年金（个人扣款）")
+
+  // 税务相关
+  taxableIncome Float? @map("累计应纳税额")
+  tax           Float? @map("本次扣税")
+
+  // 专项附加扣除 (用于分析避税情况)
+  deductRent  Float? @map("累计住房租金专项扣除额")
+  deductChild Float? @map("累计婴幼儿照护专项扣除额")
+
+  // 最终到手
+  netPay Float? @map("实发合计")
+
+  // 设置联合主键，确保每人每月只有一条记录
+  @@id([year, month, employeeId])
+  // 映射表名
+  @@map("mywage")
 }
