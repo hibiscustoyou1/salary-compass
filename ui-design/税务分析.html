@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html class="light" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>税务分析 - 个税跳档与优化建议</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=Noto+Sans+SC:wght@300;400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#1241a1",
+                        "primary-light": "#e7ebf3",
+                        "primary-dark": "#0e337d",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#111621",
+                        "wealth-red": "#d32f2f",
+                        "wealth-red-light": "#fce8e8",
+                        "wealth-green": "#059669",
+                        "wealth-green-light": "#d1fae5",
+                        "surface-white": "#ffffff",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "Noto Sans SC", "sans-serif"],
+                        "sans": ["Inter", "Noto Sans SC", "sans-serif"],
+                    },
+                    borderRadius: { "DEFAULT": "0.375rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .filled-icon {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-white font-sans antialiased">
+<div class="flex h-screen w-full overflow-hidden">
+<aside class="flex w-[280px] flex-col justify-between border-r border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 z-20 shrink-0 transition-all duration-300">
+<div class="flex flex-col h-full p-5">
+<div class="flex items-center gap-3 mb-8 px-2">
+<div class="flex items-center justify-center w-10 h-10 rounded-xl bg-primary text-white shadow-sm">
+<span class="material-symbols-outlined text-[24px]">analytics</span>
+</div>
+<h1 class="text-primary dark:text-white text-xl font-bold tracking-tight">WealthTrack</h1>
+</div>
+<div class="flex items-center gap-4 p-4 mb-8 bg-slate-50 dark:bg-slate-800 rounded-2xl">
+<div class="relative w-12 h-12 rounded-full overflow-hidden ring-2 ring-white dark:ring-slate-700 shrink-0">
+<img alt="Profile" class="w-full h-full object-cover" data-alt="Profile picture of Alex Morgan" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD7T7XTdmIb8IMQDnucaRFv-_rDBYO39M1R1--DLLT09XShipinZeDsPwR4eY1zzc9Q5RyoC-sjXe2iyRZ_T-8spAKlKLpVk9sSaXkNXheBJlcP5U1aBjBDfk5k4AqOw15URtyNgwsVtYMIjM28-cBToCBsBE4mu5xhqmgbNVZSoM6u2HxStoDzYhHrPDZjFbMufo5kOFUqoAHgBva-jdfIdVje5K8gCxqq50Zs7YoiGky6_dKKoss2iEsQE55qOgh1FNOaukpKi_I"/>
+</div>
+<div class="flex flex-col overflow-hidden">
+<span class="text-base font-bold text-slate-900 dark:text-white truncate">Alex Morgan</span>
+<span class="text-sm text-primary dark:text-blue-400 font-medium truncate">高级合伙人</span>
+</div>
+</div>
+<nav class="flex flex-col gap-2 space-y-1">
+<a class="flex items-center gap-4 px-4 py-3.5 rounded-lg text-slate-600 dark:text-slate-300 hover:text-primary hover:bg-slate-50 dark:hover:bg-slate-800 group transition-colors" href="#">
+<span class="material-symbols-outlined text-[24px] group-hover:text-primary transition-colors">dashboard</span>
+<span class="text-base font-medium">概览</span>
+</a>
+<a class="flex items-center gap-4 px-4 py-3.5 rounded-lg text-slate-600 dark:text-slate-300 hover:text-primary hover:bg-slate-50 dark:hover:bg-slate-800 group transition-colors" href="#">
+<span class="material-symbols-outlined text-[24px] group-hover:text-primary transition-colors">payments</span>
+<span class="text-base font-medium">薪资详情</span>
+</a>
+<a class="flex items-center gap-4 px-4 py-3.5 rounded-lg bg-primary text-white shadow-md shadow-blue-900/10 group transition-colors" href="#">
+<span class="material-symbols-outlined text-[24px] text-white">account_balance</span>
+<span class="text-base font-bold">税务分析</span>
+</a>
+<a class="flex items-center gap-4 px-4 py-3.5 rounded-lg text-slate-600 dark:text-slate-300 hover:text-primary hover:bg-slate-50 dark:hover:bg-slate-800 group transition-colors" href="#">
+<span class="material-symbols-outlined text-[24px] group-hover:text-primary transition-colors">trending_up</span>
+<span class="text-base font-medium">福利预测</span>
+</a>
+<a class="flex items-center gap-4 px-4 py-3.5 rounded-lg text-slate-600 dark:text-slate-300 hover:text-primary hover:bg-slate-50 dark:hover:bg-slate-800 group transition-colors" href="#">
+<span class="material-symbols-outlined text-[24px] group-hover:text-primary transition-colors">pie_chart</span>
+<span class="text-base font-medium">投资组合</span>
+</a>
+</nav>
+<div class="mt-auto pt-6 flex flex-col gap-4">
+<div class="bg-primary dark:bg-blue-900 rounded-xl p-4 text-white shadow-lg shadow-blue-900/20 relative overflow-hidden">
+<div class="relative z-10 flex flex-col gap-1">
+<span class="text-sm font-medium opacity-90">安全状态</span>
+<span class="text-lg font-bold">已加密</span>
+</div>
+<span class="material-symbols-outlined absolute right-2 bottom-0 text-[64px] text-white opacity-10 rotate-12">lock</span>
+</div>
+<button class="flex w-full items-center justify-center gap-2 px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-600 dark:text-slate-300 text-sm font-bold hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
+<span class="material-symbols-outlined text-[20px]">logout</span>
+                    退出登录
+                </button>
+</div>
+</div>
+</aside>
+<main class="flex-1 flex flex-col h-full overflow-hidden bg-background-light dark:bg-background-dark relative">
+<header class="flex-shrink-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm sticky top-0 z-10 border-b border-slate-200 dark:border-slate-800 px-8 py-5">
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-4 max-w-7xl mx-auto">
+<div class="flex flex-col gap-1">
+<h2 class="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">职业财富分析</h2>
+<p class="text-sm text-slate-500 dark:text-slate-400 font-medium">2024财年税务效能分析</p>
+</div>
+<div class="flex items-center gap-3">
+<button class="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-300 text-sm font-semibold hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors shadow-sm">
+<span class="material-symbols-outlined text-[18px]">visibility_off</span>
+                        隐私模式
+                    </button>
+<button class="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary-dark text-white rounded-lg text-sm font-semibold transition-colors shadow-sm shadow-blue-500/20">
+<span class="material-symbols-outlined text-[18px]">download</span>
+                        导出报告
+                    </button>
+</div>
+</div>
+</header>
+<div class="flex-1 overflow-y-auto p-8">
+<div class="max-w-7xl mx-auto flex flex-col gap-6">
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<div class="bg-white dark:bg-slate-900 rounded-xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between h-36">
+<div class="flex items-start justify-between">
+<p class="text-slate-500 dark:text-slate-400 text-sm font-medium">年度累计个税</p>
+<div class="bg-red-50 dark:bg-red-900/20 p-1.5 rounded-md">
+<span class="material-symbols-outlined text-wealth-red text-[20px]">money_off</span>
+</div>
+</div>
+<div>
+<h3 class="text-3xl font-bold text-wealth-red dark:text-red-400 tracking-tight">¥12,450</h3>
+<div class="flex items-center gap-1 mt-1 text-xs text-slate-500 dark:text-slate-400">
+<span>较去年同期</span>
+<span class="text-wealth-red font-medium flex items-center">
+                                    +4.2% <span class="material-symbols-outlined text-[12px]">arrow_upward</span>
+</span>
+</div>
+</div>
+</div>
+<div class="bg-white dark:bg-slate-900 rounded-xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between h-36 relative overflow-hidden">
+<div class="flex items-start justify-between z-10 relative">
+<p class="text-slate-500 dark:text-slate-400 text-sm font-medium">综合税负率</p>
+<div class="bg-blue-50 dark:bg-blue-900/20 p-1.5 rounded-md">
+<span class="material-symbols-outlined text-primary text-[20px]">percent</span>
+</div>
+</div>
+<div class="flex items-end justify-between z-10 relative">
+<div>
+<h3 class="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">8.5%</h3>
+<p class="text-xs text-slate-500 mt-1">处于合理优化区间</p>
+</div>
+<div class="relative w-16 h-16 flex items-center justify-center">
+<svg class="w-full h-full transform -rotate-90">
+<circle class="text-slate-100 dark:text-slate-800" cx="32" cy="32" fill="transparent" r="28" stroke="currentColor" stroke-width="6"></circle>
+<circle class="text-primary" cx="32" cy="32" fill="transparent" r="28" stroke="currentColor" stroke-dasharray="175.9" stroke-dashoffset="160" stroke-linecap="round" stroke-width="6"></circle>
+</svg>
+</div>
+</div>
+</div>
+<div class="bg-white dark:bg-slate-900 rounded-xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between h-36">
+<div class="flex items-start justify-between">
+<p class="text-slate-500 dark:text-slate-400 text-sm font-medium">专项附加扣除已抵税</p>
+<div class="bg-emerald-50 dark:bg-emerald-900/20 p-1.5 rounded-md">
+<span class="material-symbols-outlined text-wealth-green text-[20px]">savings</span>
+</div>
+</div>
+<div>
+<h3 class="text-3xl font-bold text-wealth-green dark:text-emerald-400 tracking-tight">¥24,000</h3>
+<div class="flex items-center gap-1 mt-1 text-xs text-slate-500 dark:text-slate-400">
+<span>本财年预计节省总额</span>
+</div>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+<div class="lg:col-span-2 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-6">
+<div class="flex flex-wrap items-center justify-between mb-6 gap-2">
+<div>
+<h3 class="text-base font-bold text-slate-900 dark:text-white">个税跳档趋势分析</h3>
+<p class="text-xs text-slate-500 dark:text-slate-400 mt-1">累计应纳税所得额 vs 本次扣税</p>
+</div>
+<div class="flex items-center gap-4 text-xs">
+<div class="flex items-center gap-1.5">
+<div class="w-3 h-3 rounded-full bg-primary"></div>
+<span class="text-slate-600 dark:text-slate-400">累计所得额</span>
+</div>
+<div class="flex items-center gap-1.5">
+<div class="w-3 h-3 bg-wealth-red/80 rounded-sm"></div>
+<span class="text-slate-600 dark:text-slate-400">月度扣税额</span>
+</div>
+<div class="flex items-center gap-1.5">
+<div class="w-4 h-0 border-t border-dashed border-slate-400"></div>
+<span class="text-slate-600 dark:text-slate-400">10% 税率临界点</span>
+</div>
+</div>
+</div>
+<div class="relative h-[300px] w-full mt-8">
+<div class="absolute inset-0 flex flex-col justify-between pointer-events-none">
+<div class="w-full h-px bg-slate-100 dark:bg-slate-800"></div>
+<div class="w-full h-px bg-slate-100 dark:bg-slate-800"></div>
+<div class="w-full h-px bg-slate-100 dark:bg-slate-800"></div>
+<div class="w-full h-px bg-slate-100 dark:bg-slate-800"></div>
+<div class="w-full h-px bg-slate-100 dark:bg-slate-800"></div>
+</div>
+<div class="absolute inset-0 flex items-end justify-between px-4 pb-6 pt-2">
+<div class="absolute top-[40%] left-0 right-0 border-t-2 border-dashed border-slate-300 dark:border-slate-600 z-0"></div>
+<div class="flex flex-col items-center gap-2 group w-full relative z-10 h-full justify-end">
+<div class="w-1.5 bg-primary/20 h-[10%] rounded-full absolute bottom-[15%] group-hover:bg-primary transition-colors"></div> 
+<div class="w-2 h-2 bg-primary rounded-full absolute bottom-[14%] border-2 border-white dark:border-slate-900 shadow-sm z-20"></div>
+<div class="w-6 sm:w-8 bg-wealth-red/80 h-[5%] rounded-t-sm hover:opacity-90 transition-opacity"></div>
+<span class="text-[10px] text-slate-500 absolute -bottom-1">1月</span>
+</div>
+<div class="flex flex-col items-center gap-2 group w-full relative z-10 h-full justify-end">
+<div class="w-1.5 bg-primary/20 h-[20%] rounded-full absolute bottom-[15%] group-hover:bg-primary transition-colors"></div>
+<div class="w-2 h-2 bg-primary rounded-full absolute bottom-[24%] border-2 border-white dark:border-slate-900 shadow-sm z-20"></div>
+<div class="w-6 sm:w-8 bg-wealth-red/80 h-[5%] rounded-t-sm hover:opacity-90 transition-opacity"></div>
+<span class="text-[10px] text-slate-500 absolute -bottom-1">2月</span>
+</div>
+<div class="flex flex-col items-center gap-2 group w-full relative z-10 h-full justify-end">
+<div class="w-1.5 bg-primary/20 h-[30%] rounded-full absolute bottom-[15%] group-hover:bg-primary transition-colors"></div>
+<div class="w-2 h-2 bg-primary rounded-full absolute bottom-[34%] border-2 border-white dark:border-slate-900 shadow-sm z-20"></div>
+<div class="w-6 sm:w-8 bg-wealth-red/80 h-[6%] rounded-t-sm hover:opacity-90 transition-opacity"></div>
+<span class="text-[10px] text-slate-500 absolute -bottom-1">3月</span>
+</div>
+<div class="flex flex-col items-center gap-2 group w-full relative z-10 h-full justify-end">
+<div class="w-1.5 bg-primary/20 h-[40%] rounded-full absolute bottom-[15%] group-hover:bg-primary transition-colors"></div>
+<div class="w-2 h-2 bg-primary rounded-full absolute bottom-[44%] border-2 border-white dark:border-slate-900 shadow-sm z-20"></div>
+<div class="w-6 sm:w-8 bg-wealth-red/80 h-[6%] rounded-t-sm hover:opacity-90 transition-opacity"></div>
+<span class="text-[10px] text-slate-500 absolute -bottom-1">4月</span>
+</div>
+<div class="flex flex-col items-center gap-2 group w-full relative z-10 h-full justify-end">
+<div class="w-1.5 bg-primary/20 h-[50%] rounded-full absolute bottom-[15%] group-hover:bg-primary transition-colors"></div>
+<div class="w-2 h-2 bg-primary rounded-full absolute bottom-[54%] border-2 border-white dark:border-slate-900 shadow-sm z-20"></div>
+<div class="w-6 sm:w-8 bg-wealth-red/80 h-[7%] rounded-t-sm hover:opacity-90 transition-opacity"></div>
+<span class="text-[10px] text-slate-500 absolute -bottom-1">5月</span>
+</div>
+<div class="flex flex-col items-center gap-2 group w-full relative z-10 h-full justify-end">
+<div class="w-1.5 bg-primary/20 h-[60%] rounded-full absolute bottom-[15%] group-hover:bg-primary transition-colors"></div>
+<div class="w-2 h-2 bg-primary rounded-full absolute bottom-[64%] border-2 border-white dark:border-slate-900 shadow-sm z-20"></div>
+<div class="w-6 sm:w-8 bg-wealth-red h-[18%] rounded-t-sm hover:opacity-90 transition-opacity shadow-[0_0_10px_rgba(220,38,38,0.3)]"></div> 
+<span class="text-[10px] text-slate-500 absolute -bottom-1 font-bold text-wealth-red">6月</span>
+</div>
+<div class="flex flex-col items-center gap-2 group w-full relative z-10 h-full justify-end">
+<div class="w-1.5 bg-primary/20 h-[70%] rounded-full absolute bottom-[15%] group-hover:bg-primary transition-colors"></div>
+<div class="w-2 h-2 bg-primary rounded-full absolute bottom-[74%] border-2 border-white dark:border-slate-900 shadow-sm z-20"></div>
+<div class="w-6 sm:w-8 bg-wealth-red/80 h-[18%] rounded-t-sm hover:opacity-90 transition-opacity"></div>
+<span class="text-[10px] text-slate-500 absolute -bottom-1">7月</span>
+</div>
+<div class="flex flex-col items-center gap-2 group w-full relative z-10 h-full justify-end">
+<div class="w-1.5 bg-primary/20 h-[80%] rounded-full absolute bottom-[15%] group-hover:bg-primary transition-colors"></div>
+<div class="w-2 h-2 bg-primary rounded-full absolute bottom-[84%] border-2 border-white dark:border-slate-900 shadow-sm z-20"></div>
+<div class="w-6 sm:w-8 bg-wealth-red/80 h-[18%] rounded-t-sm hover:opacity-90 transition-opacity"></div>
+<span class="text-[10px] text-slate-500 absolute -bottom-1">8月</span>
+</div>
+</div>
+</div>
+</div>
+<div class="flex flex-col gap-6">
+<div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-6 flex-1 flex flex-col">
+<h3 class="text-base font-bold text-slate-900 dark:text-white mb-4">专项扣除构成</h3>
+<div class="flex flex-col items-center flex-1 justify-center gap-6">
+<div class="relative w-40 h-40 rounded-full" style="background: conic-gradient(#1241a1 0% 50%, #3b82f6 50% 80%, #93c5fd 80% 100%);">
+<div class="absolute inset-4 bg-white dark:bg-slate-900 rounded-full flex items-center justify-center flex-col">
+<span class="text-xs text-slate-400">总计扣除</span>
+<span class="font-bold text-slate-800 dark:text-white">¥6000/月</span>
+</div>
+</div>
+<div class="w-full flex flex-col gap-3">
+<div class="flex items-center justify-between text-sm">
+<div class="flex items-center gap-2">
+<div class="w-3 h-3 rounded-full bg-primary"></div>
+<span class="text-slate-600 dark:text-slate-300">住房租金</span>
+</div>
+<span class="font-bold text-slate-900 dark:text-white">50%</span>
+</div>
+<div class="flex items-center justify-between text-sm">
+<div class="flex items-center gap-2">
+<div class="w-3 h-3 rounded-full bg-blue-500"></div>
+<span class="text-slate-600 dark:text-slate-300">婴幼儿照护</span>
+</div>
+<span class="font-bold text-slate-900 dark:text-white">30%</span>
+</div>
+<div class="flex items-center justify-between text-sm">
+<div class="flex items-center gap-2">
+<div class="w-3 h-3 rounded-full bg-blue-300"></div>
+<span class="text-slate-600 dark:text-slate-300">基本养老/医疗</span>
+</div>
+<span class="font-bold text-slate-900 dark:text-white">20%</span>
+</div>
+</div>
+</div>
+</div>
+<div class="bg-gradient-to-br from-blue-50 to-white dark:from-slate-800 dark:to-slate-900 rounded-xl border border-blue-100 dark:border-slate-700 shadow-sm p-6 relative overflow-hidden">
+<div class="absolute top-0 right-0 p-4 opacity-10">
+<span class="material-symbols-outlined text-6xl text-primary">lightbulb</span>
+</div>
+<div class="flex items-center gap-2 mb-3">
+<span class="material-symbols-outlined text-primary text-[24px]">tips_and_updates</span>
+<h3 class="text-base font-bold text-slate-900 dark:text-white">税务优化建议</h3>
+</div>
+<div class="flex flex-col gap-3">
+<div class="flex gap-3 items-start p-3 bg-white dark:bg-slate-800/50 rounded-lg border border-blue-100 dark:border-slate-700/50 shadow-sm">
+<span class="material-symbols-outlined text-amber-500 text-[20px] mt-0.5 shrink-0">warning</span>
+<p class="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
+                                        预计将在 <span class="font-bold text-slate-900 dark:text-white">10月</span> 触达20%税率档位。
+                                    </p>
+</div>
+<div class="flex gap-3 items-start p-3 bg-emerald-50 dark:bg-emerald-900/10 rounded-lg border border-emerald-100 dark:border-emerald-900/30 shadow-sm">
+<span class="material-symbols-outlined text-emerald-600 text-[20px] mt-0.5 shrink-0">check_circle</span>
+<p class="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
+                                        建议将 <span class="font-bold text-emerald-700 dark:text-emerald-400">年终奖</span> 调整至次年1月发放以优化税负。
+                                    </p>
+</div>
+</div>
+<button class="w-full mt-4 py-2 px-4 text-xs font-bold text-primary bg-primary/10 hover:bg-primary/20 dark:bg-blue-900/20 dark:text-blue-300 rounded-lg transition-colors flex items-center justify-center gap-1">
+                                查看详细模拟
+                                <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+
+</body></html>

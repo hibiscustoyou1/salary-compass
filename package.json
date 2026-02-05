@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "scripts": {
     "install:all": "pnpm i -r && pnpm build:shared",
-    "dev": "pnpm --filter './apps/*' --parallel dev",
+    "dev": "pnpm --filter \"./apps/*\" --parallel dev",
     "build": "pnpm clean && pnpm build:shared && pnpm --filter './apps/*' --parallel build",
     "build:shared": "pnpm --filter @repo/shared build",
     "clean": "rimraf dist apps/*/dist packages/*/dist",
@@ -12,9 +12,9 @@
     "db:gen": "dotenv -e .env -- pnpm --filter server prisma:gen",
     "vault:enc": "node scripts/vault.js encrypt",
     "vault:dec": "node scripts/vault.js decrypt",
-    "docker:build": "docker build --build-arg VAULT_PASS=$VAULT_PASS -t mywage .",
-    "docker:stop": "docker rm -f mywage | true",
-    "docker:run": "pnpm docker:stop && docker run -d -p 8030:80 -e VAULT_PASS=$VAULT_PASS --name mywage mywage"
+    "docker:build": "docker build --build-arg VAULT_PASS=$VAULT_PASS -t app-template .",
+    "docker:stop": "docker rm -f app-template | true",
+    "docker:run": "pnpm docker:stop && docker run -d -p 8030:80 -e VAULT_PASS=$VAULT_PASS --name app-template app-template"
   },
   "devDependencies": {
     "@repo/shared": "workspace:*",

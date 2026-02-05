@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Career Wealth Analytics Dashboard</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Theme Configuration -->
+<script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#1241a1",
+              "background-light": "#f6f6f8",
+              "background-dark": "#111621",
+              "card-light": "#ffffff",
+              "card-dark": "#1a2231",
+              "text-main-light": "#0e121b",
+              "text-main-dark": "#ffffff",
+              "text-secondary-light": "#4e6797",
+              "text-secondary-dark": "#9ca3af",
+              "border-light": "#e5e7eb",
+              "border-dark": "#374151",
+              "emerald": "#07883b",
+              "muted-red": "#d32f2f"
+            },
+            fontFamily: {
+              "display": ["Inter", "sans-serif"]
+            },
+            borderRadius: {
+              "DEFAULT": "0.5rem",
+              "lg": "0.5rem", 
+              "xl": "0.75rem",
+              "2xl": "1rem",
+              "full": "9999px"
+            },
+          },
+        },
+      }
+    </script>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-text-main-light dark:text-text-main-dark transition-colors duration-200">
+<div class="flex min-h-screen w-full overflow-hidden">
+<!-- Side Navigation -->
+<aside class="hidden lg:flex flex-col w-72 bg-white dark:bg-card-dark border-r border-border-light dark:border-border-dark h-screen sticky top-0 z-20 transition-colors duration-200">
+<div class="p-6 flex flex-col h-full justify-between">
+<!-- Logo / Branding Area -->
+<div class="flex flex-col gap-8">
+<div class="flex items-center gap-3">
+<div class="flex items-center justify-center w-10 h-10 rounded-xl bg-primary text-white">
+<span class="material-symbols-outlined">finance_mode</span>
+</div>
+<h2 class="text-xl font-bold tracking-tight text-primary dark:text-blue-400">WealthTrack</h2>
+</div>
+<!-- User Profile -->
+<div class="flex items-center gap-3 p-3 rounded-xl bg-background-light dark:bg-gray-800/50">
+<div class="bg-center bg-no-repeat bg-cover rounded-full h-12 w-12 border-2 border-white dark:border-gray-700 shadow-sm" data-alt="Portrait of a professional man in a suit" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDzYrtUgHmqumYT8PbAzrCJVDgDbCQrTDdXI_2Sjsmly6v_UEbpisZKgz-stxPQRh7WiHMEt_LuRGrjGGeM868gQnGpfVmDlUitRgmfuqJ3j8i0RLVF3xe2b4IBWkuI3TH2xqa446lTQ0rZLXSvdpDYq0fT7t_hmtCEGHyyfne4Jzide2e9qYVmCYAY9g8wHpARSm_ohSpuVAlrD2gZv6qo2D1zk86U-7fr0ylD0rL2pCd6dJm-5OGDof6luaUNcvXZQ15sQj0Og_s");'></div>
+<div class="flex flex-col overflow-hidden">
+<h1 class="text-sm font-bold truncate">Alex Morgan</h1>
+<p class="text-text-secondary-light dark:text-text-secondary-dark text-xs truncate">Senior Partner</p>
+</div>
+</div>
+<!-- Navigation Links -->
+<nav class="flex flex-col gap-2">
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg bg-primary text-white shadow-sm transition-all hover:shadow-md" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="text-sm font-medium">Overview</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-text-secondary-light dark:text-text-secondary-dark hover:bg-background-light dark:hover:bg-gray-800 transition-colors" href="#">
+<span class="material-symbols-outlined">payments</span>
+<span class="text-sm font-medium">Salary Detail</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-text-secondary-light dark:text-text-secondary-dark hover:bg-background-light dark:hover:bg-gray-800 transition-colors" href="#">
+<span class="material-symbols-outlined">account_balance</span>
+<span class="text-sm font-medium">Tax Analysis</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-text-secondary-light dark:text-text-secondary-dark hover:bg-background-light dark:hover:bg-gray-800 transition-colors" href="#">
+<span class="material-symbols-outlined">trending_up</span>
+<span class="text-sm font-medium">Benefit Forecast</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-text-secondary-light dark:text-text-secondary-dark hover:bg-background-light dark:hover:bg-gray-800 transition-colors" href="#">
+<span class="material-symbols-outlined">pie_chart</span>
+<span class="text-sm font-medium">Portfolio</span>
+</a>
+</nav>
+</div>
+<!-- Bottom Actions -->
+<div class="flex flex-col gap-4">
+<div class="p-4 rounded-xl bg-gradient-to-br from-primary to-blue-900 text-white relative overflow-hidden">
+<div class="absolute top-0 right-0 p-2 opacity-10">
+<span class="material-symbols-outlined text-6xl">lock</span>
+</div>
+<p class="text-xs font-medium opacity-80 mb-1">Security Status</p>
+<p class="text-sm font-bold flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-emerald-400"></span> Encrypted
+                        </p>
+</div>
+<button class="flex w-full items-center justify-center gap-2 rounded-lg h-10 px-4 border border-border-light dark:border-border-dark text-text-secondary-light dark:text-text-secondary-dark hover:bg-background-light dark:hover:bg-gray-800 transition-colors text-sm font-semibold">
+<span class="material-symbols-outlined text-lg">logout</span>
+<span>Logout</span>
+</button>
+</div>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 flex flex-col h-screen overflow-y-auto bg-background-light dark:bg-background-dark scroll-smooth">
+<!-- Top Header -->
+<header class="sticky top-0 z-10 bg-background-light/90 dark:bg-background-dark/90 backdrop-blur-md px-6 py-4 border-b border-border-light dark:border-border-dark flex flex-wrap justify-between items-center gap-4">
+<div class="flex flex-col">
+<h1 class="text-2xl font-bold tracking-tight text-text-main-light dark:text-white">Career Analytics</h1>
+<p class="text-sm text-text-secondary-light dark:text-text-secondary-dark">Fiscal Year 2024 Performance</p>
+</div>
+<div class="flex items-center gap-3">
+<button class="flex items-center gap-2 h-10 px-4 rounded-lg bg-white dark:bg-card-dark border border-border-light dark:border-border-dark text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors shadow-sm">
+<span class="material-symbols-outlined text-lg">visibility_off</span>
+<span class="hidden sm:inline">Privacy Mode</span>
+</button>
+<button class="flex items-center gap-2 h-10 px-4 rounded-lg bg-primary text-white text-sm font-bold hover:bg-blue-800 transition-colors shadow-md shadow-primary/20">
+<span class="material-symbols-outlined text-lg">download</span>
+<span>Export Report</span>
+</button>
+</div>
+</header>
+<div class="p-6 max-w-[1400px] w-full mx-auto flex flex-col gap-6">
+<!-- KPI Stats Row -->
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+<!-- KPI 1 -->
+<div class="bg-white dark:bg-card-dark rounded-xl p-5 border border-border-light dark:border-border-dark shadow-sm hover:shadow-md transition-shadow group">
+<div class="flex justify-between items-start mb-2">
+<p class="text-text-secondary-light dark:text-text-secondary-dark text-sm font-medium">YTD Net Income</p>
+<span class="material-symbols-outlined text-emerald bg-emerald/10 p-1 rounded text-lg">trending_up</span>
+</div>
+<h3 class="text-2xl font-bold text-text-main-light dark:text-white mb-1">$142,500</h3>
+<div class="flex items-center gap-2">
+<span class="text-emerald text-sm font-semibold bg-emerald/10 px-1.5 py-0.5 rounded">+12%</span>
+<span class="text-text-secondary-light dark:text-text-secondary-dark text-xs">vs last year</span>
+</div>
+<!-- Sparkline placeholder -->
+<div class="h-10 mt-3 w-full opacity-50 group-hover:opacity-100 transition-opacity">
+<svg class="w-full h-full" preserveaspectratio="none" viewbox="0 0 100 20">
+<path d="M0 15 Q 10 18, 20 12 T 40 10 T 60 14 T 80 5 T 100 2" fill="none" stroke="#07883b" stroke-width="2"></path>
+</svg>
+</div>
+</div>
+<!-- KPI 2 -->
+<div class="bg-white dark:bg-card-dark rounded-xl p-5 border border-border-light dark:border-border-dark shadow-sm hover:shadow-md transition-shadow group">
+<div class="flex justify-between items-start mb-2">
+<p class="text-text-secondary-light dark:text-text-secondary-dark text-sm font-medium">Total Tax Paid</p>
+<span class="material-symbols-outlined text-muted-red bg-muted-red/10 p-1 rounded text-lg">account_balance</span>
+</div>
+<h3 class="text-2xl font-bold text-text-main-light dark:text-white mb-1">$68,200</h3>
+<div class="flex items-center gap-2">
+<span class="text-text-secondary-light dark:text-text-secondary-dark text-sm font-medium">32% Eff. Rate</span>
+</div>
+<div class="h-10 mt-3 w-full opacity-50 group-hover:opacity-100 transition-opacity">
+<div class="w-full bg-gray-100 dark:bg-gray-700 h-2 rounded-full mt-4 overflow-hidden">
+<div class="bg-muted-red h-full rounded-full" style="width: 32%"></div>
+</div>
+</div>
+</div>
+<!-- KPI 3 -->
+<div class="bg-white dark:bg-card-dark rounded-xl p-5 border border-border-light dark:border-border-dark shadow-sm hover:shadow-md transition-shadow group">
+<div class="flex justify-between items-start mb-2">
+<p class="text-text-secondary-light dark:text-text-secondary-dark text-sm font-medium">Hidden Wealth (Vested)</p>
+<span class="material-symbols-outlined text-primary bg-primary/10 p-1 rounded text-lg">lock_open</span>
+</div>
+<h3 class="text-2xl font-bold text-text-main-light dark:text-white mb-1">$45,000</h3>
+<div class="flex items-center gap-2">
+<span class="text-emerald text-sm font-semibold bg-emerald/10 px-1.5 py-0.5 rounded">+5%</span>
+<span class="text-text-secondary-light dark:text-text-secondary-dark text-xs">Growth</span>
+</div>
+<div class="h-10 mt-3 w-full opacity-50 group-hover:opacity-100 transition-opacity flex items-end gap-1">
+<div class="w-1/6 bg-primary/30 h-[40%] rounded-t-sm"></div>
+<div class="w-1/6 bg-primary/40 h-[50%] rounded-t-sm"></div>
+<div class="w-1/6 bg-primary/50 h-[45%] rounded-t-sm"></div>
+<div class="w-1/6 bg-primary/60 h-[70%] rounded-t-sm"></div>
+<div class="w-1/6 bg-primary/80 h-[85%] rounded-t-sm"></div>
+<div class="w-1/6 bg-primary h-[95%] rounded-t-sm"></div>
+</div>
+</div>
+<!-- KPI 4 -->
+<div class="bg-white dark:bg-card-dark rounded-xl p-5 border border-border-light dark:border-border-dark shadow-sm hover:shadow-md transition-shadow group">
+<div class="flex justify-between items-start mb-2">
+<p class="text-text-secondary-light dark:text-text-secondary-dark text-sm font-medium">Variable Income Ratio</p>
+<span class="material-symbols-outlined text-blue-400 bg-blue-400/10 p-1 rounded text-lg">donut_small</span>
+</div>
+<h3 class="text-2xl font-bold text-text-main-light dark:text-white mb-1">25%</h3>
+<div class="flex items-center gap-2">
+<span class="text-text-secondary-light dark:text-text-secondary-dark text-xs">Target: 30%</span>
+</div>
+<div class="h-10 mt-3 w-full opacity-50 group-hover:opacity-100 transition-opacity flex items-center justify-center relative">
+<svg class="transform -rotate-90" height="40" viewbox="0 0 40 40" width="40">
+<circle cx="20" cy="20" fill="none" r="15.9155" stroke="#e5e7eb" stroke-width="4"></circle>
+<circle cx="20" cy="20" fill="none" r="15.9155" stroke="#1241a1" stroke-dasharray="25, 100" stroke-width="4"></circle>
+</svg>
+</div>
+</div>
+</div>
+<!-- Main Charts Grid -->
+<div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+<!-- Gross vs Net Income (Spans 2 columns) -->
+<div class="xl:col-span-2 bg-white dark:bg-card-dark rounded-xl border border-border-light dark:border-border-dark p-6 shadow-sm">
+<div class="flex justify-between items-center mb-6">
+<div>
+<h3 class="text-lg font-bold text-text-main-light dark:text-white">Gross vs. Net Income Trends</h3>
+<p class="text-sm text-text-secondary-light dark:text-text-secondary-dark">Comparing total compensation against take-home pay</p>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 rounded-full bg-primary"></span>
+<span class="text-xs font-medium text-text-secondary-light dark:text-text-secondary-dark">Gross</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 rounded-full bg-emerald"></span>
+<span class="text-xs font-medium text-text-secondary-light dark:text-text-secondary-dark">Net</span>
+</div>
+</div>
+</div>
+<div class="relative w-full h-[300px]">
+<!-- Chart SVG -->
+<svg class="w-full h-full overflow-visible" preserveaspectratio="none" viewbox="0 0 800 300">
+<!-- Grid Lines -->
+<line class="dark:stroke-gray-700" stroke="#e5e7eb" stroke-dasharray="4 4" stroke-width="1" x1="0" x2="800" y1="250" y2="250"></line>
+<line class="dark:stroke-gray-700" stroke="#e5e7eb" stroke-dasharray="4 4" stroke-width="1" x1="0" x2="800" y1="175" y2="175"></line>
+<line class="dark:stroke-gray-700" stroke="#e5e7eb" stroke-dasharray="4 4" stroke-width="1" x1="0" x2="800" y1="100" y2="100"></line>
+<line class="dark:stroke-gray-700" stroke="#e5e7eb" stroke-dasharray="4 4" stroke-width="1" x1="0" x2="800" y1="25" y2="25"></line>
+<!-- Gross Area Gradient -->
+<defs>
+<lineargradient id="grossGradient" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#1241a1" stop-opacity="0.1"></stop>
+<stop offset="100%" stop-color="#1241a1" stop-opacity="0"></stop>
+</lineargradient>
+</defs>
+<path d="M0,200 Q100,190 200,160 T400,140 T600,80 T800,60 V300 H0 Z" fill="url(#grossGradient)"></path>
+<!-- Gross Line (Blue) -->
+<path d="M0,200 Q100,190 200,160 T400,140 T600,80 T800,60" fill="none" stroke="#1241a1" stroke-linecap="round" stroke-width="3"></path>
+<!-- Net Line (Green) -->
+<path d="M0,240 Q100,230 200,210 T400,200 T600,170 T800,160" fill="none" stroke="#07883b" stroke-linecap="round" stroke-width="3"></path>
+<!-- Hover Indicators (Static representation) -->
+<circle cx="600" cy="80" fill="#fff" r="5" stroke="#1241a1" stroke-width="2"></circle>
+<circle cx="600" cy="170" fill="#fff" r="5" stroke="#07883b" stroke-width="2"></circle>
+<!-- Tooltip -->
+<g transform="translate(615, 60)">
+<rect class="dark:fill-gray-800 dark:stroke-gray-700" fill="#ffffff" height="50" rx="4" stroke="#e5e7eb" width="90" x="0" y="-10"></rect>
+<text fill="#1241a1" font-family="Inter" font-size="12" font-weight="bold" x="10" y="10">$19.5k Gross</text>
+<text fill="#07883b" font-family="Inter" font-size="12" font-weight="bold" x="10" y="30">$12.2k Net</text>
+</g>
+</svg>
+</div>
+<div class="flex justify-between text-xs text-text-secondary-light dark:text-text-secondary-dark mt-2 px-2">
+<span>Jan</span><span>Feb</span><span>Mar</span><span>Apr</span><span>May</span><span>Jun</span><span>Jul</span><span>Aug</span><span>Sep</span><span>Oct</span><span>Nov</span><span>Dec</span>
+</div>
+</div>
+<!-- Income Structure Health -->
+<div class="bg-white dark:bg-card-dark rounded-xl border border-border-light dark:border-border-dark p-6 shadow-sm flex flex-col">
+<h3 class="text-lg font-bold text-text-main-light dark:text-white mb-1">Income Structure</h3>
+<p class="text-sm text-text-secondary-light dark:text-text-secondary-dark mb-6">Composition of annual compensation</p>
+<div class="flex-1 flex flex-col justify-center gap-6">
+<!-- Stack Item 1 -->
+<div class="space-y-2">
+<div class="flex justify-between text-sm">
+<span class="font-medium text-text-main-light dark:text-white">Base Salary</span>
+<span class="font-bold text-primary">$180,000</span>
+</div>
+<div class="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-3">
+<div class="bg-primary h-3 rounded-full" style="width: 65%"></div>
+</div>
+</div>
+<!-- Stack Item 2 -->
+<div class="space-y-2">
+<div class="flex justify-between text-sm">
+<span class="font-medium text-text-main-light dark:text-white">Annual Bonus</span>
+<span class="font-bold text-blue-400">$65,000</span>
+</div>
+<div class="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-3">
+<div class="bg-blue-400 h-3 rounded-full" style="width: 25%"></div>
+</div>
+</div>
+<!-- Stack Item 3 -->
+<div class="space-y-2">
+<div class="flex justify-between text-sm">
+<span class="font-medium text-text-main-light dark:text-white">Equity (RSU)</span>
+<span class="font-bold text-emerald">$35,000</span>
+</div>
+<div class="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-3">
+<div class="bg-emerald h-3 rounded-full" style="width: 10%"></div>
+</div>
+</div>
+</div>
+<div class="mt-6 pt-4 border-t border-border-light dark:border-border-dark">
+<div class="flex justify-between items-center">
+<span class="text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark">Total Compensation</span>
+<span class="text-xl font-black text-text-main-light dark:text-white">$280,000</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Secondary Charts Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+<!-- Monthly Cash Flow Waterfall -->
+<div class="bg-white dark:bg-card-dark rounded-xl border border-border-light dark:border-border-dark p-6 shadow-sm">
+<div class="flex justify-between items-start mb-6">
+<div>
+<h3 class="text-lg font-bold text-text-main-light dark:text-white">Monthly Cash Flow Breakdown</h3>
+<p class="text-sm text-text-secondary-light dark:text-text-secondary-dark">Where your gross monthly income goes</p>
+</div>
+<div class="px-3 py-1 rounded bg-gray-100 dark:bg-gray-800 text-xs font-medium text-text-secondary-light dark:text-text-secondary-dark">
+                                Avg. Monthly
+                            </div>
+</div>
+<div class="grid grid-cols-5 gap-2 h-[220px] items-end pb-6 border-b border-border-light dark:border-border-dark relative">
+<!-- Labels below are absolutely positioned or flex, here using grid alignment -->
+<!-- Bar 1: Gross -->
+<div class="flex flex-col items-center w-full h-full justify-end group relative">
+<span class="text-xs font-bold mb-1 opacity-0 group-hover:opacity-100 transition-opacity">$23.3k</span>
+<div class="w-full bg-primary/20 rounded-t-sm border-t-2 border-primary h-full relative" style="height: 100%;"></div>
+<p class="absolute -bottom-8 text-xs font-medium text-text-secondary-light text-center">Gross</p>
+</div>
+<!-- Bar 2: Fed Tax (Negative) -->
+<div class="flex flex-col items-center w-full h-full justify-end group relative">
+<span class="text-xs font-bold mb-1 opacity-0 group-hover:opacity-100 transition-opacity">-$5.1k</span>
+<div class="w-full bg-transparent h-full relative">
+<div class="absolute top-0 w-full bg-muted-red/20 border-t-2 border-muted-red rounded-t-sm" style="height: 22%;"></div>
+</div>
+<p class="absolute -bottom-8 text-xs font-medium text-text-secondary-light text-center">Fed Tax</p>
+</div>
+<!-- Bar 3: State Tax (Negative) -->
+<div class="flex flex-col items-center w-full h-full justify-end group relative">
+<span class="text-xs font-bold mb-1 opacity-0 group-hover:opacity-100 transition-opacity">-$1.8k</span>
+<div class="w-full bg-transparent h-full relative">
+<div class="absolute top-[22%] w-full bg-muted-red/20 border-t-2 border-muted-red rounded-t-sm" style="height: 8%;"></div>
+</div>
+<p class="absolute -bottom-8 text-xs font-medium text-text-secondary-light text-center">State Tax</p>
+</div>
+<!-- Bar 4: 401k (Negative/Savings) -->
+<div class="flex flex-col items-center w-full h-full justify-end group relative">
+<span class="text-xs font-bold mb-1 opacity-0 group-hover:opacity-100 transition-opacity">-$1.9k</span>
+<div class="w-full bg-transparent h-full relative">
+<div class="absolute top-[30%] w-full bg-emerald/20 border-t-2 border-emerald rounded-t-sm" style="height: 8%;"></div>
+</div>
+<p class="absolute -bottom-8 text-xs font-medium text-text-secondary-light text-center">401k</p>
+</div>
+<!-- Bar 5: Net (Result) -->
+<div class="flex flex-col items-center w-full h-full justify-end group relative">
+<span class="text-xs font-bold mb-1 opacity-0 group-hover:opacity-100 transition-opacity">$14.5k</span>
+<div class="w-full bg-emerald rounded-t-sm h-full relative" style="height: 62%;"></div>
+<p class="absolute -bottom-8 text-xs font-medium text-text-secondary-light text-center">Net Pay</p>
+</div>
+</div>
+</div>
+<!-- Long-term Asset Accumulation -->
+<div class="bg-white dark:bg-card-dark rounded-xl border border-border-light dark:border-border-dark p-6 shadow-sm">
+<div class="flex justify-between items-center mb-6">
+<div>
+<h3 class="text-lg font-bold text-text-main-light dark:text-white">Long-term Asset Accumulation</h3>
+<p class="text-sm text-text-secondary-light dark:text-text-secondary-dark">Projected wealth growth over next 5 years</p>
+</div>
+<span class="material-symbols-outlined text-text-secondary-light">more_horiz</span>
+</div>
+<div class="relative h-[240px] w-full">
+<svg class="w-full h-full" preserveaspectratio="none" viewbox="0 0 400 200">
+<defs>
+<lineargradient id="areaGradient" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#07883b" stop-opacity="0.2"></stop>
+<stop offset="100%" stop-color="#07883b" stop-opacity="0"></stop>
+</lineargradient>
+</defs>
+<!-- Area -->
+<path d="M0,180 C50,175 100,160 150,140 C200,120 250,90 300,70 C350,50 400,20 400,20 V200 H0 Z" fill="url(#areaGradient)"></path>
+<!-- Line -->
+<path d="M0,180 C50,175 100,160 150,140 C200,120 250,90 300,70 C350,50 400,20 400,20" fill="none" stroke="#07883b" stroke-width="3"></path>
+<!-- Points -->
+<circle cx="0" cy="180" fill="#fff" r="3" stroke="#07883b" stroke-width="2"></circle>
+<circle cx="150" cy="140" fill="#fff" r="3" stroke="#07883b" stroke-width="2"></circle>
+<circle cx="300" cy="70" fill="#fff" r="3" stroke="#07883b" stroke-width="2"></circle>
+<circle cx="400" cy="20" fill="#fff" r="3" stroke="#07883b" stroke-width="2"></circle>
+</svg>
+</div>
+<div class="flex justify-between mt-2 text-xs font-medium text-text-secondary-light dark:text-text-secondary-dark">
+<span>2024</span>
+<span>2025</span>
+<span>2026</span>
+<span>2027</span>
+<span>2028</span>
+</div>
+</div>
+</div>
+</div>
+<footer class="p-6 mt-auto border-t border-border-light dark:border-border-dark text-center text-xs text-text-secondary-light dark:text-text-secondary-dark">
+                © 2024 WealthTrack Analytics. Confidential &amp; Proprietary.
+            </footer>
+</main>
+</div>
+</body></html>

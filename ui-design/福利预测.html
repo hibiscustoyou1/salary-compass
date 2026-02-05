@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html class="light" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WealthTrack - 福利预测</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Noto+Sans+SC:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#1241a1",
+                        "primary-hover": "#0e3385",
+                        "background-light": "#f8f9fc",
+                        "background-dark": "#111621",
+                        "emerald-custom": "#10b981",
+                        "slate-custom": "#4e6797",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"],
+                        "sans": ["Noto Sans SC", "Inter", "sans-serif"],
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem", 
+                        "lg": "0.5rem", 
+                        "xl": "0.75rem", 
+                        "2xl": "1rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>input[type=range] {
+            -webkit-appearance: none; 
+            background: transparent; 
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+        }
+        input[type=range]:focus {
+            outline: none; 
+        }
+    </style>
+</head>
+<body class="bg-background-light text-[#0e121b] antialiased font-sans">
+<div class="flex h-screen w-full overflow-hidden bg-background-light">
+<aside class="flex w-64 flex-col justify-between border-r border-[#e7ebf3] bg-white transition-all duration-300 ease-in-out shrink-0 h-full overflow-y-auto font-sans">
+<div class="flex flex-col gap-6 p-4">
+<div class="flex items-center gap-3 px-2 pt-2">
+<div class="bg-[#1241a1] rounded-xl size-10 flex items-center justify-center shadow-sm text-white">
+<span class="material-symbols-outlined text-[24px]">analytics</span>
+</div>
+<h1 class="text-[#1241a1] text-2xl font-bold tracking-tight font-display">WealthTrack</h1>
+</div>
+<div class="flex items-center gap-4 p-4 bg-[#f4f6f8] rounded-2xl">
+<div class="bg-center bg-no-repeat bg-cover rounded-full size-12 shadow-sm border-2 border-white" data-alt="Profile picture of user Alex Morgan" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAKgaO7gypvDg6SamFGiLN6fB6mTrVElG2ZdEG7IyiWl3cUZkp-PJ36_i0pQAnggHKyi9R0Y7EIybjnAmL0tw9TVHe3QLI_XM8C4ZlhShEUJIyrSmdRl2KkDEnoMU-fUaJThRJ6Rue54lV-oKl6wZ2b95LmMAOdAJkahgjbmRMdT10wg5KqNgmjNsRufbC18jImzi7JaRLWtejSi3QyzdLOHtZgUtGw-Cm8qb5a7N3RGqInB9clHVF1Emt_h-5ItMCsn2EtmEnt54Y");'></div>
+<div class="flex flex-col">
+<span class="text-base font-bold text-[#0e121b]">Alex Morgan</span>
+<span class="text-sm text-[#4e6797]">高级合伙人</span>
+</div>
+</div>
+<nav class="flex flex-col gap-2 mt-2">
+<a class="flex items-center gap-4 px-4 py-3 rounded-xl text-[#4e6797] hover:bg-gray-50 transition-colors group" href="#">
+<span class="material-symbols-outlined text-[24px] group-hover:text-[#1241a1]">dashboard</span>
+<span class="text-base font-medium">概览</span>
+</a>
+<a class="flex items-center gap-4 px-4 py-3 rounded-xl text-[#4e6797] hover:bg-gray-50 transition-colors group" href="#">
+<span class="material-symbols-outlined text-[24px] group-hover:text-[#1241a1]">payments</span>
+<span class="text-base font-medium">薪资详情</span>
+</a>
+<a class="flex items-center gap-4 px-4 py-3 rounded-xl text-[#4e6797] hover:bg-gray-50 transition-colors group" href="#">
+<span class="material-symbols-outlined text-[24px] group-hover:text-[#1241a1]">account_balance</span>
+<span class="text-base font-medium">税务分析</span>
+</a>
+<a class="flex items-center gap-4 px-4 py-3 rounded-xl bg-[#1241a1] text-white shadow-md shadow-blue-900/20" href="#">
+<span class="material-symbols-outlined text-[24px]">trending_up</span>
+<span class="text-base font-medium">福利预测</span>
+</a>
+<a class="flex items-center gap-4 px-4 py-3 rounded-xl text-[#4e6797] hover:bg-gray-50 transition-colors group" href="#">
+<span class="material-symbols-outlined text-[24px] group-hover:text-[#1241a1]">pie_chart</span>
+<span class="text-base font-medium">投资组合</span>
+</a>
+</nav>
+</div>
+<div class="p-4 flex flex-col gap-3 pb-6">
+<div class="relative overflow-hidden rounded-xl bg-[#1241a1] p-4 text-white shadow-md group">
+<div class="flex flex-col gap-1 relative z-10">
+<span class="text-sm font-medium opacity-90">安全状态</span>
+<span class="text-lg font-bold">已加密</span>
+</div>
+<span class="material-symbols-outlined absolute right-2 bottom-[-4px] text-[64px] text-white/10 rotate-12 group-hover:rotate-0 transition-transform duration-300">lock</span>
+<span class="material-symbols-outlined absolute right-3 bottom-3 text-[28px] text-white/20">lock</span>
+</div>
+<button class="flex items-center justify-center gap-2 w-full py-3 rounded-xl border border-[#e7ebf3] bg-white text-[#4e6797] font-medium hover:bg-gray-50 hover:text-[#1241a1] transition-colors shadow-sm">
+<span class="material-symbols-outlined text-[20px]">logout</span>
+                    退出登录
+                </button>
+</div>
+</aside>
+<main class="flex-1 flex flex-col h-full overflow-hidden relative">
+<header class="flex-none px-8 py-6 bg-background-light border-b border-[#e7ebf3]/60">
+<div class="flex flex-wrap items-center justify-between gap-4 max-w-[1200px] mx-auto w-full">
+<div class="flex flex-col gap-1">
+<h1 class="text-[#0e121b] text-2xl font-bold leading-tight font-display tracking-tight">福利详情</h1>
+<p class="text-[#4e6797] text-sm font-normal">长期福利与退休资产预测</p>
+</div>
+<div class="flex gap-3">
+<button class="flex items-center justify-center h-9 px-4 rounded-lg border border-[#d0d7e7] bg-white text-[#0e121b] text-sm font-semibold hover:bg-gray-50 transition-colors shadow-sm">
+<span class="material-symbols-outlined text-[18px] mr-2 text-[#4e6797]">visibility_off</span>
+                            隐私模式
+                        </button>
+<button class="flex items-center justify-center h-9 px-4 rounded-lg bg-[#1241a1] text-white text-sm font-semibold hover:bg-[#0e3385] transition-colors shadow-sm shadow-blue-900/20">
+<span class="material-symbols-outlined text-[18px] mr-2">download</span>
+                            导出报告
+                        </button>
+</div>
+</div>
+</header>
+<div class="flex-1 overflow-y-auto p-8">
+<div class="flex flex-col gap-6 max-w-[1200px] mx-auto pb-10">
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+<div class="flex flex-col justify-between gap-4 rounded-xl border border-[#e7ebf3] bg-white p-5 shadow-sm">
+<div class="flex items-center justify-between">
+<p class="text-[#4e6797] text-sm font-medium">公积金总额</p>
+<span class="material-symbols-outlined text-[#4e6797] text-[20px]">savings</span>
+</div>
+<div>
+<p class="text-emerald-600 font-display text-3xl font-bold tracking-tight">¥5,800,000</p>
+<div class="flex items-center gap-1 mt-1">
+<span class="material-symbols-outlined text-emerald-600 text-[14px]">trending_up</span>
+<span class="text-xs text-emerald-600 font-medium">+12.5% 较上年预测</span>
+</div>
+</div>
+</div>
+<div class="flex flex-col justify-between gap-4 rounded-xl border border-[#e7ebf3] bg-white p-5 shadow-sm">
+<div class="flex items-center justify-between">
+<p class="text-[#4e6797] text-sm font-medium">月度福利缴纳</p>
+<span class="material-symbols-outlined text-[#4e6797] text-[20px]">account_balance_wallet</span>
+</div>
+<div>
+<p class="text-[#0e121b] font-display text-3xl font-bold tracking-tight">¥4,700</p>
+<p class="text-xs text-[#4e6797] mt-1 font-medium">包含个人与企业部分</p>
+</div>
+</div>
+<div class="flex flex-col justify-between gap-4 rounded-xl border border-[#e7ebf3] bg-white p-5 shadow-sm">
+<div class="flex items-center justify-between">
+<p class="text-[#4e6797] text-sm font-medium">预计退休年龄</p>
+<span class="material-symbols-outlined text-[#4e6797] text-[20px]">event</span>
+</div>
+<div>
+<p class="text-[#0e121b] font-display text-3xl font-bold tracking-tight">65 <span class="text-lg text-[#4e6797] font-normal">岁</span></p>
+<p class="text-xs text-[#4e6797] mt-1 font-medium">距离退休还有 32 年</p>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+<div class="lg:col-span-2 flex flex-col rounded-xl border border-[#e7ebf3] bg-white p-6 shadow-sm">
+<div class="flex items-center justify-between mb-6">
+<h2 class="text-[#0e121b] text-lg font-bold">资产增长曲线</h2>
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2">
+<div class="size-3 rounded-full bg-[#1241a1]"></div>
+<span class="text-xs text-[#4e6797] font-medium">基本养老金</span>
+</div>
+<div class="flex items-center gap-2">
+<div class="size-3 rounded-full bg-[#60a5fa]"></div>
+<span class="text-xs text-[#4e6797] font-medium">企业年金</span>
+</div>
+<div class="flex items-center gap-2">
+<div class="size-3 rounded-full bg-[#10b981]"></div>
+<span class="text-xs text-[#4e6797] font-medium">公积金</span>
+</div>
+</div>
+</div>
+<div class="relative w-full aspect-[2/1] min-h-[300px]">
+<svg class="w-full h-full" preserveAspectRatio="none" viewBox="0 0 800 400">
+<defs>
+<linearGradient id="grad1" x1="0%" x2="0%" y1="0%" y2="100%">
+<stop offset="0%" style="stop-color:#1241a1;stop-opacity:0.8"></stop>
+<stop offset="100%" style="stop-color:#1241a1;stop-opacity:0.1"></stop>
+</linearGradient>
+<linearGradient id="grad2" x1="0%" x2="0%" y1="0%" y2="100%">
+<stop offset="0%" style="stop-color:#60a5fa;stop-opacity:0.8"></stop>
+<stop offset="100%" style="stop-color:#60a5fa;stop-opacity:0.1"></stop>
+</linearGradient>
+<linearGradient id="grad3" x1="0%" x2="0%" y1="0%" y2="100%">
+<stop offset="0%" style="stop-color:#10b981;stop-opacity:0.8"></stop>
+<stop offset="100%" style="stop-color:#10b981;stop-opacity:0.1"></stop>
+</linearGradient>
+</defs>
+<line stroke="#e7ebf3" stroke-width="1" x1="0" x2="800" y1="350" y2="350"></line>
+<line stroke="#e7ebf3" stroke-dasharray="4 4" stroke-width="1" x1="0" x2="800" y1="250" y2="250"></line>
+<line stroke="#e7ebf3" stroke-dasharray="4 4" stroke-width="1" x1="0" x2="800" y1="150" y2="150"></line>
+<line stroke="#e7ebf3" stroke-dasharray="4 4" stroke-width="1" x1="0" x2="800" y1="50" y2="50"></line>
+<path d="M0,350 C100,340 200,320 300,280 C400,220 500,150 600,100 C700,60 800,20 800,20 V350 H0 Z" fill="url(#grad3)"></path>
+<path d="M0,350 C100,342 200,330 300,300 C400,250 500,190 600,150 C700,110 800,80 800,80 V350 H0 Z" fill="url(#grad2)"></path>
+<path d="M0,350 C100,345 200,338 300,320 C400,280 500,240 600,210 C700,180 800,160 800,160 V350 H0 Z" fill="url(#grad1)"></path>
+<path d="M0,350 C100,340 200,320 300,280 C400,220 500,150 600,100 C700,60 800,20 800,20" fill="none" stroke="#10b981" stroke-width="2"></path>
+<path d="M0,350 C100,342 200,330 300,300 C400,250 500,190 600,150 C700,110 800,80 800,80" fill="none" stroke="#60a5fa" stroke-width="2"></path>
+<path d="M0,350 C100,345 200,338 300,320 C400,280 500,240 600,210 C700,180 800,160 800,160" fill="none" stroke="#1241a1" stroke-width="2"></path>
+</svg>
+<div class="flex justify-between mt-2 px-2 text-xs text-[#4e6797] font-medium font-display">
+<span>2024</span>
+<span>2029</span>
+<span>2034</span>
+<span>2039</span>
+<span>2044</span>
+<span>2049</span>
+<span>2054</span>
+</div>
+</div>
+</div>
+<div class="flex flex-col gap-6">
+<div class="flex flex-col rounded-xl border border-[#e7ebf3] bg-white p-6 shadow-sm h-full">
+<div class="flex items-center gap-2 mb-6">
+<span class="material-symbols-outlined text-[#1241a1]">tune</span>
+<h2 class="text-[#0e121b] text-lg font-bold">策略参数调整</h2>
+</div>
+<div class="flex flex-col gap-8 flex-1 justify-center">
+<div class="flex flex-col gap-3">
+<div class="flex justify-between items-end">
+<label class="text-sm font-medium text-[#4e6797]">年化收益率预测</label>
+<span class="text-lg font-bold text-[#1241a1] font-display">4.5%</span>
+</div>
+<input class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#1241a1]" max="10" min="1" step="0.1" type="range" value="4.5"/>
+<div class="flex justify-between text-xs text-gray-400 font-display">
+<span>1%</span>
+<span>10%</span>
+</div>
+</div>
+<div class="flex flex-col gap-3">
+<div class="flex justify-between items-end">
+<label class="text-sm font-medium text-[#4e6797]">计划退休年龄</label>
+<span class="text-lg font-bold text-[#1241a1] font-display">65岁</span>
+</div>
+<input class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#1241a1]" max="75" min="50" step="1" type="range" value="65"/>
+<div class="flex justify-between text-xs text-gray-400 font-display">
+<span>50</span>
+<span>75</span>
+</div>
+</div>
+<div class="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-100">
+<p class="text-xs text-blue-800 leading-relaxed">
+<span class="font-bold">提示：</span> 延迟退休3年可使最终退休资产增加约 <span class="font-bold">18%</span>。
+                                        </p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="flex flex-col gap-4">
+<h2 class="text-[#0e121b] text-lg font-bold px-1">福利构成明细</h2>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+<div class="flex flex-col gap-3 rounded-xl border border-[#e7ebf3] bg-white p-5 shadow-sm hover:shadow-md transition-shadow">
+<div class="flex items-center gap-3">
+<div class="p-2 rounded-lg bg-blue-50 text-[#1241a1]">
+<span class="material-symbols-outlined text-[20px]">medical_services</span>
+</div>
+<h3 class="text-[#0e121b] font-medium">基本医疗保险</h3>
+</div>
+<div class="space-y-2 mt-1">
+<div class="flex justify-between text-sm">
+<span class="text-[#4e6797]">缴纳状态</span>
+<span class="text-[#1241a1] font-medium">正常</span>
+</div>
+<div class="w-full bg-gray-100 rounded-full h-2">
+<div class="bg-[#1241a1] h-2 rounded-full" style="width: 100%"></div>
+</div>
+<div class="flex justify-between text-xs text-[#4e6797] mt-1">
+<span>企业 8%</span>
+<span>个人 2%</span>
+</div>
+</div>
+</div>
+<div class="flex flex-col gap-3 rounded-xl border border-[#e7ebf3] bg-white p-5 shadow-sm hover:shadow-md transition-shadow">
+<div class="flex items-center gap-3">
+<div class="p-2 rounded-lg bg-orange-50 text-orange-600">
+<span class="material-symbols-outlined text-[20px]">umbrella</span>
+</div>
+<h3 class="text-[#0e121b] font-medium">失业保险</h3>
+</div>
+<div class="space-y-2 mt-1">
+<div class="flex justify-between text-sm">
+<span class="text-[#4e6797]">累计缴纳</span>
+<span class="text-[#0e121b] font-medium font-display">86 个月</span>
+</div>
+<div class="w-full bg-gray-100 rounded-full h-2">
+<div class="bg-orange-500 h-2 rounded-full" style="width: 85%"></div>
+</div>
+<div class="flex justify-between text-xs text-[#4e6797] mt-1">
+<span>当前覆盖率</span>
+<span>85%</span>
+</div>
+</div>
+</div>
+<div class="flex flex-col gap-3 rounded-xl border border-[#e7ebf3] bg-white p-5 shadow-sm hover:shadow-md transition-shadow">
+<div class="flex items-center gap-3">
+<div class="p-2 rounded-lg bg-purple-50 text-purple-600">
+<span class="material-symbols-outlined text-[20px]">health_and_safety</span>
+</div>
+<h3 class="text-[#0e121b] font-medium">工伤与生育</h3>
+</div>
+<div class="space-y-2 mt-1">
+<div class="flex justify-between text-sm">
+<span class="text-[#4e6797]">保障额度</span>
+<span class="text-[#0e121b] font-medium">顶级覆盖</span>
+</div>
+<div class="w-full bg-gray-100 rounded-full h-2">
+<div class="bg-purple-500 h-2 rounded-full" style="width: 100%"></div>
+</div>
+<div class="flex justify-between text-xs text-[#4e6797] mt-1">
+<span>企业全额承担</span>
+<span>已激活</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>
