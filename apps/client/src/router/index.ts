@@ -28,14 +28,9 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'benefits',
         name: 'Benefits',
-        component: () => import('@/views/dashboard/DashboardView.vue') // 暂时占位
+        component: () => import('@/views/benefits/BenefitsView.vue') // 暂时占位
       }
     ]
-  },
-  {
-    path: '/login',
-    name: 'Login',
-    component: () => import('@/components/hello-world.vue') // 暂时使用 hello-world 作为登录占位
   }
 ]
 
