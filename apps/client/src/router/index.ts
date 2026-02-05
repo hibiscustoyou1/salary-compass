@@ -23,7 +23,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'tax',
         name: 'Tax',
-        component: () => import('@/views/dashboard/DashboardView.vue') // 暂时占位
+        component: () => import('@/views/tax/TaxView.vue') // 暂时占位
       },
       {
         path: 'benefits',

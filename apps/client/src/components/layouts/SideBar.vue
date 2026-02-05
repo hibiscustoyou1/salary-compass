@@ -57,7 +57,6 @@ const menuItems = [
   { name: '薪资详情', icon: 'payments', path: '/salary' },
   { name: '税务分析', icon: 'account_balance', path: '/tax' },
   { name: '福利预测', icon: 'trending_up', path: '/benefits' },
-  { name: '投资组合', icon: 'pie_chart', path: '/portfolio' },
 ];
 
 const isActive = (path: string) => route.path.startsWith(path);
