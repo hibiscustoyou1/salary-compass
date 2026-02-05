@@ -18,7 +18,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'salary',
         name: 'Salary',
-        component: () => import('@/views/dashboard/DashboardView.vue') // 暂时占位
+        component: () => import('@/views/salary/SalaryView.vue') // 暂时占位
       },
       {
         path: 'tax',
