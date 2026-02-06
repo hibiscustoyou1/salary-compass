@@ -1,8 +1,1 @@
-<template>
-  <router-view />
-</template>
-
-<script setup lang="ts">
-</script>
-
-<style scoped></style>
+<template>  <MainLayout v-slot="{ privacyMode, currentTab }">    <DashboardView      v-if="currentTab === 'dashboard'"      :is-active="currentTab === 'dashboard'"      :privacy-mode="privacyMode"    />    <SalaryListView      v-if="currentTab === 'salary'"      :is-active="currentTab === 'salary'"      :privacy-mode="privacyMode"    />    <TaxAnalysisView      v-if="currentTab === 'tax'"      :is-active="currentTab === 'tax'"      :privacy-mode="privacyMode"    />    <BenefitsView      v-if="currentTab === 'benefits'"      :is-active="currentTab === 'benefits'"      :privacy-mode="privacyMode"    />  </MainLayout></template><script setup lang="ts">  import MainLayout from '@/layout/MainLayout.vue';  import DashboardView from '@/views/DashboardView.vue';  import SalaryListView from '@/views/SalaryListView.vue';  import TaxAnalysisView from '@/views/TaxAnalysisView.vue';  import BenefitsView from '@/views/BenefitsView.vue';</script>
