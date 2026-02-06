@@ -10,6 +10,7 @@
     "start": "cd dist && node server/index.js",
     "db:migrate": "dotenv -e .env -- pnpm --filter server prisma:migrate",
     "db:gen": "dotenv -e .env -- pnpm --filter server prisma:gen",
+    "db:pull": "dotenv -e .env -- pnpm --filter server prisma:pull",
     "vault:enc": "node scripts/vault.js encrypt",
     "vault:dec": "node scripts/vault.js decrypt",
     "docker:build": "docker build --build-arg VAULT_PASS=$VAULT_PASS -t app-template .",

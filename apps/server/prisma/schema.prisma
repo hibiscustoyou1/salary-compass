@@ -1,15 +1,69 @@
+// apps/server/prisma/schema.prisma
+
 generator client {
   provider      = "prisma-client-js"
   binaryTargets = ["native", "linux-musl-openssl-3.0.x", "debian-openssl-3.0.x"]
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
-model Temp {
-  id        Int      @id @default(autoincrement())
-  value     String
-  createdAt DateTime @default(now())
+model SalaryRecord {
+  // --- 联合主键 ---
+  // 个人模式下，年份+月份即可唯一确定一条记录
+  @@id([year, month])
+
+  // --- 基础信息 ---
+  paymentDate String? @map("发放日期")
+  year        Int     @map("年度")
+  month       Int     @map("期间")
+
+  // --- 核心收入 ---
+  grossTotal         Float? @default(0) @map("应发合计")
+  baseSalary         Float? @default(0) @map("岗位工资")
+  monthlyPerformance Float? @default(0) @map("月度绩效奖金")
+  subsidy            Float? @default(0) @map("综合补贴")
+  otherSalary        Float? @default(0) @map("其他工资")
+
+  // --- 奖金类 ---
+  talentBonus      Float? @default(0) @map("人才特区专项奖金")
+  quarterlyBonus   Float? @default(0) @map("季度绩效奖金")
+  annualBonus      Float? @default(0) @map("年度绩效奖金")
+  specialIncentive Float? @default(0) @map("专项激励")
+  mealAllowance    Float? @default(0) @map("伙食补贴（翼支付发放，合并工资计税）")
+  heatAllowance    Float? @default(0) @map("防暑降温费")
+
+  // --- 扣减类 ---
+  deductionTotal Float? @default(0) @map("扣款合计")
+  unionFee       Float? @default(0) @map("代扣工会费")
+
+  // --- 五险一金 (个人) ---
+  pensionPersonal      Float? @default(0) @map("基本养老保险（个人扣款）")
+  medicalPersonal      Float? @default(0) @map("基本医疗保险（个人扣款）")
+  unemploymentPersonal Float? @default(0) @map("失业保险（个人扣款）")
+  housingFundPersonal  Float? @default(0) @map("住房公积金（个人扣款）")
+  annuityPersonal      Float? @default(0) @map("企业年金（个人扣款）")
+
+  // --- 税务 ---
+  cumulativeRentDeduction      Float? @default(0) @map("累计住房租金专项扣除额")
+  cumulativeChildCareDeduction Float? @default(0) @map("累计婴幼儿照护专项扣除额")
+  cumulativeTaxPaid            Float? @default(0) @map("累计应纳税额")
+  currentTax                   Float? @default(0) @map("本次扣税")
+
+  // --- 结果 ---
+  netPay Float? @default(0) @map("实发合计")
+
+  // 映射真实表名
+  @@map("mywage")
+}
+
+model AppConfig {
+  id                 Int      @id @default(1) // 永远只有一行 ID=1
+  expectedReturnRate Float    @default(4.5)   // 预期年化收益率
+  plannedRetireAge   Int      @default(65)    // 计划退休年龄
+  updatedAt          DateTime @updatedAt
+
+  @@map("app_config")
 }
