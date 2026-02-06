@@ -2,7 +2,7 @@ import { defineConfig } from 'tsup'
 import { dependencies } from './package.json'
 
 export default defineConfig({
-  entry: ['src/index.ts'],
+  entry: ['src/http.ts'],
   outDir: 'dist',
   format: ['cjs'],
   target: 'node22',

@@ -2,9 +2,9 @@ import { defineConfig } from 'tsup';
 
 export default defineConfig({
   entry: {
-    'common/index': 'src/common/index.ts',
-    'node/index': 'src/node/index.ts',
-    'browser/index': 'src/browser/index.ts',
+    'common/index': 'src/common/http.ts',
+    'node/index': 'src/node/http.ts',
+    'browser/index': 'src/browser/http.ts',
   },
   format: ['cjs', 'esm'],
   dts: true,
