@@ -14,7 +14,6 @@
             <span>{{ selectedYear }}年</span>
             <span class="material-symbols-outlined text-lg transition-transform duration-300" :class="{ 'rotate-180': isYearDropdownOpen }">expand_more</span>
           </button>
-
           <transition
             enter-active-class="transition duration-200 ease-out"
             enter-from-class="transform scale-95 opacity-0"
@@ -65,7 +64,7 @@
 
         <div v-if="filteredSalaryHistory.length === 0" class="flex flex-col items-center justify-center h-40 text-text-secondary-light dark:text-text-secondary-dark">
           <span class="material-symbols-outlined text-4xl mb-2 opacity-50">folder_off</span>
-          <span class="text-sm">该年度无薪资记录</span>
+          <span class="text-sm">无数据或正在加载...</span>
         </div>
       </div>
     </div>
@@ -157,8 +156,9 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, computed, onMounted, onUnmounted } from 'vue';
-  import { generateSalaryHistory, SalaryRecord } from '@/api/mock';
+  import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
+  import { useWageStore } from '@/stores/wage.store';
+  import { SalaryRecord } from '@/api'; // Update Import
   import SalaryWaterfall from '@/components/charts/SalaryWaterfall.vue';
 
   const props = defineProps<{
@@ -166,71 +166,54 @@
     privacyMode: boolean;
   }>();
 
-  const salaryHistory = generateSalaryHistory();
+  const store = useWageStore();
   const selectedYear = ref('2024');
   const isYearDropdownOpen = ref(false);
   const yearDropdownRef = ref<HTMLElement | null>(null);
-
-  // 提取可用年份
-  const availableYears = computed(() => {
-    const years = new Set(salaryHistory.map(item => item.period.split('-')[0]));
-    return Array.from(years).sort((a, b) => Number(b) - Number(a));
-  });
-
-  // 筛选数据
-  const filteredSalaryHistory = computed(() => {
-    return salaryHistory.filter(item => item.period.startsWith(selectedYear.value));
-  });
-
-  // 默认选中第一条
   const selectedSalary = ref<SalaryRecord | null>(null);
 
-  // 初始化选中逻辑
-  if (filteredSalaryHistory.value.length > 0) {
-    // 优先选中有详细数据的记录
-    const detailRecord = filteredSalaryHistory.value.find(s => s.details && Object.keys(s.details.income).length > 0);
-    selectedSalary.value = detailRecord || filteredSalaryHistory.value[0];
-  }
+  // init data if not
+  onMounted(() => {
+    store.initData();
+    document.addEventListener('click', handleClickOutside);
+  });
 
-  const selectYear = (year: string) => {
-    selectedYear.value = year;
+  // Watch store data to set default selection
+  watch(() => store.salaryHistory, (newVal) => {
+    if (newVal.length > 0 && !selectedSalary.value) {
+      const currentYearStr = new Date().getFullYear().toString();
+      selectedYear.value = currentYearStr;
+      const firstRecord = newVal.find(r => r.period.startsWith(currentYearStr));
+      selectedSalary.value = firstRecord || newVal[0];
+    }
+  }, { immediate: true });
+
+  // Available years
+  const availableYears = computed(() => {
+    const years = new Set(store.salaryHistory.map(item => item.year));
+    return Array.from(years).sort((a, b) => b - a);
+  });
+
+  const filteredSalaryHistory = computed(() => {
+    return store.salaryHistory.filter(item => item.year === Number(selectedYear.value));
+  });
+
+  const selectYear = (year: number) => {
+    selectedYear.value = year.toString();
     isYearDropdownOpen.value = false;
-    // 切换年份后重新选中第一条
-    const firstInYear = salaryHistory.find(item => item.period.startsWith(year));
+    const firstInYear = store.salaryHistory.find(item => item.year === year);
     if (firstInYear) selectedSalary.value = firstInYear;
   };
 
   const masked = (val: string) => props.privacyMode ? '****' : val;
 
-  // 点击外部关闭下拉菜单
   const handleClickOutside = (e: MouseEvent) => {
     if (yearDropdownRef.value && !yearDropdownRef.value.contains(e.target as Node)) {
       isYearDropdownOpen.value = false;
     }
   };
 
-  onMounted(() => {
-    document.addEventListener('click', handleClickOutside);
-  });
-
   onUnmounted(() => {
     document.removeEventListener('click', handleClickOutside);
   });
 </script>
-
-<style scoped>
-/* 滚动条微调 */
-.custom-scrollbar::-webkit-scrollbar {
-  width: 6px;
-}
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background-color: #cbd5e1;
-  border-radius: 3px;
-}
-.dark .custom-scrollbar::-webkit-scrollbar-thumb {
-  background-color: #475569;
-}
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
-}
-</style>

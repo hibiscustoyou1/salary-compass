@@ -1,15 +1,54 @@
 generator client {
-  provider      = "prisma-client-js"
-  binaryTargets = ["native", "linux-musl-openssl-3.0.x", "debian-openssl-3.0.x"]
+  provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
-model Temp {
-  id        Int      @id @default(autoincrement())
-  value     String
-  createdAt DateTime @default(now())
+model Wage {
+  // --- 基础信息 ---
+  payoutDate       String   @map("发放日期") // 之前已修正为 String
+  year             Int      @map("年度")
+
+  // [修改] String -> Int, 移除 @id
+  period           Int      @map("期间")
+
+  // ... 其他字段保持不变 ...
+
+  // --- 收入项 (Gross) ---
+  grossTotal       Decimal  @map("应发合计")
+  baseSalary       Decimal  @map("岗位工资")
+  meritPay         Decimal  @map("月度绩效奖金")
+  subsidy          Decimal  @map("综合补贴")
+  otherWage        Decimal  @map("其他工资")
+  talentBonus      Decimal  @map("人才特区专项奖金")
+  quarterlyBonus   Decimal  @map("季度绩效奖金")
+  annualBonus      Decimal  @map("年度绩效奖金")
+  heatSubsidy      Decimal  @map("防暑降温费")
+  specialIncentive Decimal  @map("专项激励")
+  mealAllowance    Decimal  @map("伙食补贴（翼支付发放，合并工资计税）")
+
+  // --- 扣除项 (Deductions) ---
+  deductionTotal   Decimal  @map("扣款合计")
+  unionFee         Decimal  @map("代扣工会费")
+  pension          Decimal  @map("基本养老保险（个人扣款）")
+  medicalInsurance Decimal  @map("基本医疗保险（个人扣款）")
+  unemploymentIns  Decimal  @map("失业保险（个人扣款）")
+  housingFund      Decimal  @map("住房公积金（个人扣款）")
+  corporateAnnuity Decimal  @map("企业年金（个人扣款）")
+
+  // --- 税务项 (Tax) ---
+  taxableIncome      Decimal  @map("累计应纳税额")
+  taxAmount          Decimal  @map("本次扣税")
+  rentDeduction      Decimal  @map("累计住房租金专项扣除额")
+  childCareDeduction Decimal  @map("累计婴幼儿照护专项扣除额")
+
+  // --- 实发 (Net) ---
+  netTotal         Decimal  @map("实发合计")
+
+  // [新增] 复合主键：年度 + 期间 唯一确定一条记录
+  @@id([year, period])
+  @@map("mywage")
 }
