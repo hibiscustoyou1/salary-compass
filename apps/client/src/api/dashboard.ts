@@ -3,10 +3,11 @@ import request, { type ApiResponse } from './index';
 // --- 类型定义 ---
 export interface DashboardStats {
   netIncomeYTD: string;
-  netIncomeChange: string; // [新增]
+  netIncomeChange: string;
   taxPaid: string;
-  variableIncomeRatio: string;
-  hiddenWealth: string;
+  // [修改] 替换原有字段
+  providentFundAccumulated: string; // 公积金累计
+  annuityAccumulated: string;       // 年金累计
 }
 
 // --- 接口方法 ---
