@@ -4,13 +4,13 @@
     <div class="flex justify-between items-center bg-card-light dark:bg-card-dark rounded-xl p-4 shadow-sm border border-border-light dark:border-border-dark">
       <div>
         <h2 class="text-lg font-bold text-text-main-light dark:text-white">年度概览</h2>
-        <p class="text-xs text-text-secondary-light dark:text-text-secondary-dark">查看 {{ store.dashboardYear }} 年度核心财务指标</p>
+        <p class="text-xs text-text-secondary-light dark:text-text-secondary-dark">查看 {{ dashboardStore.dashboardYear }} 年度核心财务指标</p>
       </div>
 
       <div class="relative z-20" ref="yearDropdownRef">
         <button @click="isYearDropdownOpen = !isYearDropdownOpen"
                 class="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-text-main-light dark:text-white px-4 py-2 rounded-xl text-sm font-bold transition-all duration-200 border border-transparent focus:border-primary/50 focus:ring-2 focus:ring-primary/20 outline-none">
-          <span>{{ store.dashboardYear }}年</span>
+          <span>{{ dashboardStore.dashboardYear }}年</span>
           <span class="material-symbols-outlined text-lg transition-transform duration-300" :class="{ 'rotate-180': isYearDropdownOpen }">expand_more</span>
         </button>
 
@@ -24,12 +24,12 @@
         >
           <div v-if="isYearDropdownOpen" class="absolute right-0 top-full mt-2 w-36 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-border-light dark:border-border-dark py-2 overflow-hidden origin-top-right">
             <div class="max-h-60 overflow-y-auto custom-scrollbar">
-              <button v-for="year in store.availableYears" :key="year"
+              <button v-for="year in dashboardStore.availableYears" :key="year"
                       @click="handleYearSelect(year)"
                       class="w-full text-left px-4 py-2.5 text-sm hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors flex items-center justify-between group"
-                      :class="store.dashboardYear === year ? 'text-primary font-bold bg-primary/5 dark:bg-primary/10' : 'text-text-secondary-light dark:text-text-secondary-dark'">
+                      :class="dashboardStore.dashboardYear === year ? 'text-primary font-bold bg-primary/5 dark:bg-primary/10' : 'text-text-secondary-light dark:text-text-secondary-dark'">
                 <span>{{ year }}年</span>
-                <span v-if="store.dashboardYear === year" class="material-symbols-outlined text-base">check</span>
+                <span v-if="dashboardStore.dashboardYear === year" class="material-symbols-outlined text-base">check</span>
               </button>
             </div>
           </div>
@@ -37,7 +37,7 @@
       </div>
     </div>
 
-    <div v-if="store.isLoading" class="flex justify-center py-20">
+    <div v-if="dashboardStore.isLoading" class="flex justify-center py-20">
       <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
     </div>
 
@@ -48,15 +48,15 @@
             <p class="text-text-secondary-light dark:text-text-secondary-dark text-sm font-medium">本年至今净收入</p>
             <span class="material-symbols-outlined text-emerald-custom bg-emerald-custom/10 p-1 rounded text-lg">trending_up</span>
           </div>
-          <h3 class="text-2xl font-bold text-text-main-light dark:text-white mb-1">{{ masked(store.dashboardStats.netIncomeYTD) }}</h3>
+          <h3 class="text-2xl font-bold text-text-main-light dark:text-white mb-1">{{ masked(dashboardStore.dashboardStats.netIncomeYTD) }}</h3>
           <div class="flex items-center gap-2">
             <span :class="[
-              store.dashboardStats.netIncomeChange.startsWith('-')
+              dashboardStore.dashboardStats.netIncomeChange.startsWith('-')
                 ? 'text-red-500 bg-red-50 dark:bg-red-900/20'
                 : 'text-emerald-custom bg-emerald-custom/10',
               'text-sm font-semibold px-1.5 py-0.5 rounded'
             ]">
-              {{ store.dashboardStats.netIncomeChange }}
+              {{ dashboardStore.dashboardStats.netIncomeChange }}
             </span>
             <span class="text-text-secondary-light dark:text-text-secondary-dark text-xs">同比去年</span>
           </div>
@@ -71,13 +71,13 @@
             <p class="text-text-secondary-light dark:text-text-secondary-dark text-sm font-medium">已缴税额总计</p>
             <span class="material-symbols-outlined text-red-custom bg-red-custom/10 p-1 rounded text-lg">account_balance</span>
           </div>
-          <h3 class="text-2xl font-bold text-text-main-light dark:text-white mb-1">{{ masked(store.dashboardStats.taxPaid) }}</h3>
+          <h3 class="text-2xl font-bold text-text-main-light dark:text-white mb-1">{{ masked(dashboardStore.dashboardStats.taxPaid) }}</h3>
           <div class="flex items-center gap-2">
-            <span class="text-text-secondary-light dark:text-text-secondary-dark text-sm font-medium">{{ store.taxAnalysis.kpi.effectiveRate }}% 有效税率</span>
+            <span class="text-text-secondary-light dark:text-text-secondary-dark text-sm font-medium">{{ dashboardStore.taxAnalysis.kpi.effectiveRate }}% 有效税率</span>
           </div>
           <div class="h-10 mt-3 w-full opacity-50 group-hover:opacity-100 transition-opacity">
             <div v-if="!privacyMode" class="w-full bg-slate-100 dark:bg-slate-700 h-2 rounded-full mt-4 overflow-hidden">
-              <div class="bg-red-custom h-full rounded-full" :style="{ width: store.taxAnalysis.kpi.effectiveRate + '%' }"></div>
+              <div class="bg-red-custom h-full rounded-full" :style="{ width: dashboardStore.taxAnalysis.kpi.effectiveRate + '%' }"></div>
             </div>
             <div v-else class="h-full w-full flex items-center justify-center text-text-secondary-light text-xl tracking-widest font-bold">****</div>
           </div>
@@ -88,7 +88,7 @@
             <p class="text-text-secondary-light dark:text-text-secondary-dark text-sm font-medium">公积金积累 (全量)</p>
             <span class="material-symbols-outlined text-primary bg-primary/10 p-1 rounded text-lg">domain</span>
           </div>
-          <h3 class="text-2xl font-bold text-text-main-light dark:text-white mb-1">{{ masked(store.dashboardStats.providentFundAccumulated) }}</h3>
+          <h3 class="text-2xl font-bold text-text-main-light dark:text-white mb-1">{{ masked(dashboardStore.dashboardStats.providentFundAccumulated) }}</h3>
           <div class="flex items-center gap-2">
             <span class="text-text-secondary-light dark:text-text-secondary-dark text-xs">公司1:1配比 | 个人x2</span>
           </div>
@@ -103,7 +103,7 @@
             <p class="text-text-secondary-light dark:text-text-secondary-dark text-sm font-medium">企业年金积累 (全量)</p>
             <span class="material-symbols-outlined text-blue-400 bg-blue-400/10 p-1 rounded text-lg">savings</span>
           </div>
-          <h3 class="text-2xl font-bold text-text-main-light dark:text-white mb-1">{{ masked(store.dashboardStats.annuityAccumulated) }}</h3>
+          <h3 class="text-2xl font-bold text-text-main-light dark:text-white mb-1">{{ masked(dashboardStore.dashboardStats.annuityAccumulated) }}</h3>
           <div class="flex items-center gap-2">
             <span class="text-text-secondary-light dark:text-text-secondary-dark text-xs">公司4:1配比 | 个人x5</span>
           </div>
@@ -115,13 +115,12 @@
       </div>
 
       <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
-
         <div class="xl:col-span-2 bg-card-light dark:bg-card-dark rounded-xl border border-border-light dark:border-border-dark p-6 shadow-soft flex flex-col">
           <div class="flex justify-between items-center mb-6">
             <div>
               <h3 class="text-lg font-bold text-text-main-light dark:text-white">毛收入 vs 净收入趋势</h3>
               <p class="text-sm text-text-secondary-light dark:text-text-secondary-dark">
-                {{ store.dashboardYear }} 年度月度趋势
+                {{ dashboardStore.dashboardYear }} 年度月度趋势
               </p>
             </div>
           </div>
@@ -135,10 +134,10 @@
           <p class="text-sm text-text-secondary-light dark:text-text-secondary-dark mb-6">年度薪酬构成比例</p>
 
           <div class="flex-1 flex flex-col justify-center gap-6">
-            <div v-if="store.incomeStructure.length === 0" class="flex items-center justify-center h-full text-text-secondary-light text-sm">
+            <div v-if="dashboardStore.incomeStructure.length === 0" class="flex items-center justify-center h-full text-text-secondary-light text-sm">
               暂无本年度数据
             </div>
-            <div v-else v-for="(item, idx) in store.incomeStructure" :key="idx" class="space-y-2">
+            <div v-else v-for="(item, idx) in dashboardStore.incomeStructure" :key="idx" class="space-y-2">
               <div class="flex justify-between text-sm">
                 <span class="font-medium text-text-main-light dark:text-white">{{ item.label }}</span>
                 <span class="font-bold" :class="item.colorText">{{ masked(item.value) }}</span>
@@ -152,7 +151,7 @@
           <div class="mt-6 pt-4 border-t border-border-light dark:border-border-dark">
             <div class="flex justify-between items-center">
               <span class="text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark">年度总薪酬</span>
-              <span class="text-xl font-black text-text-main-light dark:text-white">{{ masked(store.totalAnnualGross) }}</span>
+              <span class="text-xl font-black text-text-main-light dark:text-white">{{ masked(dashboardStore.totalAnnualGross) }}</span>
             </div>
           </div>
         </div>
@@ -166,19 +165,25 @@
   import { ref, computed, onMounted, onUnmounted } from 'vue';
   import BaseEChart from '@/components/charts/BaseEChart.vue';
   import * as echarts from 'echarts';
+  // [修改] 引用新的 store
   import { useWageStore } from '@/stores/wage.store';
+  import { useDashboardStore } from '@/stores/dashboard.store';
 
   const props = defineProps<{
     isActive: boolean;
     privacyMode: boolean;
   }>();
 
-  const store = useWageStore();
+  // 引入两个 Store
+  const wageStore = useWageStore();
+  const dashboardStore = useDashboardStore();
+
   const isYearDropdownOpen = ref(false);
   const yearDropdownRef = ref<HTMLElement | null>(null);
 
   onMounted(() => {
-    store.initData();
+    // 初始化
+    dashboardStore.initDashboard();
     document.addEventListener('click', handleClickOutside);
   });
 
@@ -187,7 +192,7 @@
   });
 
   const handleYearSelect = (year: number) => {
-    store.switchDashboardYear(year);
+    dashboardStore.switchYear(year);
     isYearDropdownOpen.value = false;
   };
 
@@ -199,11 +204,11 @@
 
   const masked = (val: string) => props.privacyMode ? '****' : val;
 
-  // 迷你折线图 (净收入 - 年度)
+  // 下方所有 computed 均改为使用 dashboardStore
   const miniLineOption = computed(() => {
-    const data = store.netIncomeMiniChartData;
+    const data = dashboardStore.netIncomeMiniChartData;
     const chartData = data.length ? data : [0, 0, 0, 0, 0, 0];
-
+    // ... (图表配置保持不变)
     return {
       grid: { top: 0, bottom: 0, left: 0, right: 0 },
       xAxis: { show: false, type: 'category', data: chartData.map((_, i) => i) },
@@ -224,22 +229,18 @@
     };
   });
 
-  // [修改] 公积金趋势图配置 (全量 - 平滑折线图)
   const providentFundTrendOption = computed(() => {
-    const data = store.providentFundTrend;
-    // 展示全量数据 (移除 slice)
-    const chartData = data;
-
+    const chartData = dashboardStore.providentFundTrend;
     return {
       grid: { top: 0, bottom: 0, left: 0, right: 0 },
       xAxis: { show: false, type: 'category', data: chartData.map((_, i) => i) },
       yAxis: { show: false, min: 'dataMin' },
       series: [{
-        type: 'line', // 改为折线图
-        smooth: true, // 平滑曲线
+        type: 'line',
+        smooth: true,
         showSymbol: false,
         data: chartData,
-        lineStyle: { color: '#1241a1', width: 2 }, // 保持 Primary 色系
+        lineStyle: { color: '#1241a1', width: 2 },
         areaStyle: {
           color: {
             type: 'linear', x: 0, y: 0, x2: 0, y2: 1,
@@ -250,12 +251,8 @@
     };
   });
 
-  // [修改] 企业年金趋势图配置 (全量 - 平滑折线图)
   const annuityTrendOption = computed(() => {
-    const data = store.annuityTrend;
-    // 展示全量数据 (移除 slice)
-    const chartData = data;
-
+    const chartData = dashboardStore.annuityTrend;
     return {
       grid: { top: 0, bottom: 0, left: 0, right: 0 },
       xAxis: { show: false, type: 'category', data: chartData.map((_, i) => i) },
@@ -265,7 +262,7 @@
         smooth: true,
         showSymbol: false,
         data: chartData,
-        lineStyle: { color: '#60a5fa', width: 2 }, // 保持 Blue-400 色系
+        lineStyle: { color: '#60a5fa', width: 2 },
         areaStyle: {
           color: {
             type: 'linear', x: 0, y: 0, x2: 0, y2: 1,
@@ -278,9 +275,9 @@
 
   const trendChartOption = computed(() => {
     const isHidden = props.privacyMode;
-
-    const chartData = store.salaryHistory
-      .filter(item => item.year === store.dashboardYear)
+    // 使用 wageStore.salaryHistory
+    const chartData = wageStore.salaryHistory
+      .filter(item => item.year === dashboardStore.dashboardYear)
       .sort((a, b) => a.period.localeCompare(b.period))
       .map(item => ({
         period: item.period.split('-')[1] + '月',
