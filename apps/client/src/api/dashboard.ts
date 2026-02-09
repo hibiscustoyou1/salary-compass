@@ -9,6 +9,9 @@ export interface DashboardStats {
 }
 
 // --- 接口方法 ---
-export const getDashboardStats = () => {
-  return request.get<any, ApiResponse<DashboardStats>>('/dashboard/stats');
+// [修改] 增加可选参数 year
+export const getDashboardStats = (year?: number) => {
+  return request.get<any, ApiResponse<DashboardStats>>('/dashboard/stats', {
+    params: { year }
+  });
 };

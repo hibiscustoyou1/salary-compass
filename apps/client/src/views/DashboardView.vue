@@ -1,5 +1,42 @@
 <template>
   <div class="max-w-[1400px] mx-auto flex flex-col gap-6" v-if="isActive">
+
+    <div class="flex justify-between items-center bg-card-light dark:bg-card-dark rounded-xl p-4 shadow-sm border border-border-light dark:border-border-dark">
+      <div>
+        <h2 class="text-lg font-bold text-text-main-light dark:text-white">年度概览</h2>
+        <p class="text-xs text-text-secondary-light dark:text-text-secondary-dark">查看 {{ store.dashboardYear }} 年度核心财务指标</p>
+      </div>
+
+      <div class="relative z-20" ref="yearDropdownRef">
+        <button @click="isYearDropdownOpen = !isYearDropdownOpen"
+                class="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-text-main-light dark:text-white px-4 py-2 rounded-xl text-sm font-bold transition-all duration-200 border border-transparent focus:border-primary/50 focus:ring-2 focus:ring-primary/20 outline-none">
+          <span>{{ store.dashboardYear }}年</span>
+          <span class="material-symbols-outlined text-lg transition-transform duration-300" :class="{ 'rotate-180': isYearDropdownOpen }">expand_more</span>
+        </button>
+
+        <transition
+          enter-active-class="transition duration-200 ease-out"
+          enter-from-class="transform scale-95 opacity-0"
+          enter-to-class="transform scale-100 opacity-100"
+          leave-active-class="transition duration-75 ease-in"
+          leave-from-class="transform scale-100 opacity-100"
+          leave-to-class="transform scale-95 opacity-0"
+        >
+          <div v-if="isYearDropdownOpen" class="absolute right-0 top-full mt-2 w-36 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-border-light dark:border-border-dark py-2 overflow-hidden origin-top-right">
+            <div class="max-h-60 overflow-y-auto custom-scrollbar">
+              <button v-for="year in store.availableYears" :key="year"
+                      @click="handleYearSelect(year)"
+                      class="w-full text-left px-4 py-2.5 text-sm hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors flex items-center justify-between group"
+                      :class="store.dashboardYear === year ? 'text-primary font-bold bg-primary/5 dark:bg-primary/10' : 'text-text-secondary-light dark:text-text-secondary-dark'">
+                <span>{{ year }}年</span>
+                <span v-if="store.dashboardYear === year" class="material-symbols-outlined text-base">check</span>
+              </button>
+            </div>
+          </div>
+        </transition>
+      </div>
+    </div>
+
     <div v-if="store.isLoading" class="flex justify-center py-20">
       <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
     </div>
@@ -81,7 +118,9 @@
           <div class="flex justify-between items-center mb-6">
             <div>
               <h3 class="text-lg font-bold text-text-main-light dark:text-white">毛收入 vs 净收入趋势</h3>
-              <p class="text-sm text-text-secondary-light dark:text-text-secondary-dark">比较总薪酬与实际到手收入</p>
+              <p class="text-sm text-text-secondary-light dark:text-text-secondary-dark">
+                {{ store.dashboardYear }} 年度月度趋势
+              </p>
             </div>
           </div>
           <div class="flex-1 min-h-[300px]">
@@ -122,7 +161,7 @@
 </template>
 
 <script setup lang="ts">
-  import { computed, onMounted } from 'vue';
+  import { ref, computed, onMounted, onUnmounted } from 'vue';
   import BaseEChart from '@/components/charts/BaseEChart.vue';
   import * as echarts from 'echarts';
   import { useWageStore } from '@/stores/wage.store';
@@ -133,14 +172,31 @@
   }>();
 
   const store = useWageStore();
+  const isYearDropdownOpen = ref(false);
+  const yearDropdownRef = ref<HTMLElement | null>(null);
 
   onMounted(() => {
     store.initData();
+    document.addEventListener('click', handleClickOutside);
   });
+
+  onUnmounted(() => {
+    document.removeEventListener('click', handleClickOutside);
+  });
+
+  const handleYearSelect = (year: number) => {
+    store.switchDashboardYear(year);
+    isYearDropdownOpen.value = false;
+  };
+
+  const handleClickOutside = (e: MouseEvent) => {
+    if (yearDropdownRef.value && !yearDropdownRef.value.contains(e.target as Node)) {
+      isYearDropdownOpen.value = false;
+    }
+  };
 
   const masked = (val: string) => props.privacyMode ? '****' : val;
 
-  // 迷你折线图配置（KPI卡片用）
   const miniLineOption = computed(() => ({
     grid: { top: 0, bottom: 0, left: 0, right: 0 },
     xAxis: { show: false, type: 'category', data: [1,2,3,4,5,6,7,8] },
@@ -154,14 +210,13 @@
     }]
   }));
 
-  // 主趋势图配置（动态基于 store 数据）
   const trendChartOption = computed(() => {
     const isHidden = props.privacyMode;
 
-    // 处理数据：取最近 12 条，反转顺序使时间正序，提取所需字段
+    // [修改] 过滤选中年份的数据，并按月份正序排列 (1月 -> 12月)
     const chartData = store.salaryHistory
-      .slice(0, 12)
-      .reverse()
+      .filter(item => item.year === store.dashboardYear)
+      .sort((a, b) => a.period.localeCompare(b.period)) // 字符串比较 "2024-01" < "2024-02"
       .map(item => ({
         period: item.period.split('-')[1] + '月',
         gross: item.raw.gross,
@@ -173,25 +228,19 @@
     const netData = chartData.map(d => d.net);
 
     return {
-      // 边距配置，给图例和轴标签留出空间
       grid: { top: 40, right: 20, bottom: 20, left: 50, containLabel: true },
-
       tooltip: {
         trigger: 'axis',
         formatter: isHidden ? '****' : undefined
       },
-
       legend: {
         show: !isHidden,
         data: ['毛薪', '净薪'],
         right: 10,
         top: 0,
         icon: 'circle',
-        textStyle: {
-          color: '#64748b'
-        }
+        textStyle: { color: '#64748b' }
       },
-
       xAxis: {
         type: 'category',
         data: periods.length ? periods : ['无数据'],
@@ -199,13 +248,11 @@
         axisTick: { show: false },
         axisLabel: { color: '#94a3b8', fontSize: 10 }
       },
-
       yAxis: {
         type: 'value',
         splitLine: { lineStyle: { type: 'dashed', color: '#334155', opacity: 0.2 } },
         axisLabel: { show: !isHidden, color: '#94a3b8' }
       },
-
       series: [
         {
           name: '毛薪',
@@ -235,3 +282,19 @@
     };
   });
 </script>
+
+<style scoped>
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #cbd5e1;
+  border-radius: 3px;
+}
+.dark .custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #475569;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+</style>

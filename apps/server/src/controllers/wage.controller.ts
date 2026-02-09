@@ -1,31 +1,28 @@
 import { Request, Response } from 'express';
-import { prisma } from '../db';
+import { prisma } from '@/db';
 import { Decimal } from '@prisma/client/runtime/library';
 
-// 辅助函数：将 Decimal 转为保留两位小数的字符串或数字
 const fmt = (val: Decimal | null) => val ? val.toNumber() : 0;
 const fmtStr = (val: Decimal | null) => val ? val.toFixed(2) : '0.00';
 
+// ... (getSalaryHistory 保持不变，省略) ...
 export const getSalaryHistory = async (req: Request, res: Response) => {
+  // ... 保持原有代码 ...
   try {
-    // [修改] 排序逻辑：先按年倒序，再按月倒序
     const wages = await prisma.wage.findMany({
       orderBy: [
         { year: 'desc' },
         { period: 'desc' }
       ]
     });
-
-    // 转换为前端需要的结构
+    // ... 保持原有数据转换逻辑 ...
     const history = wages.map(w => ({
-      // [修改] 拼接期间字符串: 2024, 12 -> "2024-12"
       period: `${w.year}-${String(w.period).padStart(2, '0')}`,
       year: w.year,
       gross: fmtStr(w.grossTotal),
       deduction: fmtStr(w.deductionTotal),
       net: fmtStr(w.netTotal),
       status: '已发放',
-      // 详情对象
       details: {
         income: {
           '岗位工资': fmtStr(w.baseSalary),
@@ -57,12 +54,8 @@ export const getSalaryHistory = async (req: Request, res: Response) => {
     }));
 
     history.forEach(item => {
-      item.details.income = Object.fromEntries(
-        Object.entries(item.details.income).filter(([_, v]) => v !== '0.00')
-      );
-      item.details.deductions = Object.fromEntries(
-        Object.entries(item.details.deductions).filter(([_, v]) => v !== '0.00')
-      );
+      item.details.income = Object.fromEntries(Object.entries(item.details.income).filter(([_, v]) => v !== '0.00'));
+      item.details.deductions = Object.fromEntries(Object.entries(item.details.deductions).filter(([_, v]) => v !== '0.00'));
     });
 
     res.json({ success: true, data: history });
@@ -72,14 +65,19 @@ export const getSalaryHistory = async (req: Request, res: Response) => {
   }
 };
 
+// [修改] 支持年份参数
 export const getDashboardStats = async (req: Request, res: Response) => {
   try {
-    const currentYear = new Date().getFullYear();
+    // 获取年份参数，默认为当前年
+    const queryYear = Number(req.query.year);
+    const targetYear = isNaN(queryYear) ? new Date().getFullYear() : queryYear;
 
+    // 获取目标年份数据
     const thisYearData = await prisma.wage.findMany({
-      where: { year: currentYear }
+      where: { year: targetYear }
     });
 
+    // 计算 KPI
     let netIncomeYTD = 0;
     let taxPaidYTD = 0;
     let grossYTD = 0;
@@ -102,7 +100,7 @@ export const getDashboardStats = async (req: Request, res: Response) => {
         netIncomeYTD: `¥${netIncomeYTD.toLocaleString()}`,
         taxPaid: `¥${taxPaidYTD.toLocaleString()}`,
         variableIncomeRatio: variableRatio,
-        hiddenWealth: '¥45,000'
+        hiddenWealth: '¥45,000' // Mock value or calculate if DB has asset data
       }
     });
   } catch (error) {
@@ -110,26 +108,19 @@ export const getDashboardStats = async (req: Request, res: Response) => {
   }
 };
 
+// ... (getBenefitsStats 保持不变，省略) ...
 export const getBenefitsStats = async (req: Request, res: Response) => {
   try {
     const allWages = await prisma.wage.findMany();
-
-    // 1. 计算累计资产 (估算逻辑)
-    // 假设：公积金和年金企业均按 1:1 缴纳，所以个人扣款 * 2 = 总入账
     let totalHousingFund = 0;
     let totalAnnuity = 0;
-
     allWages.forEach(w => {
       totalHousingFund += fmt(w.housingFund) * 2;
       totalAnnuity += fmt(w.corporateAnnuity) * 2;
     });
 
-    // 2. 获取最近一个月的缴纳详情
     const lastWage = await prisma.wage.findFirst({
-      orderBy: [
-        { year: 'desc' },
-        { period: 'desc' }
-      ]
+      orderBy: [{ year: 'desc' }, { period: 'desc' }]
     });
 
     const latest = lastWage ? {
@@ -140,22 +131,16 @@ export const getBenefitsStats = async (req: Request, res: Response) => {
       annuity: fmt(lastWage.corporateAnnuity)
     } : { housing: 0, pension: 0, medical: 0, unemployment: 0, annuity: 0 };
 
-    // 计算月度总缴存 (个人+企业)
-    // 假设五险一金中，只有公积金和年金是 1:1 进个人账户，社保企业部分进统筹（此处仅展示个人账户相关或缴存规模）
-    // 为了展示“月度福利缴纳”这个 KPI，我们计算所有福利项的个人+企业总和
-    // 简单估算：养老(8%+16%), 医疗(2%+8%), 失业(0.5%+0.5%), 公积金(12%+12%), 年金(4%+4%)
-    // 这里简化处理：显示 个人扣款总额 * 2 作为估算的月度福利投入规模
     const monthlyTotal = (latest.housing + latest.pension + latest.medical + latest.unemployment + latest.annuity) * 2;
 
     const data = {
       providentFundTotal: `¥${totalHousingFund.toLocaleString()}`,
       annuityTotal: `¥${totalAnnuity.toLocaleString()}`,
       monthlyContribution: `¥${monthlyTotal.toLocaleString()}`,
-      // 详情列表
       details: [
         {
           title: '住房公积金',
-          icon: 'home_work', // Material Icon
+          icon: 'home_work',
           color: 'emerald',
           status: '正常缴纳',
           progress: 100,
