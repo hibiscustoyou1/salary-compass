@@ -11,10 +11,12 @@ export const useWageStore = defineStore('wage', () => {
 
   const dashboardStats = ref<DashboardStats>({
     netIncomeYTD: '¥0',
+    netIncomeChange: '+0%', // [新增]
     taxPaid: '¥0',
     variableIncomeRatio: '0%',
     hiddenWealth: '¥0'
   });
+
   const benefitsStats = ref<BenefitsStats>({
     providentFundTotal: '¥0',
     annuityTotal: '¥0',
@@ -29,6 +31,16 @@ export const useWageStore = defineStore('wage', () => {
   const availableYears = computed(() => {
     const years = new Set(salaryHistory.value.map(item => item.year));
     return Array.from(years).sort((a, b) => b - a);
+  });
+
+  // [新增] 净收入迷你图数据 (Sparkline)
+  // 逻辑：筛选当前 Dashboard 年份的数据 -> 按月份正序排列 -> 提取净收入数值
+  const netIncomeMiniChartData = computed(() => {
+    const targetYear = dashboardYear.value;
+    return salaryHistory.value
+      .filter(r => r.year === targetYear)
+      .sort((a, b) => a.period.localeCompare(b.period)) // 字符串比较: "2024-01" < "2024-02"
+      .map(r => r.raw.net);
   });
 
   // --- Actions ---
@@ -125,18 +137,15 @@ export const useWageStore = defineStore('wage', () => {
     };
   });
 
-  // [优化] 收入结构调整：
-  // 1. 固定薪资 = 岗位工资 + 月度绩效 + 综合补贴
-  // 2. 绩效奖金 = 季度绩效 + 年度绩效
-  // 3. 补贴福利 = 防暑降温 + 伙食补贴 + 其他工资
+  // [优化2保留] 收入结构：固定=岗位+月度绩效+综合补贴; 绩效=季度+年度; 补贴=防暑+伙食+其他(加班)
   const incomeStructure = computed(() => {
     const targetYear = dashboardYear.value;
     const thisYearRecords = salaryHistory.value.filter(r => r.year === targetYear);
 
-    let fixed = 0;       // 固定薪资
-    let performance = 0; // 绩效奖金
-    let special = 0;     // 专项激励
-    let subsidies = 0;   // 补贴福利
+    let fixed = 0;
+    let performance = 0;
+    let special = 0;
+    let subsidies = 0;
     let total = 0;
 
     const parse = (val: string | undefined) => parseFloat(val || '0');
@@ -144,19 +153,19 @@ export const useWageStore = defineStore('wage', () => {
     thisYearRecords.forEach(record => {
       const inc = record.details.income;
 
-      // 1. [修改] 固定薪资: 岗位工资 + 月度绩效 + 综合补贴
+      // 1. 固定薪资: 岗位工资 + 月度绩效 + 综合补贴
       const f = parse(inc['岗位工资']) + parse(inc['月度绩效']) + parse(inc['综合补贴']);
       fixed += f;
 
-      // 2. [修改] 绩效奖金: 季度绩效 + 年度绩效 (月度已移出)
+      // 2. 绩效奖金: 季度绩效 + 年度绩效
       const p = parse(inc['季度绩效']) + parse(inc['年度绩效']);
       performance += p;
 
-      // 3. 专项激励: 人才特区奖金 + 专项激励 (保持不变)
+      // 3. 专项激励: 人才特区奖金 + 专项激励
       const s = parse(inc['人才特区奖金']) + parse(inc['专项激励']);
       special += s;
 
-      // 4. [修改] 补贴福利: 防暑降温 + 伙食补贴 + 其他工资 (综合补贴已移出)
+      // 4. 补贴福利: 防暑降温 + 伙食补贴 + 其他工资
       const sub = parse(inc['防暑降温']) + parse(inc['伙食补贴']) + parse(inc['其他工资']);
       subsidies += sub;
 
@@ -197,11 +206,11 @@ export const useWageStore = defineStore('wage', () => {
     ];
   });
 
+  // [优化2保留] 年度总薪酬 = Gross + 伙食补贴
   const totalAnnualGross = computed(() => {
     const targetYear = dashboardYear.value;
     const records = salaryHistory.value.filter(r => r.year === targetYear);
 
-    // 年度总薪酬 = 数据库Gross + 伙食补贴
     const total = records.reduce((sum, r) => {
       const gross = r.raw.gross;
       const meal = parseFloat(r.details.income['伙食补贴'] || '0');
@@ -222,6 +231,7 @@ export const useWageStore = defineStore('wage', () => {
     switchDashboardYear,
     taxAnalysis,
     incomeStructure,
-    totalAnnualGross
+    totalAnnualGross,
+    netIncomeMiniChartData // [新增导出]
   };
 });

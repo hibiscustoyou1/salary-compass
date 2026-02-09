@@ -50,7 +50,14 @@
           </div>
           <h3 class="text-2xl font-bold text-text-main-light dark:text-white mb-1">{{ masked(store.dashboardStats.netIncomeYTD) }}</h3>
           <div class="flex items-center gap-2">
-            <span class="text-emerald-custom text-sm font-semibold bg-emerald-custom/10 px-1.5 py-0.5 rounded">+12%</span>
+            <span :class="[
+              store.dashboardStats.netIncomeChange.startsWith('-')
+                ? 'text-red-500 bg-red-50 dark:bg-red-900/20'
+                : 'text-emerald-custom bg-emerald-custom/10',
+              'text-sm font-semibold px-1.5 py-0.5 rounded'
+            ]">
+              {{ store.dashboardStats.netIncomeChange }}
+            </span>
             <span class="text-text-secondary-light dark:text-text-secondary-dark text-xs">同比去年</span>
           </div>
           <div class="h-10 mt-3 w-full opacity-50 group-hover:opacity-100 transition-opacity">
@@ -197,23 +204,36 @@
 
   const masked = (val: string) => props.privacyMode ? '****' : val;
 
-  const miniLineOption = computed(() => ({
-    grid: { top: 0, bottom: 0, left: 0, right: 0 },
-    xAxis: { show: false, type: 'category', data: [1,2,3,4,5,6,7,8] },
-    yAxis: { show: false, min: 'dataMin' },
-    series: [{
-      type: 'line',
-      smooth: true,
-      showSymbol: false,
-      data: [12, 18, 14, 25, 18, 22, 10, 5],
-      lineStyle: { color: '#10b981', width: 2 },
-    }]
-  }));
+  // [修改] 迷你折线图配置：接入 Store 真实数据
+  const miniLineOption = computed(() => {
+    const data = store.netIncomeMiniChartData;
+    // 如果当前年份暂无数据（如刚过年），显示空线或占位
+    const chartData = data.length ? data : [0, 0, 0, 0, 0, 0];
+
+    return {
+      grid: { top: 0, bottom: 0, left: 0, right: 0 },
+      xAxis: { show: false, type: 'category', data: chartData.map((_, i) => i) }, // 简化 X 轴
+      yAxis: { show: false, min: 'dataMin' },
+      series: [{
+        type: 'line',
+        smooth: true,
+        showSymbol: false,
+        data: chartData,
+        lineStyle: { color: '#10b981', width: 2 },
+        areaStyle: {
+          color: {
+            type: 'linear', x: 0, y: 0, x2: 0, y2: 1,
+            colorStops: [{ offset: 0, color: 'rgba(16, 185, 129, 0.2)' }, { offset: 1, color: 'rgba(16, 185, 129, 0)' }]
+          }
+        }
+      }]
+    };
+  });
 
   const trendChartOption = computed(() => {
     const isHidden = props.privacyMode;
 
-    // [修改] 过滤选中年份的数据，并按月份正序排列 (1月 -> 12月)
+    // 过滤选中年份的数据，并按月份正序排列 (1月 -> 12月)
     const chartData = store.salaryHistory
       .filter(item => item.year === store.dashboardYear)
       .sort((a, b) => a.period.localeCompare(b.period)) // 字符串比较 "2024-01" < "2024-02"

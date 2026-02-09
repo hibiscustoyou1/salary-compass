@@ -1,13 +1,13 @@
 import { Request, Response } from 'express';
-import { prisma } from '@/db';
+import { prisma } from '../db';
 import { Decimal } from '@prisma/client/runtime/library';
 
+// 辅助函数
 const fmt = (val: Decimal | null) => val ? val.toNumber() : 0;
 const fmtStr = (val: Decimal | null) => val ? val.toFixed(2) : '0.00';
 
-// ... (getSalaryHistory 保持不变，省略) ...
+// 1. 获取薪资历史列表
 export const getSalaryHistory = async (req: Request, res: Response) => {
-  // ... 保持原有代码 ...
   try {
     const wages = await prisma.wage.findMany({
       orderBy: [
@@ -15,7 +15,7 @@ export const getSalaryHistory = async (req: Request, res: Response) => {
         { period: 'desc' }
       ]
     });
-    // ... 保持原有数据转换逻辑 ...
+
     const history = wages.map(w => ({
       period: `${w.year}-${String(w.period).padStart(2, '0')}`,
       year: w.year,
@@ -53,6 +53,7 @@ export const getSalaryHistory = async (req: Request, res: Response) => {
       }
     }));
 
+    // 过滤掉金额为 0 的项
     history.forEach(item => {
       item.details.income = Object.fromEntries(Object.entries(item.details.income).filter(([_, v]) => v !== '0.00'));
       item.details.deductions = Object.fromEntries(Object.entries(item.details.deductions).filter(([_, v]) => v !== '0.00'));
@@ -65,42 +66,61 @@ export const getSalaryHistory = async (req: Request, res: Response) => {
   }
 };
 
-// [修改] 支持年份参数
+// 2. 获取仪表盘统计数据 (含同比计算)
 export const getDashboardStats = async (req: Request, res: Response) => {
   try {
-    // 获取年份参数，默认为当前年
     const queryYear = Number(req.query.year);
     const targetYear = isNaN(queryYear) ? new Date().getFullYear() : queryYear;
 
-    // 获取目标年份数据
+    // 获取本年数据
     const thisYearData = await prisma.wage.findMany({
       where: { year: targetYear }
     });
 
-    // 计算 KPI
+    // [新增] 获取去年数据用于计算同比
+    const lastYearData = await prisma.wage.findMany({
+      where: { year: targetYear - 1 }
+    });
+
+    // 计算本年 KPI
     let netIncomeYTD = 0;
     let taxPaidYTD = 0;
     let grossYTD = 0;
+    let variableIncome = 0;
 
     thisYearData.forEach(w => {
       netIncomeYTD += fmt(w.netTotal);
       taxPaidYTD += fmt(w.taxAmount);
       grossYTD += fmt(w.grossTotal);
-    });
-
-    let variableIncome = 0;
-    thisYearData.forEach(w => {
       variableIncome += fmt(w.meritPay) + fmt(w.quarterlyBonus) + fmt(w.annualBonus) + fmt(w.specialIncentive);
     });
+
+    // [新增] 计算去年 KPI 及同比
+    let lastNetIncomeYTD = 0;
+    lastYearData.forEach(w => {
+      lastNetIncomeYTD += fmt(w.netTotal);
+    });
+
+    let netIncomeChange = '+0%';
+    if (lastNetIncomeYTD > 0) {
+      const diff = netIncomeYTD - lastNetIncomeYTD;
+      const percent = (diff / lastNetIncomeYTD) * 100;
+      const sign = percent >= 0 ? '+' : '';
+      netIncomeChange = `${sign}${percent.toFixed(1)}%`;
+    } else if (netIncomeYTD > 0) {
+      netIncomeChange = '+100%'; // 去年无数据，今年有数据
+    }
+
     const variableRatio = grossYTD > 0 ? ((variableIncome / grossYTD) * 100).toFixed(1) + '%' : '0%';
 
     res.json({
       success: true,
       data: {
         netIncomeYTD: `¥${netIncomeYTD.toLocaleString()}`,
+        netIncomeChange, // [新增返回字段]
         taxPaid: `¥${taxPaidYTD.toLocaleString()}`,
         variableIncomeRatio: variableRatio,
-        hiddenWealth: '¥45,000' // Mock value or calculate if DB has asset data
+        hiddenWealth: '¥45,000'
       }
     });
   } catch (error) {
@@ -108,12 +128,13 @@ export const getDashboardStats = async (req: Request, res: Response) => {
   }
 };
 
-// ... (getBenefitsStats 保持不变，省略) ...
+// 3. 获取福利统计数据
 export const getBenefitsStats = async (req: Request, res: Response) => {
   try {
     const allWages = await prisma.wage.findMany();
     let totalHousingFund = 0;
     let totalAnnuity = 0;
+
     allWages.forEach(w => {
       totalHousingFund += fmt(w.housingFund) * 2;
       totalAnnuity += fmt(w.corporateAnnuity) * 2;
