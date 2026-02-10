@@ -1,12 +1,17 @@
 import { Router } from 'express';
-// [修改] 引入新的 controller 方法
-import { getSalaryHistory, getDashboardStats, getBenefitsStats } from '@/controllers/wage.controller';
+import * as wageController from '../controllers/wage.controller';
+import * as dashboardController from '../controllers/dashboard.controller';
+import * as benefitsController from '../controllers/benefits.controller';
 
 const router = Router();
 
-router.get('/salary/history', getSalaryHistory);
-router.get('/dashboard/stats', getDashboardStats);
-// [新增] 福利接口
-router.get('/benefits/stats', getBenefitsStats);
+// 工资条历史
+router.get('/salary/history', wageController.getSalaryHistory);
 
-export { router as wageRouter };
+// 仪表盘数据
+router.get('/dashboard/stats', dashboardController.getDashboardStats);
+
+// 福利概览数据
+router.get('/benefits/stats', benefitsController.getBenefitsStats);
+
+export const wageRouter = router;

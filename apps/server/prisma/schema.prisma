@@ -8,47 +8,62 @@ datasource db {
 }
 
 model Wage {
-  // --- 基础信息 ---
-  payoutDate       String   @map("发放日期") // 之前已修正为 String
-  year             Int      @map("年度")
+  // === 基础信息 ===
+  // [匹配] BIGINT UNSIGNED NOT NULL AUTO_INCREMENT
+  id         BigInt  @id @default(autoincrement()) @db.UnsignedBigInt
 
-  // [修改] String -> Int, 移除 @id
-  period           Int      @map("期间")
+  // [匹配] VARCHAR(50)
+  payoutDate String? @map("发放日期") @db.VarChar(50)
 
-  // ... 其他字段保持不变 ...
+  // [匹配] INT
+  year       Int?    @map("年度")
+  period     Int?    @map("期间")
 
-  // --- 收入项 (Gross) ---
-  grossTotal       Decimal  @map("应发合计")
-  baseSalary       Decimal  @map("岗位工资")
-  meritPay         Decimal  @map("月度绩效奖金")
-  subsidy          Decimal  @map("综合补贴")
-  otherWage        Decimal  @map("其他工资")
-  talentBonus      Decimal  @map("人才特区专项奖金")
-  quarterlyBonus   Decimal  @map("季度绩效奖金")
-  annualBonus      Decimal  @map("年度绩效奖金")
-  heatSubsidy      Decimal  @map("防暑降温费")
-  specialIncentive Decimal  @map("专项激励")
-  mealAllowance    Decimal  @map("伙食补贴（翼支付发放，合并工资计税）")
+  // [匹配] VARCHAR(50) / VARCHAR(100)
+  personCode String? @map("人员编码") @db.VarChar(50)
+  name       String? @map("姓名") @db.VarChar(100)
 
-  // --- 扣除项 (Deductions) ---
-  deductionTotal   Decimal  @map("扣款合计")
-  unionFee         Decimal  @map("代扣工会费")
-  pension          Decimal  @map("基本养老保险（个人扣款）")
-  medicalInsurance Decimal  @map("基本医疗保险（个人扣款）")
-  unemploymentIns  Decimal  @map("失业保险（个人扣款）")
-  housingFund      Decimal  @map("住房公积金（个人扣款）")
-  corporateAnnuity Decimal  @map("企业年金（个人扣款）")
+  // === 收入项 (Gross) ===
+  grossTotal       Decimal? @default(0.00) @map("应发合计") @db.Decimal(14, 2)
+  baseSalary       Decimal? @default(0.00) @map("岗位工资") @db.Decimal(14, 2)
+  meritPay         Decimal? @default(0.00) @map("月度绩效奖金") @db.Decimal(14, 2)
+  subsidy          Decimal? @default(0.00) @map("综合补贴") @db.Decimal(14, 2)
+  otherWage        Decimal? @default(0.00) @map("其他工资") @db.Decimal(14, 2)
 
-  // --- 税务项 (Tax) ---
-  taxableIncome      Decimal  @map("累计应纳税额")
-  taxAmount          Decimal  @map("本次扣税")
-  rentDeduction      Decimal  @map("累计住房租金专项扣除额")
-  childCareDeduction Decimal  @map("累计婴幼儿照护专项扣除额")
+  // 奖金与激励
+  talentBonus      Decimal? @default(0.00) @map("人才特区专项奖金") @db.Decimal(14, 2)
+  quarterlyBonus   Decimal? @default(0.00) @map("季度绩效奖金") @db.Decimal(14, 2)
+  annualBonus      Decimal? @default(0.00) @map("年度绩效奖金") @db.Decimal(14, 2)
+  specialIncentive Decimal? @default(0.00) @map("专项激励") @db.Decimal(14, 2)
 
-  // --- 实发 (Net) ---
-  netTotal         Decimal  @map("实发合计")
+  // 补贴
+  heatSubsidy      Decimal? @default(0.00) @map("防暑降温费") @db.Decimal(14, 2)
+  // [映射回长列名]
+  mealAllowance    Decimal? @default(0.00) @map("伙食补贴（翼支付发放，合并工资计税）") @db.Decimal(14, 2)
 
-  // [新增] 复合主键：年度 + 期间 唯一确定一条记录
-  @@id([year, period])
+  // === 扣除项 (Deductions) ===
+  deductionTotal   Decimal? @default(0.00) @map("扣款合计") @db.Decimal(14, 2)
+  unionFee         Decimal? @default(0.00) @map("代扣工会费") @db.Decimal(14, 2)
+
+  // [映射回长列名]
+  pension          Decimal? @default(0.00) @map("基本养老保险（个人扣款）") @db.Decimal(14, 2)
+  medicalInsurance Decimal? @default(0.00) @map("基本医疗保险（个人扣款）") @db.Decimal(14, 2)
+  unemploymentIns  Decimal? @default(0.00) @map("失业保险（个人扣款）") @db.Decimal(14, 2)
+  housingFund      Decimal? @default(0.00) @map("住房公积金（个人扣款）") @db.Decimal(14, 2)
+  corporateAnnuity Decimal? @default(0.00) @map("企业年金（个人扣款）") @db.Decimal(14, 2)
+
+  // === 税务与专项扣除 ===
+  rentDeduction      Decimal? @default(0.00) @map("累计住房租金专项扣除额") @db.Decimal(14, 2)
+  childCareDeduction Decimal? @default(0.00) @map("累计婴幼儿照护专项扣除额") @db.Decimal(14, 2)
+
+  taxableIncome      Decimal? @default(0.00) @map("累计应纳税额") @db.Decimal(14, 2)
+  taxAmount          Decimal? @default(0.00) @map("本次扣税") @db.Decimal(14, 2)
+
+  // === 实发 ===
+  netTotal           Decimal? @default(0.00) @map("实发合计") @db.Decimal(14, 2)
+
   @@map("mywage")
+  // 索引建议
+  @@index([year, period])
+  @@index([name])
 }
