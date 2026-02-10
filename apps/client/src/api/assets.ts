@@ -7,6 +7,7 @@ export interface AssetEvent {
   amount: number;
   occurredAt: string;
   note?: string;
+  date?: string;
 }
 
 export interface CreateAssetEventDto {

@@ -98,8 +98,8 @@
 
             <div class="flex gap-4">
               <div class="flex flex-col items-center min-w-[36px]">
-                <span class="text-xs font-bold text-text-secondary-light">{{ item.date.split('-')[1] }}/{{ item.date.split('-')[2] }}</span>
-                <span class="text-[10px] text-text-secondary-light/60">{{ item.date.split('-')[0] }}</span>
+                <span class="text-xs font-bold text-text-secondary-light">{{ item.date?.split('-')[1] }}/{{ item.date?.split('-')[2] }}</span>
+                <span class="text-[10px] text-text-secondary-light/60">{{ item.date?.split('-')[0] }}</span>
               </div>
 
               <div>
@@ -228,8 +228,8 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, computed, reactive, watch } from 'vue';
-  import { useDashboardStore } from '@/stores/dashboard.store';
+  import {computed, reactive, ref, watch} from 'vue';
+  import {useDashboardStore} from '@/stores/dashboard.store';
 
   type ViewState = 'MAIN' | 'WITHDRAW' | 'INTEREST' | 'CALIBRATE' | 'HISTORY';
 
@@ -314,8 +314,7 @@
 
     if (newVal === 'INTEREST') {
       formData.category = '年度结息';
-      const defaultDate = `${new Date().getFullYear()}-06-30`;
-      formData.date = defaultDate;
+      formData.date = `${new Date().getFullYear()}-06-30`;
       formData.note = `${new Date().getFullYear()}年度公积金结息`;
     } else if (newVal === 'CALIBRATE') {
       formData.category = '基准校准';
@@ -349,7 +348,7 @@
       type,
       category: formData.category,
       amount: finalAmount,
-      date: formData.date,
+      date: formData.date ?? '',
       note: formData.note
     });
     viewState.value = 'MAIN';

@@ -85,7 +85,7 @@ export const useDashboardStore = defineStore('dashboard', () => {
         category: payload.category,
         amount: payload.amount,
         occurredAt: payload.date,
-        note: payload.note
+        note: payload.note,
       });
 
       if (res.success) {
