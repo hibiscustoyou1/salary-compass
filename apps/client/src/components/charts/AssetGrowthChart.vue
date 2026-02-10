@@ -54,7 +54,7 @@
     }
 
     const currentYear = new Date().getFullYear();
-    const currentAge = 32; // TODO: 后续应从用户信息获取
+    const currentAge = 32;
     const yearsToRetire = Math.max(0, props.retirementAge - currentAge);
     const endYear = currentYear + yearsToRetire + 5;
 

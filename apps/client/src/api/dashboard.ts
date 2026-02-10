@@ -12,7 +12,7 @@ export interface DashboardStats {
 
 // --- 接口方法 ---
 export const getDashboardStats = (year?: number) => {
-  return request.get<any, ApiResponse<DashboardStats>>('/dashboard/stats', {
+  return request.get<any, ApiResponse<DashboardStats>>('/wage/dashboard/stats', {
     params: { year }
   });
 };
