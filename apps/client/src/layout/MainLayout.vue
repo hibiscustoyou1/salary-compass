@@ -1,6 +1,6 @@
 <template>
   <div class="flex h-screen w-full bg-background-light dark:bg-background-dark overflow-hidden font-sans text-text-main-light dark:text-text-main-dark transition-colors duration-200">
-    <Sidebar v-model="currentTab" :privacy-mode="privacyMode" class="hidden lg:flex" />
+    <Sidebar :model-value="currentTab" :privacy-mode="privacyMode" class="hidden lg:flex" />
 
     <main class="flex-1 flex flex-col h-full overflow-hidden relative">
       <header class="sticky top-0 z-10 bg-card-light/80 dark:bg-card-dark/80 backdrop-blur-md px-4 lg:px-8 py-4 border-b border-border-light dark:border-border-dark flex justify-between items-center shrink-0 gap-4">
@@ -29,29 +29,34 @@
       </header>
 
       <div class="flex-1 overflow-y-auto p-4 md:p-8 scroll-smooth">
-        <slot :privacy-mode="privacyMode" :current-tab="currentTab"></slot>
+        <router-view v-slot="{ Component }">
+          <transition name="fade" mode="out-in">
+            <component :is="Component" :privacy-mode="privacyMode" :is-active="true" />
+          </transition>
+        </router-view>
       </div>
     </main>
   </div>
 </template>
 
 <script setup lang="ts">
-  import Sidebar from '@/components/layout/Sidebar.vue';
+  import Sidebar from '@/components/layout/SideBar.vue';
   import { ref, computed, onMounted } from 'vue';
+  import { useRoute } from 'vue-router';
 
-  const currentTab = ref('dashboard');
-  const privacyMode = ref(false);
+  const route = useRoute();
+  const privacyMode = ref(true);
   const isDark = ref(false);
 
+  // 根据路由名称确定当前 Tab
+  const currentTab = computed(() => (route.name as string) || 'dashboard');
+
+  // 根据路由 Meta 获取标题
   const currentTitle = computed(() => {
-    const map: Record<string, { title: string; subtitle: string }> = {
-      dashboard: { title: '职业财富分析', subtitle: '2024财年绩效表现' },
-      salary: { title: '薪资详情', subtitle: '电子工资单存档' },
-      tax: { title: '税务分析', subtitle: '2024财年税务效能分析' },
-      benefits: { title: '福利详情', subtitle: '长期福利与退休资产预测' }
+    return {
+      title: (route.meta.title as string) || 'WealthTrack',
+      subtitle: (route.meta.subtitle as string) || 'Loading...'
     };
-    // Fix: Default to Chinese
-    return map[currentTab.value] || { title: '职业财富分析', subtitle: '加载中...' };
   });
 
   const togglePrivacy = () => {
@@ -74,3 +79,15 @@
     }
   });
 </script>
+
+<style scoped>
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+</style>
