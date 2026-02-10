@@ -9,10 +9,10 @@
           </div>
         </div>
         <div>
-          <h3 class="text-3xl font-bold text-red-custom tracking-tight">{{ masked(store.taxAnalysis.kpi.totalTax) }}</h3>
+          <h3 class="text-3xl font-bold text-red-custom tracking-tight">{{ masked(dashboardStore.taxAnalysis.kpi.totalTax) }}</h3>
           <div class="flex items-center gap-1 mt-1 text-xs text-text-secondary-light dark:text-text-secondary-dark">
             <span>较去年同期</span>
-            <span class="text-red-custom font-medium flex items-center"> {{ store.taxAnalysis.kpi.totalTaxTrend }} <span class="material-symbols-outlined text-[12px]">arrow_upward</span></span>
+            <span class="text-red-custom font-medium flex items-center"> {{ dashboardStore.taxAnalysis.kpi.totalTaxTrend }} <span class="material-symbols-outlined text-[12px]">arrow_upward</span></span>
           </div>
         </div>
       </div>
@@ -26,7 +26,7 @@
         </div>
         <div class="flex items-end justify-between z-10 relative">
           <div>
-            <h3 class="text-3xl font-bold text-text-main-light dark:text-white tracking-tight">{{ privacyMode ? '**' : store.taxAnalysis.kpi.effectiveRate }}%</h3>
+            <h3 class="text-3xl font-bold text-text-main-light dark:text-white tracking-tight">{{ privacyMode ? '**' : dashboardStore.taxAnalysis.kpi.effectiveRate }}%</h3>
             <p class="text-xs text-text-secondary-light mt-1">处于合理优化区间</p>
           </div>
           <div class="relative w-16 h-16 flex items-center justify-center">
@@ -37,7 +37,7 @@
                 class="text-primary transition-all duration-1000 ease-out"
                 cx="32" cy="32" fill="transparent" r="28"
                 stroke="currentColor"
-                :stroke-dasharray="`${(Number(store.taxAnalysis.kpi.effectiveRate) / 100) * 175.9} 175.9`"
+                :stroke-dasharray="`${(Number(dashboardStore.taxAnalysis.kpi.effectiveRate) / 100) * 175.9} 175.9`"
                 stroke-linecap="round" stroke-width="6">
               </circle>
             </svg>
@@ -53,7 +53,7 @@
           </div>
         </div>
         <div>
-          <h3 class="text-3xl font-bold text-emerald-custom tracking-tight">{{ masked(store.taxAnalysis.kpi.deductionSavings) }}</h3>
+          <h3 class="text-3xl font-bold text-emerald-custom tracking-tight">{{ masked(dashboardStore.taxAnalysis.kpi.deductionSavings) }}</h3>
           <div class="flex items-center gap-1 mt-1 text-xs text-text-secondary-light dark:text-text-secondary-dark">
             <span>本财年预计节省总额</span>
           </div>
@@ -67,7 +67,7 @@
           <h3 class="font-bold text-text-main-light dark:text-white">个税跳档趋势</h3>
           <span class="text-xs text-text-secondary-light dark:text-text-secondary-dark">临界点预警</span>
         </div>
-        <TaxBracketChart :data="store.taxAnalysis.trend" :privacy-mode="privacyMode" />
+        <TaxBracketChart :data="dashboardStore.taxAnalysis.trend" :privacy-mode="privacyMode" />
       </div>
 
       <div class="bg-gradient-to-br from-blue-50 to-white dark:from-slate-800 dark:to-slate-900 rounded-xl border border-blue-100 dark:border-slate-700 shadow-soft p-6 relative overflow-hidden flex flex-col justify-center">
@@ -99,7 +99,8 @@
 
 <script setup lang="ts">
   import { onMounted } from 'vue';
-  import { useWageStore } from '@/stores/wage.store';
+  // [修改] 引用新的 store
+  import { useDashboardStore } from '@/stores/dashboard.store';
   import TaxBracketChart from '@/components/charts/TaxBracketChart.vue';
 
   const props = defineProps<{
@@ -107,10 +108,10 @@
     privacyMode: boolean;
   }>();
 
-  const store = useWageStore();
+  const dashboardStore = useDashboardStore();
 
   onMounted(() => {
-    store.initData();
+    dashboardStore.initDashboard();
   });
 
   const masked = (val: string) => props.privacyMode ? '****' : val;

@@ -10,13 +10,14 @@ const fmt = (val: Decimal | null | undefined | number) => {
 };
 const fmtStr = (val: number) => val.toFixed(2);
 
-// 聚合辅助函数 (复用)
+// 聚合逻辑 (保留)
 const mergeRecords = (target: any, source: any) => {
   target.grossTotal += fmt(source.grossTotal);
   target.deductionTotal += fmt(source.deductionTotal);
   target.netTotal += fmt(source.netTotal);
   target.taxAmount += fmt(source.taxAmount);
-  // ... (省略部分字段累加，保持与之前一致的逻辑) ...
+
+  // 累加收入
   target.baseSalary += fmt(source.baseSalary);
   target.meritPay += fmt(source.meritPay);
   target.subsidy += fmt(source.subsidy);
@@ -28,6 +29,7 @@ const mergeRecords = (target: any, source: any) => {
   target.otherWage += fmt(source.otherWage);
   target.mealAllowance += fmt(source.mealAllowance);
 
+  // 累加扣除
   target.pension += fmt(source.pension);
   target.medicalInsurance += fmt(source.medicalInsurance);
   target.unemploymentIns += fmt(source.unemploymentIns);
@@ -40,7 +42,6 @@ const mergeRecords = (target: any, source: any) => {
   }
 };
 
-// 1. 获取薪资历史列表 (核心基础数据)
 export const getSalaryHistory = async (req: Request, res: Response) => {
   try {
     const rawWages = await prisma.wage.findMany({
@@ -121,12 +122,11 @@ export const getSalaryHistory = async (req: Request, res: Response) => {
       }
     }));
 
-    // [修复 TS2740] 使用 'as any' 规避 Object.fromEntries 的类型推断问题
+    // [修复 TS2740] 使用类型断言规避 Object.fromEntries 类型不匹配警告
     history.forEach(item => {
       item.details.income = Object.fromEntries(
         Object.entries(item.details.income).filter(([_, v]) => v !== '0.00')
       ) as any;
-
       item.details.deductions = Object.fromEntries(
         Object.entries(item.details.deductions).filter(([_, v]) => v !== '0.00')
       ) as any;

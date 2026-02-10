@@ -7,7 +7,7 @@ export const useWageStore = defineStore('wage', () => {
   const isInitialized = ref(false);
   const isLoading = ref(false);
 
-  // 初始化仅获取历史记录，这是所有分析的基础
+  // 重命名为 fetchHistory，职责更明确
   const fetchHistory = async () => {
     if (isInitialized.value) return;
     isLoading.value = true;

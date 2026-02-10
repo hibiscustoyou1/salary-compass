@@ -23,7 +23,7 @@
             leave-to-class="transform scale-95 opacity-0"
           >
             <div v-if="isYearDropdownOpen" class="absolute right-0 top-full mt-2 w-36 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-border-light dark:border-border-dark py-2 overflow-hidden origin-top-right">
-              <div class="max-h-60 overflow-y-auto">
+              <div class="max-h-60 overflow-y-auto custom-scrollbar">
                 <button v-for="year in availableYears" :key="year"
                         @click="selectYear(year)"
                         class="w-full text-left px-4 py-2.5 text-sm hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors flex items-center justify-between group"
@@ -158,7 +158,7 @@
 <script setup lang="ts">
   import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
   import { useWageStore } from '@/stores/wage.store';
-  import { SalaryRecord } from '@/api'; // Update Import
+  import type { SalaryRecord } from '@/api/wage'; // [修复] 修正类型导入路径，确保准确
   import SalaryWaterfall from '@/components/charts/SalaryWaterfall.vue';
 
   const props = defineProps<{
@@ -167,28 +167,31 @@
   }>();
 
   const store = useWageStore();
-  const selectedYear = ref('2024');
+  const selectedYear = ref(new Date().getFullYear().toString());
   const isYearDropdownOpen = ref(false);
   const yearDropdownRef = ref<HTMLElement | null>(null);
   const selectedSalary = ref<SalaryRecord | null>(null);
 
-  // init data if not
   onMounted(() => {
-    store.initData();
+    // [修复] initData 已重构为 fetchHistory
+    store.fetchHistory();
     document.addEventListener('click', handleClickOutside);
   });
 
-  // Watch store data to set default selection
+  // 监听数据变化以设置默认选中项
   watch(() => store.salaryHistory, (newVal) => {
     if (newVal.length > 0 && !selectedSalary.value) {
       const currentYearStr = new Date().getFullYear().toString();
-      selectedYear.value = currentYearStr;
-      const firstRecord = newVal.find(r => r.period.startsWith(currentYearStr));
+      // 如果当前年份无数据，则使用最新数据的年份
+      const hasCurrentYearData = newVal.some(r => r.period.startsWith(currentYearStr));
+      const targetYearStr = hasCurrentYearData ? currentYearStr : newVal[0].year.toString();
+
+      selectedYear.value = targetYearStr;
+      const firstRecord = newVal.find(r => r.period.startsWith(targetYearStr));
       selectedSalary.value = firstRecord || newVal[0];
     }
   }, { immediate: true });
 
-  // Available years
   const availableYears = computed(() => {
     const years = new Set(store.salaryHistory.map(item => item.year));
     return Array.from(years).sort((a, b) => b - a);
@@ -217,3 +220,19 @@
     document.removeEventListener('click', handleClickOutside);
   });
 </script>
+
+<style scoped>
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #cbd5e1;
+  border-radius: 3px;
+}
+.dark .custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #475569;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+</style>

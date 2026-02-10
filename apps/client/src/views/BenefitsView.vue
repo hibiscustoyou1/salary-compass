@@ -7,9 +7,9 @@
           <span class="material-symbols-outlined text-text-secondary-light text-[20px]">savings</span>
         </div>
         <div>
-          <p class="text-emerald-custom text-3xl font-bold tracking-tight transition-all duration-300">{{ masked(store.benefitsStats.providentFundTotal) }}</p>
+          <p class="text-emerald-custom text-3xl font-bold tracking-tight transition-all duration-300">{{ masked(benefitsStore.benefitsStats.providentFundTotal) }}</p>
           <div class="flex items-center gap-1 mt-1">
-            <span class="text-xs text-text-secondary-light">含企业年金: {{ masked(store.benefitsStats.annuityTotal) }}</span>
+            <span class="text-xs text-text-secondary-light">含企业年金: {{ masked(benefitsStore.benefitsStats.annuityTotal) }}</span>
           </div>
         </div>
       </div>
@@ -19,7 +19,7 @@
           <span class="material-symbols-outlined text-text-secondary-light text-[20px]">account_balance_wallet</span>
         </div>
         <div>
-          <p class="text-text-main-light dark:text-white text-3xl font-bold tracking-tight">{{ masked(store.benefitsStats.monthlyContribution) }}</p>
+          <p class="text-text-main-light dark:text-white text-3xl font-bold tracking-tight">{{ masked(benefitsStore.benefitsStats.monthlyContribution) }}</p>
           <p class="text-xs text-text-secondary-light mt-1 font-medium">企业+个人双边总额</p>
         </div>
       </div>
@@ -76,7 +76,7 @@
     <div class="flex flex-col gap-4">
       <h2 class="text-text-main-light dark:text-white text-lg font-bold px-1">福利构成明细</h2>
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div v-for="(item, idx) in store.benefitsStats.details" :key="idx"
+        <div v-for="(item, idx) in benefitsStore.benefitsStats.details" :key="idx"
              class="flex flex-col gap-3 rounded-xl border border-border-light dark:border-border-dark bg-card-light dark:bg-card-dark p-5 shadow-soft hover:shadow-md transition-shadow">
           <div class="flex items-center gap-3">
             <div class="p-2 rounded-lg bg-opacity-20" :class="`bg-${item.color}-100 dark:bg-${item.color}-900/20 text-${item.color}-600 dark:text-${item.color}-400`">
@@ -105,7 +105,8 @@
 
 <script setup lang="ts">
   import { ref, onMounted } from 'vue';
-  import { useWageStore } from '@/stores/wage.store';
+  // [修改] 引用 benefits.store
+  import { useBenefitsStore } from '@/stores/benefits.store';
   import AssetGrowthChart from '@/components/charts/AssetGrowthChart.vue';
 
   const props = defineProps<{
@@ -113,12 +114,13 @@
     privacyMode: boolean;
   }>();
 
-  const store = useWageStore();
+  // [修改] 使用 benefitsStore
+  const benefitsStore = useBenefitsStore();
   const returnRate = ref(4.5);
   const retirementAge = ref(65);
 
   onMounted(() => {
-    store.initData();
+    benefitsStore.initBenefits();
   });
 
   const masked = (val: string) => props.privacyMode ? '****' : val;
