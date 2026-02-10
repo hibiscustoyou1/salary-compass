@@ -71,7 +71,10 @@
         trigger: 'axis',
         formatter: (params: any) => {
           const item = params[0];
-          const rate = props.data[item.dataIndex].currentRate;
+          // [修复 TS2532] 使用可选链 ?. 和空值合并 ?? 确保安全性
+          // 即使数组越界（理论上不应发生），也会回退到 0，避免崩溃
+          const rate = props.data[item.dataIndex]?.currentRate ?? 0;
+
           return `${item.name}<br/>累计应纳税: <b>¥${item.value.toLocaleString()}</b><br/>当前适用税率: <b>${rate}%</b>`;
         },
         backgroundColor: isDark.value ? 'rgba(30, 41, 59, 0.9)' : 'rgba(255, 255, 255, 0.9)',

@@ -27,9 +27,9 @@
                 <button v-for="year in availableYears" :key="year"
                         @click="selectYear(year)"
                         class="w-full text-left px-4 py-2.5 text-sm hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors flex items-center justify-between group"
-                        :class="selectedYear === year ? 'text-primary font-bold bg-primary/5 dark:bg-primary/10' : 'text-text-secondary-light dark:text-text-secondary-dark'">
+                        :class="isSelectedYear(year) ? 'text-primary font-bold bg-primary/5 dark:bg-primary/10' : 'text-text-secondary-light dark:text-text-secondary-dark'">
                   <span>{{ year }}年</span>
-                  <span v-if="selectedYear === year" class="material-symbols-outlined text-base">check</span>
+                  <span v-if="isSelectedYear(year)" class="material-symbols-outlined text-base">check</span>
                 </button>
               </div>
             </div>
@@ -48,7 +48,7 @@
           </tr>
           </thead>
           <tbody class="text-sm">
-          <tr v-for="(record, index) in filteredSalaryHistory" :key="record.period"
+          <tr v-for="(record) in filteredSalaryHistory" :key="record.period"
               @click="selectedSalary = record"
               :class="[
                   selectedSalary === record ? 'bg-primary/5 dark:bg-primary/10 border-l-4 border-l-primary' : 'hover:bg-slate-50 dark:hover:bg-slate-800 border-l-4 border-l-transparent',
@@ -178,17 +178,22 @@
     document.addEventListener('click', handleClickOutside);
   });
 
-  // 监听数据变化以设置默认选中项
+  const isSelectedYear = (year: string | number) => year === selectedYear.value;
+
   watch(() => store.salaryHistory, (newVal) => {
-    if (newVal.length > 0 && !selectedSalary.value) {
+    if (newVal && newVal.length > 0 && !selectedSalary.value) {
       const currentYearStr = new Date().getFullYear().toString();
-      // 如果当前年份无数据，则使用最新数据的年份
+
+      const latestRecord = newVal[0];
+      if (!latestRecord) return;
+
       const hasCurrentYearData = newVal.some(r => r.period.startsWith(currentYearStr));
-      const targetYearStr = hasCurrentYearData ? currentYearStr : newVal[0].year.toString();
+      const targetYearStr = hasCurrentYearData ? currentYearStr : latestRecord.year.toString();
 
       selectedYear.value = targetYearStr;
-      const firstRecord = newVal.find(r => r.period.startsWith(targetYearStr));
-      selectedSalary.value = firstRecord || newVal[0];
+
+      const targetRecord = newVal.find(r => r.period.startsWith(targetYearStr));
+      selectedSalary.value = targetRecord || latestRecord || null;
     }
   }, { immediate: true });
 
