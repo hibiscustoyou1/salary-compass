@@ -2,6 +2,8 @@ import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import { useWageStore } from './wage.store';
 import { getDashboardStats, type DashboardStats } from '@/api/dashboard';
+// [新增] 引入 Asset API
+import { getAssetEvents, createAssetEvent, type AssetEvent } from '@/api/assets';
 
 export const useDashboardStore = defineStore('dashboard', () => {
   const wageStore = useWageStore();
@@ -16,7 +18,123 @@ export const useDashboardStore = defineStore('dashboard', () => {
   });
   const isLoading = ref(false);
 
-  // --- Getters ---
+  // === [Step 1-3] 公积金 UI 状态与真实数据 ===
+  const isProvidentModalOpen = ref(false);
+  const providentHistory = ref<AssetEvent[]>([]);
+
+  // 余额计算属性：直接透传后端动态计算的统计值
+  const providentFundBalance = computed(() => dashboardStats.value.providentFundAccumulated);
+
+  // 辅助显示：上一年度结息 (从流水中查找最近的一笔 INTEREST)
+  const lastYearInterest = computed(() => {
+    const interestEvent = providentHistory.value.find(e => e.type === 'INTEREST');
+    return interestEvent ? `+¥${interestEvent.amount.toLocaleString()}` : '¥0';
+  });
+
+  const toggleProvidentModal = (isOpen: boolean) => {
+    isProvidentModalOpen.value = isOpen;
+    // 打开弹窗时，顺便刷新一下最新流水，保证数据鲜活
+    if (isOpen) {
+      fetchHistory();
+    }
+  };
+
+  // --- Actions ---
+
+  // 1. 获取流水记录
+  const fetchHistory = async () => {
+    try {
+      const res = await getAssetEvents();
+      if (res.success) {
+        // 简单格式化日期，仅展示 YYYY-MM-DD
+        providentHistory.value = res.data.map(e => ({
+          ...e,
+          date: e.occurredAt.split('T')[0] // 适配前端 UI 显示字段
+        }));
+      }
+    } catch (e) {
+      console.error('Fetch asset history failed', e);
+    }
+  };
+
+  // 封装内部使用的 Stats 请求，避免代码重复
+  const getDashboardStatsApi = async (year: number) => {
+    const res = await getDashboardStats(year);
+    if (res.success) {
+      dashboardStats.value = res.data;
+    }
+  };
+
+  // 2. 提交资产变动 (提取/结息/校准)
+  const submitProvidentRecord = async (payload: { type: string; category: string; amount: number; date: string; note: string }) => {
+    try {
+      isLoading.value = true;
+      // A. 调用提交接口
+      const res = await createAssetEvent({
+        type: payload.type,
+        category: payload.category,
+        amount: payload.amount,
+        occurredAt: payload.date, // 确保是 ISO 格式或后端能解析的字符串
+        note: payload.note
+      });
+
+      if (res.success) {
+        // B. 提交成功后，必须重新获取 Dashboard Stats (因为余额变了)
+        // C. 同时也刷新流水列表
+        await Promise.all([
+          getDashboardStatsApi(dashboardYear.value),
+          fetchHistory()
+        ]);
+      }
+    } catch (e) {
+      console.error('Submit asset event failed', e);
+      // 实际项目中这里应该弹出 Toast 错误提示
+    } finally {
+      isLoading.value = false;
+    }
+  };
+
+  // 3. 初始化 Dashboard (聚合调用)
+  const initDashboard = async () => {
+    isLoading.value = true;
+    try {
+      // 并行请求：薪资历史 + Dashboard 指标 + 资产流水
+      await Promise.all([
+        wageStore.fetchHistory(),
+        getDashboardStatsApi(dashboardYear.value),
+        fetchHistory()
+      ]);
+
+      const history = wageStore.salaryHistory;
+      if (history && history.length > 0) {
+        const hasCurrentYear = history.some(r => r.year === dashboardYear.value);
+        if (!hasCurrentYear) {
+          const first = history[0];
+          if (first) {
+            dashboardYear.value = first.year;
+            // 年份变了，重新拉取一次 Stats
+            await getDashboardStatsApi(dashboardYear.value);
+          }
+        }
+      }
+    } catch (e) {
+      console.error('Init dashboard error', e);
+    } finally {
+      isLoading.value = false;
+    }
+  };
+
+  const switchYear = async (year: number) => {
+    dashboardYear.value = year;
+    isLoading.value = true;
+    try {
+      await getDashboardStatsApi(year);
+    } finally {
+      isLoading.value = false;
+    }
+  };
+
+  // --- Getters (原有图表逻辑保持不变) ---
   const availableYears = computed(() => {
     const years = new Set(wageStore.salaryHistory.map(item => item.year));
     return Array.from(years).sort((a, b) => b - a);
@@ -62,7 +180,6 @@ export const useDashboardStore = defineStore('dashboard', () => {
       currentRate: 0
     }));
 
-    // 简单累进税率逻辑模拟 (省略复杂判断，仅为了保留结构)
     let acc = 0;
     trend.forEach(t => { acc += t.accumulated; });
 
@@ -109,44 +226,6 @@ export const useDashboardStore = defineStore('dashboard', () => {
     return `¥${total.toLocaleString()}`;
   });
 
-  // --- Actions ---
-  const initDashboard = async () => {
-    isLoading.value = true;
-    try {
-      await wageStore.fetchHistory();
-
-      const history = wageStore.salaryHistory;
-      // [修复 TS2532] 安全访问数组第一个元素
-      if (history && history.length > 0) {
-        const hasCurrentYear = history.some(r => r.year === dashboardYear.value);
-        if (!hasCurrentYear) {
-          const first = history[0];
-          if (first) dashboardYear.value = first.year;
-        }
-      }
-
-      const res = await getDashboardStats(dashboardYear.value);
-      if (res.success) {
-        dashboardStats.value = res.data;
-      }
-    } catch (e) {
-      console.error('Init dashboard error', e);
-    } finally {
-      isLoading.value = false;
-    }
-  };
-
-  const switchYear = async (year: number) => {
-    dashboardYear.value = year;
-    isLoading.value = true;
-    try {
-      const res = await getDashboardStats(year);
-      if (res.success) dashboardStats.value = res.data;
-    } finally {
-      isLoading.value = false;
-    }
-  };
-
   return {
     dashboardYear,
     dashboardStats,
@@ -159,6 +238,13 @@ export const useDashboardStore = defineStore('dashboard', () => {
     incomeStructure,
     totalAnnualGross,
     initDashboard,
-    switchYear
+    switchYear,
+    // [Export]
+    isProvidentModalOpen,
+    providentFundBalance,
+    lastYearInterest,
+    providentHistory,
+    toggleProvidentModal,
+    submitProvidentRecord
   };
 });

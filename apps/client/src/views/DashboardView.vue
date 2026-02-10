@@ -1,19 +1,19 @@
 <template>
   <div class="max-w-[1400px] mx-auto flex flex-col gap-6" v-if="isActive">
 
+    <ProvidentFundModal />
+
     <div class="flex justify-between items-center bg-card-light dark:bg-card-dark rounded-xl p-4 shadow-sm border border-border-light dark:border-border-dark">
       <div>
         <h2 class="text-lg font-bold text-text-main-light dark:text-white">年度概览</h2>
         <p class="text-xs text-text-secondary-light dark:text-text-secondary-dark">查看 {{ dashboardStore.dashboardYear }} 年度核心财务指标</p>
       </div>
-
       <div class="relative z-20" ref="yearDropdownRef">
         <button @click="isYearDropdownOpen = !isYearDropdownOpen"
                 class="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-text-main-light dark:text-white px-4 py-2 rounded-xl text-sm font-bold transition-all duration-200 border border-transparent focus:border-primary/50 focus:ring-2 focus:ring-primary/20 outline-none">
           <span>{{ dashboardStore.dashboardYear }}年</span>
           <span class="material-symbols-outlined text-lg transition-transform duration-300" :class="{ 'rotate-180': isYearDropdownOpen }">expand_more</span>
         </button>
-
         <transition
           enter-active-class="transition duration-200 ease-out"
           enter-from-class="transform scale-95 opacity-0"
@@ -43,6 +43,7 @@
 
     <template v-else>
       <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+
         <div class="bg-card-light dark:bg-card-dark rounded-xl p-5 border border-border-light dark:border-border-dark shadow-soft hover:shadow-md transition-all group">
           <div class="flex justify-between items-start mb-2">
             <p class="text-text-secondary-light dark:text-text-secondary-dark text-sm font-medium">本年至今净收入</p>
@@ -50,7 +51,7 @@
           </div>
           <h3 class="text-2xl font-bold text-text-main-light dark:text-white mb-1">{{ masked(dashboardStore.dashboardStats.netIncomeYTD) }}</h3>
           <div class="flex items-center gap-2">
-            <span :class="[
+             <span :class="[
               dashboardStore.dashboardStats.netIncomeChange.startsWith('-')
                 ? 'text-red-500 bg-red-50 dark:bg-red-900/20'
                 : 'text-emerald-custom bg-emerald-custom/10',
@@ -83,15 +84,30 @@
           </div>
         </div>
 
-        <div class="bg-card-light dark:bg-card-dark rounded-xl p-5 border border-border-light dark:border-border-dark shadow-soft hover:shadow-md transition-all group">
+        <div
+          @click="dashboardStore.toggleProvidentModal(true)"
+          class="bg-card-light dark:bg-card-dark rounded-xl p-5 border border-border-light dark:border-border-dark shadow-soft hover:shadow-md transition-all group relative cursor-pointer hover:border-primary/50 dark:hover:border-primary/50"
+          title="点击管理公积金资产"
+        >
           <div class="flex justify-between items-start mb-2">
-            <p class="text-text-secondary-light dark:text-text-secondary-dark text-sm font-medium">公积金积累 (全量)</p>
-            <span class="material-symbols-outlined text-primary bg-primary/10 p-1 rounded text-lg">domain</span>
+            <div class="flex items-center gap-1">
+              <p class="text-text-secondary-light dark:text-text-secondary-dark text-sm font-medium">公积金余额</p>
+              <span class="material-symbols-outlined text-[16px] text-text-secondary-light" title="基于校准值和薪资流水估算">help</span>
+            </div>
+            <div>
+              <span class="material-symbols-outlined text-primary bg-primary/10 p-1 rounded text-lg">domain</span>
+            </div>
           </div>
-          <h3 class="text-2xl font-bold text-text-main-light dark:text-white mb-1">{{ masked(dashboardStore.dashboardStats.providentFundAccumulated) }}</h3>
+
+          <h3 class="text-2xl font-bold text-text-main-light dark:text-white mb-1">
+            {{ masked(dashboardStore.providentFundBalance) }}
+          </h3>
+
           <div class="flex items-center gap-2">
-            <span class="text-text-secondary-light dark:text-text-secondary-dark text-xs">公司1:1配比 | 个人x2</span>
+            <span class="text-xs text-emerald-custom bg-emerald-custom/10 px-1.5 py-0.5 rounded font-medium">+{{ dashboardStore.lastYearInterest }}</span>
+            <span class="text-text-secondary-light dark:text-text-secondary-dark text-xs">上年度结息</span>
           </div>
+
           <div class="h-10 mt-3 w-full opacity-50 group-hover:opacity-100 transition-opacity">
             <BaseEChart v-if="!privacyMode" :options="providentFundTrendOption" />
             <div v-else class="h-full w-full flex items-center justify-center text-text-secondary-light text-xl tracking-widest font-bold">****</div>
@@ -165,16 +181,16 @@
   import { ref, computed, onMounted, onUnmounted } from 'vue';
   import BaseEChart from '@/components/charts/BaseEChart.vue';
   import * as echarts from 'echarts';
-  // [修改] 引用新的 store
   import { useWageStore } from '@/stores/wage.store';
   import { useDashboardStore } from '@/stores/dashboard.store';
+  // [新增] 引入弹窗组件
+  import ProvidentFundModal from '@/components/modals/ProvidentFundModal.vue';
 
   const props = defineProps<{
     isActive: boolean;
     privacyMode: boolean;
   }>();
 
-  // 引入两个 Store
   const wageStore = useWageStore();
   const dashboardStore = useDashboardStore();
 
@@ -182,7 +198,6 @@
   const yearDropdownRef = ref<HTMLElement | null>(null);
 
   onMounted(() => {
-    // 初始化
     dashboardStore.initDashboard();
     document.addEventListener('click', handleClickOutside);
   });
@@ -204,11 +219,9 @@
 
   const masked = (val: string) => props.privacyMode ? '****' : val;
 
-  // 下方所有 computed 均改为使用 dashboardStore
   const miniLineOption = computed(() => {
     const data = dashboardStore.netIncomeMiniChartData;
     const chartData = data.length ? data : [0, 0, 0, 0, 0, 0];
-    // ... (图表配置保持不变)
     return {
       grid: { top: 0, bottom: 0, left: 0, right: 0 },
       xAxis: { show: false, type: 'category', data: chartData.map((_, i) => i) },
@@ -275,7 +288,6 @@
 
   const trendChartOption = computed(() => {
     const isHidden = props.privacyMode;
-    // 使用 wageStore.salaryHistory
     const chartData = wageStore.salaryHistory
       .filter(item => item.year === dashboardStore.dashboardYear)
       .sort((a, b) => a.period.localeCompare(b.period))
