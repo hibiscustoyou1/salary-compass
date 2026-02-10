@@ -58,7 +58,7 @@
     const yearsToRetire = Math.max(0, props.retirementAge - currentAge);
     const endYear = currentYear + yearsToRetire + 5;
 
-    const years = [];
+    const years: number[] = [];
     for (let y = currentYear; y <= endYear; y += 2) {
       years.push(y);
     }
@@ -79,7 +79,7 @@
         // 将月投转化为年投
         const yearlyContribution = monthlyAdd * 12;
         const r = props.rate * rateMultiplier / 100;
-        let contributionGrown = 0;
+        let contributionGrown: number;
         if (r > 0 && yearsPassed > 0) {
           contributionGrown = yearlyContribution * ((Math.pow(1 + r, yearsPassed) - 1) / r);
         } else {
