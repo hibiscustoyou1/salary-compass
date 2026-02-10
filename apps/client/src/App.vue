@@ -1,1 +1,1 @@
-<script setup lang="ts">  import { useUIStore } from '@/stores/ui.store';  // 初始化 UI Store，触发主题持久化逻辑  useUIStore();</script><template>  <router-view /></template><style>/* 确保背景色随主题平滑过渡 */body {  transition: background-color 0.3s ease, color 0.3s ease;}</style>
+<template>  <router-view /></template><script setup lang="ts">  import { useUIStore } from '@/stores/ui.store';  // 初始化 UI Store，触发主题持久化逻辑  useUIStore();</script><style>/* 确保背景色随主题平滑过渡 */body {  transition: background-color 0.3s ease, color 0.3s ease;}</style>
