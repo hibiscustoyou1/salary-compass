@@ -11,7 +11,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'dashboard',
         name: 'dashboard',
-        component: () => import('@/views/DashboardView.vue'),
+        component: () => import('@/views/dashboard/DashboardView.vue'),
         meta: {
           title: '职业财富分析',
           subtitle: '2024财年绩效表现'
