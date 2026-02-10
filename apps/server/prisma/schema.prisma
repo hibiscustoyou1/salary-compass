@@ -67,3 +67,18 @@ model Wage {
   @@index([year, period])
   @@index([name])
 }
+
+// 新增模型：公积金/资产变动记录
+model AssetEvent {
+  id          BigInt   @id @default(autoincrement()) @db.UnsignedBigInt
+  type        String   // 枚举: 'WITHDRAWAL'(提取), 'INTEREST'(结息), 'CALIBRATION'(校准)
+  category    String?  // 子类: 'RENT'(租房), 'LOAN'(还贷), 'YEARLY'(年度结息)
+  amount      Decimal  @db.Decimal(14, 2) // 正负值
+  occurredAt  DateTime @map("发生时间")
+  note        String?  @db.VarChar(200)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("asset_events")
+}
