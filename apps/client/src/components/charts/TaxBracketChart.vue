@@ -7,7 +7,7 @@
 <script setup lang="ts">
   import { computed, ref, onMounted, onUnmounted } from 'vue';
   import BaseEChart from '@/components/charts/BaseEChart.vue';
-  import { TAX_BRACKETS } from '@/api/mock';
+  import { TAX_BRACKETS } from '@/constants/tax';
 
   const props = defineProps<{
     data: Array<{ month: string; accumulated: number; currentRate: number }>;
