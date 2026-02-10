@@ -30,7 +30,7 @@
   import { useDashboardStore } from '@/stores/dashboard.store.ts';
 
   // 引入子组件
-  import ProvidentFundModal from '@/components/modals/ProvidentFundModal.vue';
+  import ProvidentFundModal from '@/views/dashboard/components/ProvidentFundModal.vue';
   import DashboardHeader from './components/DashboardHeader.vue';
   import StatCardNetIncome from './components/StatCardNetIncome.vue';
   import StatCardTax from './components/StatCardTax.vue';

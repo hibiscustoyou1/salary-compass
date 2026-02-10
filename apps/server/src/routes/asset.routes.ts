@@ -4,9 +4,11 @@ import * as AssetController from '@/controllers/asset.controller';
 const router = Router();
 
 // GET /api/assets/events - 获取历史流水
-router.get('/assets/events', AssetController.getAssetEvents);
+router.get('/events', AssetController.getAssetEvents);
 
 // POST /api/assets/event - 提交新变动
-router.post('/assets/event', AssetController.createAssetEvent);
+router.post('/event', AssetController.createAssetEvent);
+
+router.delete('/event/:id', AssetController.deleteAssetEvent);
 
 export const assetRouter = router;

@@ -23,5 +23,5 @@ export interface SalaryRecord {
 
 // --- 接口方法 ---
 export const getSalaryHistory = () => {
-  return request.get<any, ApiResponse<SalaryRecord[]>>('/salary/history');
+  return request.get<any, ApiResponse<SalaryRecord[]>>('/wage/salary/history');
 };

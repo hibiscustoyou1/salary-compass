@@ -4,8 +4,8 @@ import { wageRouter } from './wage.routes'; // [新增]
 
 const routes = Router();
 
-routes.use('/api', assetRouter);
-routes.use('/api', wageRouter); // [新增]
+routes.use('/api/assets', assetRouter);
+routes.use('/api/wage', wageRouter); // [新增]
 
 export const initRoutes = (app: Express) => {
   app.use(routes);

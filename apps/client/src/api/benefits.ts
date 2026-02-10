@@ -20,5 +20,5 @@ export interface BenefitsStats {
 }
 
 export const getBenefitsStats = () => {
-  return request.get<any, ApiResponse<BenefitsStats>>('/benefits/stats');
+  return request.get<any, ApiResponse<BenefitsStats>>('/wage/benefits/stats');
 };

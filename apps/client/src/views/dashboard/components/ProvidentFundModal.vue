@@ -56,9 +56,14 @@
         </div>
 
         <div>
-          <h4 class="text-xs font-bold text-text-secondary-light uppercase tracking-wider mb-3">近期变动</h4>
+          <div class="flex justify-between items-center mb-3">
+            <h4 class="text-xs font-bold text-text-secondary-light uppercase tracking-wider">近期变动</h4>
+            <button @click="openHistory" class="text-xs text-primary font-bold hover:underline flex items-center gap-0.5">
+              查看全部 <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+            </button>
+          </div>
           <div class="space-y-3">
-            <div v-for="item in store.providentHistory.slice(0, 5)" :key="item.id" class="flex items-center justify-between p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50 border border-transparent hover:border-slate-100 dark:hover:border-slate-700 transition-colors">
+            <div v-for="item in store.providentHistory" :key="item.id" class="flex items-center justify-between p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50 border border-transparent hover:border-slate-100 dark:hover:border-slate-700 transition-colors">
               <div class="flex items-center gap-3">
                 <div class="w-8 h-8 rounded-full flex items-center justify-center shrink-0"
                      :class="{
@@ -71,21 +76,68 @@
                   </span>
                 </div>
                 <div class="overflow-hidden">
-                  <p class="text-sm font-bold text-text-main-light dark:text-white truncate">{{ item.note }}</p>
+                  <p class="text-sm font-bold text-text-main-light dark:text-white truncate">{{ item.note || item.category }}</p>
                   <p class="text-xs text-text-secondary-light truncate">{{ item.date }} · {{ item.category }}</p>
                 </div>
               </div>
               <span class="font-mono font-bold text-sm shrink-0"
                     :class="item.type === 'WITHDRAWAL' ? 'text-text-main-light dark:text-white' : 'text-emerald-custom'">
-                {{ item.amount > 0 && item.type !== 'CALIBRATION' ? '+' : '' }}{{ item.type === 'CALIBRATION' ? '¥' + item.amount.toLocaleString() : item.amount.toLocaleString() }}
+                {{ item.amount > 0 && item.type !== 'CALIBRATION' ? '+' : '' }}{{ item.amount.toLocaleString() }}
               </span>
             </div>
           </div>
         </div>
       </div>
 
-      <div v-else class="flex flex-col h-full overflow-hidden bg-white dark:bg-card-dark">
+      <div v-else-if="viewState === 'HISTORY'" class="flex-1 overflow-y-auto custom-scrollbar p-0">
+        <div v-if="loadingHistory" class="flex justify-center py-10">
+          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </div>
+        <div v-else class="divide-y divide-border-light dark:divide-border-dark">
+          <div v-for="item in store.fullProvidentHistory" :key="item.id" class="p-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors flex justify-between items-center group relative">
 
+            <div class="flex gap-4">
+              <div class="flex flex-col items-center min-w-[36px]">
+                <span class="text-xs font-bold text-text-secondary-light">{{ item.date.split('-')[1] }}/{{ item.date.split('-')[2] }}</span>
+                <span class="text-[10px] text-text-secondary-light/60">{{ item.date.split('-')[0] }}</span>
+              </div>
+
+              <div>
+                <p class="text-sm font-bold text-text-main-light dark:text-white">{{ item.category }}</p>
+                <p class="text-xs text-text-secondary-light">{{ item.note || typeMap[item.type] }}</p>
+              </div>
+            </div>
+
+            <div class="text-right group-hover:opacity-0 transition-opacity duration-200">
+              <p class="font-mono font-bold text-sm"
+                 :class="item.type === 'WITHDRAWAL' ? 'text-text-main-light dark:text-white' : 'text-emerald-custom'">
+                {{ item.amount > 0 && item.type !== 'CALIBRATION' ? '+' : '' }}{{ item.amount.toLocaleString() }}
+              </p>
+              <span class="text-[10px] px-1.5 py-0.5 rounded font-bold mt-1 inline-block"
+                    :class="typeColorMap[item.type] || 'bg-slate-100 text-slate-500'">
+                   {{ typeMap[item.type] || item.type }}
+                 </span>
+            </div>
+
+            <div class="absolute right-4 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all duration-200 translate-x-2 group-hover:translate-x-0">
+              <button
+                @click.stop="handleDelete(item.id)"
+                class="p-2 rounded-full bg-red-50 text-red-500 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/40 transition-colors"
+                title="删除此记录"
+              >
+                <span class="material-symbols-outlined text-xl">delete</span>
+              </button>
+            </div>
+
+          </div>
+
+          <div v-if="store.fullProvidentHistory.length === 0" class="py-10 text-center text-text-secondary-light text-sm">
+            暂无历史记录
+          </div>
+        </div>
+      </div>
+
+      <div v-else class="flex flex-col h-full overflow-hidden bg-white dark:bg-card-dark">
         <div class="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-4">
 
           <div class="p-4 rounded-xl flex gap-3 text-sm shrink-0"
@@ -124,8 +176,27 @@
 
           <div class="space-y-1">
             <label class="text-sm font-medium text-text-main-light dark:text-white">发生日期</label>
-            <input type="date" v-model="formData.date"
-                   class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-border-light dark:border-border-dark rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-text-main-light dark:text-white">
+
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none z-10">
+                <span class="material-symbols-outlined text-text-secondary-light">event</span>
+              </div>
+              <input
+                type="date"
+                v-model="formData.date"
+                class="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-border-light dark:border-border-dark rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-text-main-light dark:text-white cursor-pointer custom-date-input"
+              >
+            </div>
+
+            <div v-if="viewState === 'INTEREST'" class="flex gap-2 mt-2 flex-wrap">
+              <button
+                v-for="year in quickYears" :key="year"
+                @click="setQuickDate(year)"
+                class="px-3 py-1 text-xs font-bold rounded-lg border border-border-light dark:border-border-dark hover:border-emerald-custom hover:text-emerald-custom hover:bg-emerald-50 dark:hover:bg-emerald-900/10 text-text-secondary-light transition-all"
+              >
+                {{ year }}年
+              </button>
+            </div>
           </div>
 
           <div class="space-y-1">
@@ -150,7 +221,6 @@
             确认提交
           </button>
         </div>
-
       </div>
 
     </div>
@@ -161,18 +231,37 @@
   import { ref, computed, reactive, watch } from 'vue';
   import { useDashboardStore } from '@/stores/dashboard.store';
 
-  type ViewState = 'MAIN' | 'WITHDRAW' | 'INTEREST' | 'CALIBRATE';
+  type ViewState = 'MAIN' | 'WITHDRAW' | 'INTEREST' | 'CALIBRATE' | 'HISTORY';
 
   const store = useDashboardStore();
   const isVisible = computed(() => store.isProvidentModalOpen);
   const viewState = ref<ViewState>('MAIN');
+  const loadingHistory = ref(false);
 
-  // UI 配置
+  // 动态计算快捷年份（近5年）
+  const currentYear = new Date().getFullYear();
+  const quickYears = Array.from({ length: 5 }, (_, i) => currentYear - 4 + i);
+
+  const typeMap: Record<string, string> = {
+    WITHDRAWAL: '提取',
+    INTEREST: '结息',
+    CALIBRATION: '校准',
+    DEPOSIT: '缴存'
+  };
+
+  const typeColorMap: Record<string, string> = {
+    WITHDRAWAL: 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300',
+    INTEREST: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300',
+    CALIBRATION: 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300',
+    DEPOSIT: 'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300'
+  };
+
   const viewTitles: Record<ViewState, string> = {
     MAIN: '公积金资产管理',
     WITHDRAW: '记录提取/还贷',
     INTEREST: '记录年度结息',
-    CALIBRATE: '基准余额校准'
+    CALIBRATE: '基准余额校准',
+    HISTORY: '完整资金流水'
   };
 
   const formHints: Record<string, string> = {
@@ -183,7 +272,6 @@
 
   const withdrawTypes = ['租房提取', '自动冲还贷', '购房提取', '离职销户'];
 
-  // 表单数据
   const formData = reactive({
     amount: '' as number | '',
     date: new Date().toISOString().split('T')[0],
@@ -191,16 +279,43 @@
     note: ''
   });
 
-  // 重置表单
+  // 打开历史并拉取全量数据
+  const openHistory = async () => {
+    viewState.value = 'HISTORY';
+    loadingHistory.value = true;
+    await store.fetchHistory('all');
+    loadingHistory.value = false;
+  };
+
+  // 快捷设置日期 (例如点击 2024年 -> 2024-06-30)
+  const setQuickDate = (year: number) => {
+    formData.date = `${year}-06-30`;
+  };
+
+  // 监听日期变化，自动填充备注
+  watch(() => formData.date, (newDate) => {
+    if (viewState.value === 'INTEREST' && newDate) {
+      const year = newDate.split('-')[0];
+      const autoNote = `${year}年度公积金结息`;
+
+      const isAutoFormat = /^\d{4}年度公积金结息$/.test(formData.note);
+      if (!formData.note || isAutoFormat) {
+        formData.note = autoNote;
+      }
+    }
+  });
+
+  // 视图切换时重置表单
   watch(viewState, (newVal) => {
-    if (newVal === 'MAIN') return;
+    if (newVal === 'MAIN' || newVal === 'HISTORY') return;
     formData.amount = '';
     formData.date = new Date().toISOString().split('T')[0];
     formData.note = '';
 
     if (newVal === 'INTEREST') {
       formData.category = '年度结息';
-      formData.date = `${new Date().getFullYear()}-06-30`; // 默认 6.30
+      const defaultDate = `${new Date().getFullYear()}-06-30`;
+      formData.date = defaultDate;
       formData.note = `${new Date().getFullYear()}年度公积金结息`;
     } else if (newVal === 'CALIBRATE') {
       formData.category = '基准校准';
@@ -214,9 +329,9 @@
     setTimeout(() => viewState.value = 'MAIN', 300);
   };
 
-  const handleSubmit = () => {
+  // 提交逻辑
+  const handleSubmit = async () => {
     if (!formData.amount) return;
-
     let type = 'DEPOSIT';
     let finalAmount = Number(formData.amount);
 
@@ -224,22 +339,30 @@
       type = 'CALIBRATION';
     } else if (viewState.value === 'WITHDRAW') {
       type = 'WITHDRAWAL';
-      finalAmount = -Math.abs(finalAmount); // 确保提取为负
+      finalAmount = -Math.abs(finalAmount);
     } else if (viewState.value === 'INTEREST') {
       type = 'INTEREST';
       finalAmount = Math.abs(finalAmount);
     }
 
-    store.submitProvidentRecord({
+    await store.submitProvidentRecord({
       type,
       category: formData.category,
       amount: finalAmount,
       date: formData.date,
       note: formData.note
     });
-
-    // 返回主页并重置
     viewState.value = 'MAIN';
+  };
+
+  // 删除逻辑
+  const handleDelete = async (id: string) => {
+    if (!window.confirm('确定要删除这条记录吗？删除后公积金余额将重新计算。')) {
+      return;
+    }
+    loadingHistory.value = true;
+    await store.removeProvidentRecord(id);
+    loadingHistory.value = false;
   };
 </script>
 
@@ -253,5 +376,22 @@
 }
 .dark .custom-scrollbar::-webkit-scrollbar-thumb {
   background-color: #475569;
+}
+
+/* 原生日期选择器美化 */
+.custom-date-input {
+  color-scheme: light dark;
+}
+.custom-date-input::-webkit-calendar-picker-indicator {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: auto;
+  height: auto;
+  color: transparent;
+  background: transparent;
+  cursor: pointer;
 }
 </style>

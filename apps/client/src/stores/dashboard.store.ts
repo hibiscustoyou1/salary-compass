@@ -2,8 +2,7 @@ import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import { useWageStore } from './wage.store';
 import { getDashboardStats, type DashboardStats } from '@/api/dashboard';
-// [新增] 引入 Asset API
-import { getAssetEvents, createAssetEvent, type AssetEvent } from '@/api/assets';
+import {getAssetEvents, createAssetEvent, type AssetEvent, deleteAssetEvent} from '@/api/assets';
 
 export const useDashboardStore = defineStore('dashboard', () => {
   const wageStore = useWageStore();
@@ -18,46 +17,57 @@ export const useDashboardStore = defineStore('dashboard', () => {
   });
   const isLoading = ref(false);
 
-  // === [Step 1-3] 公积金 UI 状态与真实数据 ===
+  // === 公积金资产管理状态 ===
   const isProvidentModalOpen = ref(false);
-  const providentHistory = ref<AssetEvent[]>([]);
+  const providentHistory = ref<AssetEvent[]>([]);     // 最近 5 条 (Dashboard/Modal首页使用)
+  const fullProvidentHistory = ref<AssetEvent[]>([]); // 全量流水 (Modal历史页使用)
 
   // 余额计算属性：直接透传后端动态计算的统计值
   const providentFundBalance = computed(() => dashboardStats.value.providentFundAccumulated);
 
-  // 辅助显示：上一年度结息 (从流水中查找最近的一笔 INTEREST)
+  // 辅助显示：上一年度结息 (从近期流水中查找最近的一笔 INTEREST)
   const lastYearInterest = computed(() => {
-    const interestEvent = providentHistory.value.find(e => e.type === 'INTEREST');
+    // 优先从 fullHistory 找，如果没有则找 recent
+    const source = fullProvidentHistory.value.length > 0 ? fullProvidentHistory.value : providentHistory.value;
+    const interestEvent = source.find(e => e.type === 'INTEREST');
     return interestEvent ? `+¥${interestEvent.amount.toLocaleString()}` : '¥0';
   });
 
-  const toggleProvidentModal = (isOpen: boolean) => {
-    isProvidentModalOpen.value = isOpen;
-    // 打开弹窗时，顺便刷新一下最新流水，保证数据鲜活
-    if (isOpen) {
-      fetchHistory();
-    }
-  };
-
   // --- Actions ---
 
-  // 1. 获取流水记录
-  const fetchHistory = async () => {
+  // 1. 获取流水记录 (支持 mode: recent | all)
+  const fetchHistory = async (mode: 'recent' | 'all' = 'recent') => {
     try {
-      const res = await getAssetEvents();
+      // recent 限制 5 条，all 不限制
+      const limit = mode === 'recent' ? 5 : undefined;
+      const res = await getAssetEvents({ limit });
+
       if (res.success) {
-        // 简单格式化日期，仅展示 YYYY-MM-DD
-        providentHistory.value = res.data.map(e => ({
+        const formatted = res.data.map(e => ({
           ...e,
-          date: e.occurredAt.split('T')[0] // 适配前端 UI 显示字段
+          date: e.occurredAt.split('T')[0] // 格式化日期 YYYY-MM-DD
         }));
+
+        if (mode === 'recent') {
+          providentHistory.value = formatted;
+        } else {
+          fullProvidentHistory.value = formatted;
+        }
       }
     } catch (e) {
       console.error('Fetch asset history failed', e);
     }
   };
 
-  // 封装内部使用的 Stats 请求，避免代码重复
+  const toggleProvidentModal = (isOpen: boolean) => {
+    isProvidentModalOpen.value = isOpen;
+    // 打开弹窗时，默认刷新一下"近期"流水
+    if (isOpen) {
+      fetchHistory('recent');
+    }
+  };
+
+  // 内部辅助：刷新 Dashboard 指标
   const getDashboardStatsApi = async (year: number) => {
     const res = await getDashboardStats(year);
     if (res.success) {
@@ -74,37 +84,41 @@ export const useDashboardStore = defineStore('dashboard', () => {
         type: payload.type,
         category: payload.category,
         amount: payload.amount,
-        occurredAt: payload.date, // 确保是 ISO 格式或后端能解析的字符串
+        occurredAt: payload.date,
         note: payload.note
       });
 
       if (res.success) {
-        // B. 提交成功后，必须重新获取 Dashboard Stats (因为余额变了)
-        // C. 同时也刷新流水列表
+        // B. 提交成功后，重新计算余额并刷新近期流水
         await Promise.all([
           getDashboardStatsApi(dashboardYear.value),
-          fetchHistory()
+          fetchHistory('recent')
         ]);
+
+        // C. 如果全量历史已经被加载过，也顺便刷新一下，保持一致性
+        if (fullProvidentHistory.value.length > 0) {
+          fetchHistory('all');
+        }
       }
     } catch (e) {
       console.error('Submit asset event failed', e);
-      // 实际项目中这里应该弹出 Toast 错误提示
     } finally {
       isLoading.value = false;
     }
   };
 
-  // 3. 初始化 Dashboard (聚合调用)
+  // 3. 初始化 Dashboard
   const initDashboard = async () => {
     isLoading.value = true;
     try {
-      // 并行请求：薪资历史 + Dashboard 指标 + 资产流水
+      // 并行请求
       await Promise.all([
         wageStore.fetchHistory(),
         getDashboardStatsApi(dashboardYear.value),
-        fetchHistory()
+        fetchHistory('recent')
       ]);
 
+      // 自动校正年份
       const history = wageStore.salaryHistory;
       if (history && history.length > 0) {
         const hasCurrentYear = history.some(r => r.year === dashboardYear.value);
@@ -112,7 +126,6 @@ export const useDashboardStore = defineStore('dashboard', () => {
           const first = history[0];
           if (first) {
             dashboardYear.value = first.year;
-            // 年份变了，重新拉取一次 Stats
             await getDashboardStatsApi(dashboardYear.value);
           }
         }
@@ -134,7 +147,7 @@ export const useDashboardStore = defineStore('dashboard', () => {
     }
   };
 
-  // --- Getters (原有图表逻辑保持不变) ---
+  // --- Getters (图表数据源) ---
   const availableYears = computed(() => {
     const years = new Set(wageStore.salaryHistory.map(item => item.year));
     return Array.from(years).sort((a, b) => b - a);
@@ -180,9 +193,6 @@ export const useDashboardStore = defineStore('dashboard', () => {
       currentRate: 0
     }));
 
-    let acc = 0;
-    trend.forEach(t => { acc += t.accumulated; });
-
     return {
       trend: trend,
       kpi: {
@@ -226,6 +236,28 @@ export const useDashboardStore = defineStore('dashboard', () => {
     return `¥${total.toLocaleString()}`;
   });
 
+  const removeProvidentRecord = async (id: string) => {
+    try {
+      isLoading.value = true;
+      const res = await deleteAssetEvent(id);
+
+      if (res.success) {
+        // 删除成功后，全量刷新所有数据 (余额变动、列表变动)
+        await Promise.all([
+          getDashboardStatsApi(dashboardYear.value),
+          fetchHistory('recent'),
+          fetchHistory('all') // 确保两个列表都同步
+        ]);
+      }
+      return res.success;
+    } catch (e) {
+      console.error('Delete asset event failed', e);
+      return false;
+    } finally {
+      isLoading.value = false;
+    }
+  };
+
   return {
     dashboardYear,
     dashboardStats,
@@ -239,12 +271,15 @@ export const useDashboardStore = defineStore('dashboard', () => {
     totalAnnualGross,
     initDashboard,
     switchYear,
-    // [Export]
+    // [公积金模块 Export]
     isProvidentModalOpen,
     providentFundBalance,
     lastYearInterest,
     providentHistory,
+    fullProvidentHistory, // 导出全量历史
     toggleProvidentModal,
-    submitProvidentRecord
+    submitProvidentRecord,
+    fetchHistory,
+    removeProvidentRecord
   };
 });
