@@ -2,7 +2,7 @@
   <div class="bg-card-light dark:bg-card-dark rounded-xl p-5 border border-border-light dark:border-border-dark shadow-soft hover:shadow-md transition-all group">
     <div class="flex justify-between items-start mb-2">
       <p class="text-text-secondary-light dark:text-text-secondary-dark text-sm font-medium">已缴税额总计</p>
-      <span class="material-symbols-outlined text-red-custom bg-red-custom/10 p-1 rounded text-lg">account_balance</span>
+      <span class="material-symbols-outlined text-red-custom bg-red-custom/10 rounded text-lg inline-flex items-center justify-center w-7 h-7">account_balance</span>
     </div>
     <h3 class="text-2xl font-bold text-text-main-light dark:text-white mb-1">{{ masked(store.dashboardStats.taxPaid) }}</h3>
     <div class="flex items-center gap-2">

@@ -6,14 +6,14 @@
 
       <div class="px-6 py-4 border-b border-border-light dark:border-border-dark flex justify-between items-center shrink-0 bg-slate-50/50 dark:bg-slate-800/50 z-10">
         <div class="flex items-center gap-2">
-          <button v-if="viewState !== 'MAIN'" @click="viewState = 'MAIN'" class="mr-1 p-1 -ml-2 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 text-text-secondary-light transition-colors">
+          <button v-if="viewState !== 'MAIN'" @click="viewState = 'MAIN'" class="mr-1 -ml-2 w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 text-text-secondary-light transition-colors">
             <span class="material-symbols-outlined text-xl">arrow_back</span>
           </button>
           <h3 class="text-lg font-bold text-text-main-light dark:text-white">
             {{ viewTitles[viewState] }}
           </h3>
         </div>
-        <button @click="close" class="p-1 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors text-text-secondary-light">
+        <button @click="close" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors text-text-secondary-light">
           <span class="material-symbols-outlined">close</span>
         </button>
       </div>
@@ -34,23 +34,23 @@
 
         <div class="grid grid-cols-3 gap-4 mb-8">
           <button @click="viewState = 'WITHDRAW'" class="flex flex-col items-center gap-2 p-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 hover:border-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/10 transition-all group">
-            <div class="w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 flex items-center justify-center group-hover:scale-110 transition-transform">
+            <span class="w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 flex items-center justify-center group-hover:scale-110 transition-transform">
               <span class="material-symbols-outlined">output</span>
-            </div>
+            </span>
             <span class="text-xs font-bold text-text-secondary-light dark:text-text-secondary-dark group-hover:text-amber-600 dark:group-hover:text-amber-400">提取/还贷</span>
           </button>
 
           <button @click="viewState = 'INTEREST'" class="flex flex-col items-center gap-2 p-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 hover:border-emerald-custom hover:bg-emerald-50 dark:hover:bg-emerald-900/10 transition-all group">
-            <div class="w-10 h-10 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center group-hover:scale-110 transition-transform">
+            <span class="w-10 h-10 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center group-hover:scale-110 transition-transform">
               <span class="material-symbols-outlined">savings</span>
-            </div>
+            </span>
             <span class="text-xs font-bold text-text-secondary-light dark:text-text-secondary-dark group-hover:text-emerald-custom dark:group-hover:text-emerald-400">年度结息</span>
           </button>
 
           <button @click="viewState = 'CALIBRATE'" class="flex flex-col items-center gap-2 p-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/10 transition-all group">
-            <div class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center group-hover:scale-110 transition-transform">
+            <span class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center group-hover:scale-110 transition-transform">
               <span class="material-symbols-outlined">tune</span>
-            </div>
+            </span>
             <span class="text-xs font-bold text-text-secondary-light dark:text-text-secondary-dark group-hover:text-blue-500 dark:group-hover:text-blue-400">余额校准</span>
           </button>
         </div>
@@ -122,7 +122,7 @@
             <div class="absolute right-4 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all duration-200 translate-x-2 group-hover:translate-x-0">
               <button
                 @click.stop="handleDelete(item.id)"
-                class="p-2 rounded-full bg-red-50 text-red-500 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/40 transition-colors"
+                class="w-9 h-9 flex items-center justify-center rounded-full bg-red-50 text-red-500 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/40 transition-colors"
                 title="删除此记录"
               >
                 <span class="material-symbols-outlined text-xl">delete</span>

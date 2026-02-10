@@ -10,7 +10,7 @@
         <span class="material-symbols-outlined text-[16px] text-text-secondary-light" title="基于校准值和薪资流水估算">help</span>
       </div>
       <div>
-        <span class="material-symbols-outlined text-primary bg-primary/10 p-1 rounded text-lg">domain</span>
+        <span class="material-symbols-outlined text-primary bg-primary/10 rounded text-lg  inline-flex items-center justify-center w-7 h-7">domain</span>
       </div>
     </div>
     <h3 class="text-2xl font-bold text-text-main-light dark:text-white mb-1">{{ masked(store.providentFundBalance) }}</h3>
