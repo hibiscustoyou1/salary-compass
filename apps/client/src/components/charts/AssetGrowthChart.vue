@@ -10,9 +10,15 @@
   import * as echarts from 'echarts';
 
   const props = defineProps<{
-    rate: number;         // 年化收益率 (e.g. 4.5)
-    retirementAge: number;// 退休年龄 (e.g. 65)
+    rate: number;          // 年化收益率 (e.g. 4.5)
+    retirementAge: number; // 退休年龄 (e.g. 65)
     privacyMode: boolean;
+    // [新增] 接收真实资金数据
+    initialProvidentFund: number; // 当前公积金余额
+    initialAnnuity: number;       // 当前年金余额
+    monthlyProvidentFund: number; // 月公积金(双边)
+    monthlyAnnuity: number;       // 月年金(个人+企业)
+    monthlyPension: number;       // 月养老金(个人)
   }>();
 
   const isDark = ref(document.documentElement.classList.contains('dark'));
@@ -48,35 +54,52 @@
     }
 
     const currentYear = new Date().getFullYear();
-    const currentAge = 32; // 假设当前年龄
+    const currentAge = 32; // TODO: 后续应从用户信息获取
     const yearsToRetire = Math.max(0, props.retirementAge - currentAge);
-    const endYear = currentYear + yearsToRetire + 5; // 多展示5年
+    const endYear = currentYear + yearsToRetire + 5;
 
-    // 生成 X 轴年份
     const years = [];
     for (let y = currentYear; y <= endYear; y += 2) {
       years.push(y);
     }
 
-    // 模拟生成三条曲线数据
-    // 公式：Base * (1 + rate)^n
     const generateCurve = (baseAmount: number, monthlyAdd: number, rateMultiplier: number) => {
       return years.map(year => {
         const n = year - currentYear;
         if (n < 0) return baseAmount;
-        // 简单复利模拟：本金 + (月存*12*年数) * 复利因子
-        const totalInvested = baseAmount + (monthlyAdd * 12 * n);
-        const compoundFactor = Math.pow(1 + (props.rate * rateMultiplier / 100), n);
-        return Math.floor(totalInvested * compoundFactor);
+        // 复利公式：Future Value of a Series (简单按年复利估算)
+        // 简化模型：当前本金复利 + 每年新增投入复利
+        const yearsPassed = n;
+        const compoundFactor = Math.pow(1 + (props.rate * rateMultiplier / 100), yearsPassed);
+
+        // 1. 初始本金增值
+        const initialGrown = baseAmount * compoundFactor;
+
+        // 2. 持续定投增值 (年金终值近似公式: PMT * ((1+r)^n - 1)/r )
+        // 将月投转化为年投
+        const yearlyContribution = monthlyAdd * 12;
+        const r = props.rate * rateMultiplier / 100;
+        let contributionGrown = 0;
+        if (r > 0 && yearsPassed > 0) {
+          contributionGrown = yearlyContribution * ((Math.pow(1 + r, yearsPassed) - 1) / r);
+        } else {
+          contributionGrown = yearlyContribution * yearsPassed;
+        }
+
+        return Math.floor(initialGrown + contributionGrown);
       });
     };
 
+    // [修改] 使用 Props 传入的真实数据
     // 1. 公积金 (稳健，收益率=用户设定)
-    const dataProvident = generateCurve(500000, 4000, 1.0);
+    const dataProvident = generateCurve(props.initialProvidentFund, props.monthlyProvidentFund, 1.0);
     // 2. 企业年金 (进取，收益率=用户设定 * 1.2)
-    const dataAnnuity = generateCurve(200000, 1200, 1.2);
-    // 3. 基本养老 (保守，收益率=用户设定 * 0.6)
-    const dataPension = generateCurve(100000, 800, 0.6);
+    const dataAnnuity = generateCurve(props.initialAnnuity, props.monthlyAnnuity, 1.2);
+    // 3. 基本养老 (保守，收益率=用户设定 * 0.6) - 假设养老金账户目前为 0 或估算值
+    // 这里暂时假设养老金个人账户累计额约为公积金的 1/3 用于展示，或者传 0
+    const estimatedPensionBalance = 100000;
+    const dataPension = generateCurve(estimatedPensionBalance, props.monthlyPension, 0.6);
+
     return {
       backgroundColor: 'transparent',
       tooltip: {
@@ -86,12 +109,18 @@
         textStyle: { color: isDark.value ? '#f8fafc' : '#0f172a' },
         formatter: (params: any) => {
           let html = `${params[0].name}年 预估资产<br/>`;
+          let total = 0;
           params.forEach((item: any) => {
-            html += `<div style="display:flex;justify-content:space-between;align-items:center;width:160px">
+            total += item.value;
+            html += `<div style="display:flex;justify-content:space-between;align-items:center;width:180px">
             <span style="color:${item.color}">● ${item.seriesName}</span>
             <span style="font-weight:bold">¥${(item.value / 10000).toFixed(1)}w</span>
           </div>`;
           });
+          html += `<div style="border-top:1px solid #ccc;margin-top:4px;padding-top:4px;display:flex;justify-content:space-between;font-weight:bold">
+            <span>总计</span>
+            <span>¥${(total / 10000).toFixed(1)}w</span>
+          </div>`
           return html;
         }
       },
@@ -119,7 +148,7 @@
           type: 'line',
           smooth: true,
           showSymbol: false,
-          stack: 'Total', // 堆叠显示
+          stack: 'Total',
           lineStyle: { width: 0 },
           areaStyle: { opacity: 0.8, color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{offset: 0, color: 'rgba(16, 185, 129, 0.8)'}, {offset: 1, color: 'rgba(16, 185, 129, 0.1)'}]) },
           itemStyle: { color: '#10b981' },
