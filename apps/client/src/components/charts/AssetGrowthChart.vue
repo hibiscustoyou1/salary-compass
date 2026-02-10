@@ -77,14 +77,6 @@
     const dataAnnuity = generateCurve(200000, 1200, 1.2);
     // 3. 基本养老 (保守，收益率=用户设定 * 0.6)
     const dataPension = generateCurve(100000, 800, 0.6);
-
-    const createGradient = (color: string) => {
-      return new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-        { offset: 0, color: color },
-        { offset: 1, color: color.replace('0.8', '0').replace('1)', '0)') } // 简单hack，实际应传rgba
-      ]);
-    };
-
     return {
       backgroundColor: 'transparent',
       tooltip: {

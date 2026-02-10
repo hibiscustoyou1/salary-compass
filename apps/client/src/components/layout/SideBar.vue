@@ -19,7 +19,7 @@
 
       <nav class="flex flex-col gap-2 flex-1 overflow-y-auto">
         <a v-for="tab in tabs" :key="tab.id" href="#"
-           @click.prevent="emit('update:modelValue', tab.id)"
+           @click.prevent="navigateTo(tab.id)"
            :class="[
              modelValue === tab.id
              ? 'bg-primary text-white shadow-md shadow-primary/20'
@@ -56,11 +56,15 @@
 </template>
 
 <script setup lang="ts">
+  import { useRouter } from 'vue-router';
+
   defineProps<{
     modelValue: string;
     privacyMode: boolean;
   }>();
-  const emit = defineEmits(['update:modelValue']);
+  // 此时不再需要 emit 'update:modelValue'，因为状态由 URL 驱动
+
+  const router = useRouter();
 
   const tabs = [
     { id: 'dashboard', label: '概览', icon: 'dashboard' },
@@ -68,4 +72,8 @@
     { id: 'tax', label: '税务分析', icon: 'account_balance' },
     { id: 'benefits', label: '福利预测', icon: 'trending_up' }
   ];
+
+  const navigateTo = (name: string) => {
+    router.push({ name });
+  };
 </script>
