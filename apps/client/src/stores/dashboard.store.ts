@@ -203,7 +203,6 @@ export const useDashboardStore = defineStore('dashboard', () => {
       if (child > maxChild) maxChild = child;
     });
     const deductionSavings = maxRent + maxChild;
-    console.log('deductionSavings', deductionSavings);
 
     const trend = thisYearRecords.map(record => ({
       month: record.period.split('-')[1] + '月',
