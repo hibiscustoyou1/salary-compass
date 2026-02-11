@@ -37,6 +37,12 @@ const mergeRecords = (target: any, source: any) => {
   target.corporateAnnuity += fmt(source.corporateAnnuity);
   target.unionFee += fmt(source.unionFee);
 
+  // [新增] 专项附加扣除 (累计值，取最大)
+  // 注意：因为是"累计"字段，同一年度内后面的月份通常包含了前面的累计额
+  // 这里为了严谨，我们取 Math.max，确保在聚合视图（如按年聚合）时能拿到该年度的最终累计额
+  target.rentDeduction = Math.max(target.rentDeduction || 0, fmt(source.rentDeduction));
+  target.childCareDeduction = Math.max(target.childCareDeduction || 0, fmt(source.childCareDeduction));
+
   if (source.payoutDate && (!target.payoutDate || source.payoutDate > target.payoutDate)) {
     target.payoutDate = source.payoutDate;
   }
@@ -78,7 +84,10 @@ export const getSalaryHistory = async (req: Request, res: Response) => {
           unemploymentIns: fmt(w.unemploymentIns),
           housingFund: fmt(w.housingFund),
           corporateAnnuity: fmt(w.corporateAnnuity),
-          unionFee: fmt(w.unionFee)
+          unionFee: fmt(w.unionFee),
+          // [新增] 专项附加扣除
+          rentDeduction: fmt(w.rentDeduction),
+          childCareDeduction: fmt(w.childCareDeduction)
         });
       } else {
         mergeRecords(groupedMap.get(key), w);
@@ -93,7 +102,6 @@ export const getSalaryHistory = async (req: Request, res: Response) => {
       net: fmtStr(w.netTotal),
       status: '已发放',
       details: {
-        // [修复核心]：在这里通过 as Record<string, string> 打破 TS 的强类型字面量推导
         income: {
           '岗位工资': fmtStr(w.baseSalary),
           '月度绩效': fmtStr(w.meritPay),
@@ -113,7 +121,10 @@ export const getSalaryHistory = async (req: Request, res: Response) => {
           '住房公积金': fmtStr(w.housingFund),
           '企业年金': fmtStr(w.corporateAnnuity),
           '工会费': fmtStr(w.unionFee),
-          '个人所得税': fmtStr(w.taxAmount)
+          '个人所得税': fmtStr(w.taxAmount),
+          // [新增] 专项附加扣除
+          '累计住房租金': fmtStr(w.rentDeduction),
+          '累计婴幼儿照护': fmtStr(w.childCareDeduction)
         } as Record<string, string>
       },
       raw: {
@@ -123,7 +134,6 @@ export const getSalaryHistory = async (req: Request, res: Response) => {
       }
     }));
 
-    // [清理完成]：既然上面已经是 Record 了，这里就不需要再做任何恶心的 as 强转了！
     history.forEach(item => {
       item.details.income = Object.fromEntries(
         Object.entries(item.details.income).filter(([_, v]) => v !== '0.00')

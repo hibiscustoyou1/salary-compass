@@ -2,7 +2,7 @@ import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import { useWageStore } from './wage.store';
 import { getDashboardStats, type DashboardStats } from '@/api/dashboard';
-import {getAssetEvents, createAssetEvent, type AssetEvent, deleteAssetEvent} from '@/api/assets';
+import { getAssetEvents, createAssetEvent, type AssetEvent, deleteAssetEvent } from '@/api/assets';
 
 export const useDashboardStore = defineStore('dashboard', () => {
   const wageStore = useWageStore();
@@ -187,6 +187,24 @@ export const useDashboardStore = defineStore('dashboard', () => {
     const totalGrossVal = thisYearRecords.reduce((sum, r) => sum + r.raw.gross, 0);
     const effectiveRate = totalGrossVal > 0 ? ((totalTaxVal / totalGrossVal) * 100).toFixed(1) : '0.0';
 
+    // [新增] 计算专项附加扣除 (取本年度最大累计值)
+    // 逻辑：遍历本年度所有记录，分别找到 '累计住房租金' 和 '累计婴幼儿照护' 的最大值，然后相加
+    // 之前逻辑是用 reduce 累加，但是这两个字段本身是 cumulative (累计) 的，但在后端返回时已被处理为单条记录的值 (controller 也是 max 逻辑?)
+    // 修正：后端 controller 对 groupedMap 用了 Math.max，说明返回给前端的每条 record (如果是一条) 里的这个字段已经是该时间段(month)的累计值
+    // 但前端拿到的是 list (salaryHistory)，每个月可能都有这个字段。
+    // 如果是"累计值"概念，那么"全年累计"应该就是"12月"(或最新月份)的那条记录里的值。
+    // 为了保险起见，我们在前端也取 Math.max，确保不错漏。
+    let maxRent = 0;
+    let maxChild = 0;
+    thisYearRecords.forEach(r => {
+      const rent = parse(r.details.deductions['累计住房租金']);
+      const child = parse(r.details.deductions['累计婴幼儿照护']);
+      if (rent > maxRent) maxRent = rent;
+      if (child > maxChild) maxChild = child;
+    });
+    const deductionSavings = maxRent + maxChild;
+    console.log('deductionSavings', deductionSavings);
+
     const trend = thisYearRecords.map(record => ({
       month: record.period.split('-')[1] + '月',
       accumulated: record.raw.gross,
@@ -199,7 +217,7 @@ export const useDashboardStore = defineStore('dashboard', () => {
         totalTax: `¥${totalTaxVal.toLocaleString()}`,
         totalTaxTrend: '+4.2%',
         effectiveRate: effectiveRate,
-        deductionSavings: '¥24,000'
+        deductionSavings: `¥${Math.floor(deductionSavings).toLocaleString()}`
       }
     };
   });
