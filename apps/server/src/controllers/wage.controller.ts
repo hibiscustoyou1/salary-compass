@@ -93,6 +93,7 @@ export const getSalaryHistory = async (req: Request, res: Response) => {
       net: fmtStr(w.netTotal),
       status: '已发放',
       details: {
+        // [修复核心]：在这里通过 as Record<string, string> 打破 TS 的强类型字面量推导
         income: {
           '岗位工资': fmtStr(w.baseSalary),
           '月度绩效': fmtStr(w.meritPay),
@@ -104,7 +105,7 @@ export const getSalaryHistory = async (req: Request, res: Response) => {
           '专项激励': fmtStr(w.specialIncentive),
           '其他工资': fmtStr(w.otherWage),
           '伙食补贴': fmtStr(w.mealAllowance)
-        },
+        } as Record<string, string>,
         deductions: {
           '基本养老': fmtStr(w.pension),
           '基本医疗': fmtStr(w.medicalInsurance),
@@ -113,7 +114,7 @@ export const getSalaryHistory = async (req: Request, res: Response) => {
           '企业年金': fmtStr(w.corporateAnnuity),
           '工会费': fmtStr(w.unionFee),
           '个人所得税': fmtStr(w.taxAmount)
-        }
+        } as Record<string, string>
       },
       raw: {
         net: w.netTotal,
@@ -122,14 +123,14 @@ export const getSalaryHistory = async (req: Request, res: Response) => {
       }
     }));
 
-    // [修复 TS2740] 使用类型断言规避 Object.fromEntries 类型不匹配警告
+    // [清理完成]：既然上面已经是 Record 了，这里就不需要再做任何恶心的 as 强转了！
     history.forEach(item => {
       item.details.income = Object.fromEntries(
         Object.entries(item.details.income).filter(([_, v]) => v !== '0.00')
-      ) as any;
+      );
       item.details.deductions = Object.fromEntries(
         Object.entries(item.details.deductions).filter(([_, v]) => v !== '0.00')
-      ) as any;
+      );
     });
 
     res.json({ success: true, data: history });
