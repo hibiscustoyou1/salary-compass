@@ -13,9 +13,19 @@ export interface BenefitDetail {
 }
 
 export interface BenefitsStats {
-  providentFundTotal: string;  // 公积金总额
-  annuityTotal: string;        // 年金总额 (新增)
-  monthlyContribution: string; // 月缴存
+  providentFundTotal: string;
+  annuityTotal: string;
+  monthlyContribution: string;
+  // [新增结构化数据]
+  raw?: {
+    providentFundTotal: number;
+    annuityTotal: number;
+  };
+  monthlyBreakdown?: {
+    provident: number;
+    annuity: number;
+    pension: number;
+  };
   details: BenefitDetail[];
 }
 

@@ -17,13 +17,11 @@
           <button @click="uiStore.togglePrivacy"
                   :class="uiStore.isPrivacyMode ? 'bg-primary/10 text-primary border-primary/20' : 'bg-white dark:bg-card-dark border-border-light dark:border-border-dark text-text-secondary-light'"
                   class="flex items-center gap-2 h-10 px-3 lg:px-4 rounded-lg border text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors shadow-sm">
-            <span class="material-symbols-outlined text-lg overflow-hidden w-5 h-5 select-none text-center">{{ uiStore.isPrivacyMode ? 'visibility' : 'visibility_off' }}</span>
-            <span class="hidden sm:inline">{{ uiStore.isPrivacyMode ? '显示数据' : '隐私模式' }}</span>
+            <span class="material-symbols-outlined text-lg overflow-hidden w-5 h-5 select-none leading-none inline-flex items-center justify-center">{{ uiStore.isPrivacyMode ? 'visibility' : 'visibility_off' }}</span>            <span class="hidden sm:inline">{{ uiStore.isPrivacyMode ? '显示数据' : '隐私模式' }}</span>
           </button>
 
           <button class="flex items-center gap-2 h-10 px-3 lg:px-4 rounded-lg bg-primary text-white text-sm font-bold hover:bg-primary-hover transition-colors shadow-md shadow-primary/20">
-            <span class="material-symbols-outlined text-lg overflow-hidden w-5 h-5 select-none text-center">download</span>
-            <span class="hidden sm:inline">导出报告</span>
+            <span class="material-symbols-outlined text-lg overflow-hidden w-5 h-5 select-none leading-none inline-flex items-center justify-center">download</span>            <span class="hidden sm:inline">导出报告</span>
           </button>
         </div>
       </header>

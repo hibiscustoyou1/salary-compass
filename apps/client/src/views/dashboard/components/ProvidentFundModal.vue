@@ -2,68 +2,86 @@
   <div v-if="isVisible" class="fixed inset-0 z-50 flex items-center justify-center p-4">
     <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" @click="close"></div>
 
-    <div class="relative w-full max-w-lg bg-white dark:bg-card-dark rounded-2xl shadow-2xl overflow-hidden transform transition-all border border-border-light dark:border-border-dark flex flex-col h-[600px] max-h-[90vh]">
+    <div
+      class="relative w-full max-w-lg bg-white dark:bg-card-dark rounded-2xl shadow-2xl overflow-hidden transform transition-all border border-border-light dark:border-border-dark flex flex-col h-[600px] max-h-[90vh]">
 
-      <div class="px-6 py-4 border-b border-border-light dark:border-border-dark flex justify-between items-center shrink-0 bg-slate-50/50 dark:bg-slate-800/50 z-10">
+      <div
+        class="px-6 py-4 border-b border-border-light dark:border-border-dark flex justify-between items-center shrink-0 bg-slate-50/50 dark:bg-slate-800/50 z-10">
         <div class="flex items-center gap-2">
-          <button v-if="viewState !== 'MAIN'" @click="viewState = 'MAIN'" class="mr-1 -ml-2 w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 text-text-secondary-light transition-colors">
+          <button v-if="viewState !== 'MAIN'" @click="viewState = 'MAIN'"
+                  class="mr-1 -ml-2 w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 text-text-secondary-light transition-colors">
             <span class="material-symbols-outlined text-xl">arrow_back</span>
           </button>
           <h3 class="text-lg font-bold text-text-main-light dark:text-white">
             {{ viewTitles[viewState] }}
           </h3>
         </div>
-        <button @click="close" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors text-text-secondary-light">
+        <button @click="close"
+                class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors text-text-secondary-light">
           <span class="material-symbols-outlined">close</span>
         </button>
       </div>
 
       <div v-if="viewState === 'MAIN'" class="flex-1 overflow-y-auto custom-scrollbar p-6">
 
-        <div class="bg-gradient-to-br from-primary to-blue-600 rounded-2xl p-6 text-white shadow-lg mb-8 relative overflow-hidden group">
-          <div class="absolute top-0 right-0 p-4 opacity-10 transform translate-x-4 -translate-y-4 group-hover:scale-110 transition-transform">
+        <div
+          class="bg-gradient-to-br from-primary to-blue-600 rounded-2xl p-6 text-white shadow-lg mb-8 relative overflow-hidden group">
+          <div
+            class="absolute top-0 right-0 p-4 opacity-10 transform translate-x-4 -translate-y-4 group-hover:scale-110 transition-transform">
             <span class="material-symbols-outlined text-9xl">account_balance</span>
           </div>
           <p class="text-blue-100 text-sm font-medium mb-1">当前公积金余额</p>
           <h2 class="text-4xl font-bold tracking-tight mb-4">{{ store.providentFundBalance }}</h2>
           <div class="flex gap-4 text-xs font-medium text-blue-100/80">
             <span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">trending_up</span> 稳健增长中</span>
-            <span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">update</span> {{ store.providentHistory[0]?.date || '无记录' }} 更新</span>
+            <span class="flex items-center gap-1"><span
+              class="material-symbols-outlined text-sm">update</span> {{ store.providentHistory[0]?.date || '无记录' }} 更新</span>
           </div>
         </div>
 
         <div class="grid grid-cols-3 gap-4 mb-8">
-          <button @click="viewState = 'WITHDRAW'" class="flex flex-col items-center gap-2 p-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 hover:border-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/10 transition-all group">
-            <span class="w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 flex items-center justify-center group-hover:scale-110 transition-transform">
+          <button @click="viewState = 'WITHDRAW'"
+                  class="flex flex-col items-center gap-2 p-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 hover:border-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/10 transition-all group">
+            <span
+              class="w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 flex items-center justify-center group-hover:scale-110 transition-transform">
               <span class="material-symbols-outlined">output</span>
             </span>
-            <span class="text-xs font-bold text-text-secondary-light dark:text-text-secondary-dark group-hover:text-amber-600 dark:group-hover:text-amber-400">提取/还贷</span>
+            <span
+              class="text-xs font-bold text-text-secondary-light dark:text-text-secondary-dark group-hover:text-amber-600 dark:group-hover:text-amber-400">提取/还贷</span>
           </button>
 
-          <button @click="viewState = 'INTEREST'" class="flex flex-col items-center gap-2 p-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 hover:border-emerald-custom hover:bg-emerald-50 dark:hover:bg-emerald-900/10 transition-all group">
-            <span class="w-10 h-10 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center group-hover:scale-110 transition-transform">
+          <button @click="viewState = 'INTEREST'"
+                  class="flex flex-col items-center gap-2 p-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 hover:border-emerald-custom hover:bg-emerald-50 dark:hover:bg-emerald-900/10 transition-all group">
+            <span
+              class="w-10 h-10 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center group-hover:scale-110 transition-transform">
               <span class="material-symbols-outlined">savings</span>
             </span>
-            <span class="text-xs font-bold text-text-secondary-light dark:text-text-secondary-dark group-hover:text-emerald-custom dark:group-hover:text-emerald-400">年度结息</span>
+            <span
+              class="text-xs font-bold text-text-secondary-light dark:text-text-secondary-dark group-hover:text-emerald-custom dark:group-hover:text-emerald-400">年度结息</span>
           </button>
 
-          <button @click="viewState = 'CALIBRATE'" class="flex flex-col items-center gap-2 p-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/10 transition-all group">
-            <span class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center group-hover:scale-110 transition-transform">
+          <button @click="viewState = 'CALIBRATE'"
+                  class="flex flex-col items-center gap-2 p-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/10 transition-all group">
+            <span
+              class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center group-hover:scale-110 transition-transform">
               <span class="material-symbols-outlined">tune</span>
             </span>
-            <span class="text-xs font-bold text-text-secondary-light dark:text-text-secondary-dark group-hover:text-blue-500 dark:group-hover:text-blue-400">余额校准</span>
+            <span
+              class="text-xs font-bold text-text-secondary-light dark:text-text-secondary-dark group-hover:text-blue-500 dark:group-hover:text-blue-400">余额校准</span>
           </button>
         </div>
 
         <div>
           <div class="flex justify-between items-center mb-3">
             <h4 class="text-xs font-bold text-text-secondary-light uppercase tracking-wider">近期变动</h4>
-            <button @click="openHistory" class="text-xs text-primary font-bold hover:underline flex items-center gap-0.5">
+            <button @click="openHistory"
+                    class="text-xs text-primary font-bold hover:underline flex items-center gap-0.5">
               查看全部 <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
             </button>
           </div>
           <div class="space-y-3">
-            <div v-for="item in store.providentHistory" :key="item.id" class="flex items-center justify-between p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50 border border-transparent hover:border-slate-100 dark:hover:border-slate-700 transition-colors">
+            <div v-for="item in store.providentHistory" :key="item.id"
+                 class="flex items-center justify-between p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50 border border-transparent hover:border-slate-100 dark:hover:border-slate-700 transition-colors">
               <div class="flex items-center gap-3">
                 <div class="w-8 h-8 rounded-full flex items-center justify-center shrink-0"
                      :class="{
@@ -76,7 +94,8 @@
                   </span>
                 </div>
                 <div class="overflow-hidden">
-                  <p class="text-sm font-bold text-text-main-light dark:text-white truncate">{{ item.note || item.category }}</p>
+                  <p class="text-sm font-bold text-text-main-light dark:text-white truncate">
+                    {{ item.note || item.category }}</p>
                   <p class="text-xs text-text-secondary-light truncate">{{ item.date }} · {{ item.category }}</p>
                 </div>
               </div>
@@ -94,11 +113,14 @@
           <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
         </div>
         <div v-else class="divide-y divide-border-light dark:divide-border-dark">
-          <div v-for="item in store.fullProvidentHistory" :key="item.id" class="p-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors flex justify-between items-center group relative">
+          <div v-for="item in store.fullProvidentHistory" :key="item.id"
+               class="p-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors flex justify-between items-center group relative">
 
             <div class="flex gap-4">
               <div class="flex flex-col items-center min-w-[36px]">
-                <span class="text-xs font-bold text-text-secondary-light">{{ item.date?.split('-')[1] }}/{{ item.date?.split('-')[2] }}</span>
+                <span class="text-xs font-bold text-text-secondary-light">{{
+                    item.date?.split('-')[1]
+                  }}/{{ item.date?.split('-')[2] }}</span>
                 <span class="text-[10px] text-text-secondary-light/60">{{ item.date?.split('-')[0] }}</span>
               </div>
 
@@ -119,7 +141,8 @@
                  </span>
             </div>
 
-            <div class="absolute right-4 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all duration-200 translate-x-2 group-hover:translate-x-0">
+            <div
+              class="absolute right-4 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all duration-200 translate-x-2 group-hover:translate-x-0">
               <button
                 @click.stop="handleDelete(item.id)"
                 class="w-9 h-9 flex items-center justify-center rounded-full bg-red-50 text-red-500 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/40 transition-colors"
@@ -131,7 +154,8 @@
 
           </div>
 
-          <div v-if="store.fullProvidentHistory.length === 0" class="py-10 text-center text-text-secondary-light text-sm">
+          <div v-if="store.fullProvidentHistory.length === 0"
+               class="py-10 text-center text-text-secondary-light text-sm">
             暂无历史记录
           </div>
         </div>
@@ -209,7 +233,8 @@
           <div class="h-4"></div>
         </div>
 
-        <div class="p-6 pt-4 border-t border-border-light dark:border-border-dark bg-white dark:bg-card-dark shrink-0 z-10">
+        <div
+          class="p-6 pt-4 border-t border-border-light dark:border-border-dark bg-white dark:bg-card-dark shrink-0 z-10">
           <button @click="handleSubmit"
                   class="w-full py-3.5 rounded-xl font-bold shadow-lg transition-all active:scale-[0.98] flex items-center justify-center gap-2 text-white"
                   :class="{
@@ -228,8 +253,10 @@
 </template>
 
 <script setup lang="ts">
-  import {computed, reactive, ref, watch} from 'vue';
-  import {useDashboardStore} from '@/stores/dashboard.store';
+  import { computed, reactive, ref, watch } from 'vue';
+  import { useDashboardStore } from '@/stores/dashboard.store';
+  import { Message } from '@/components/ui/Message';
+  import { ConfirmBox } from '@/components/ui/ConfirmBox';
 
   type ViewState = 'MAIN' | 'WITHDRAW' | 'INTEREST' | 'CALIBRATE' | 'HISTORY';
 
@@ -240,7 +267,7 @@
 
   // 动态计算快捷年份（近5年）
   const currentYear = new Date().getFullYear();
-  const quickYears = Array.from({ length: 5 }, (_, i) => currentYear - 4 + i);
+  const quickYears = Array.from({length: 5}, (_, i) => currentYear - 4 + i);
 
   const typeMap: Record<string, string> = {
     WITHDRAWAL: '提取',
@@ -356,12 +383,18 @@
 
   // 删除逻辑
   const handleDelete = async (id: string) => {
-    if (!window.confirm('确定要删除这条记录吗？删除后公积金余额将重新计算。')) {
-      return;
-    }
-    loadingHistory.value = true;
-    await store.removeProvidentRecord(id);
-    loadingHistory.value = false;
+    try {
+      await ConfirmBox({
+        title: '删除资金流水',
+        content: '您确定要删除这条资金变动记录吗？删除后相关资产数据将被重新计算，且此操作不可逆转。',
+        type: 'danger',
+        confirmText: '确认删除'
+      });
+      loadingHistory.value = true;
+      await store.removeProvidentRecord(id);
+      loadingHistory.value = false;
+      Message.success('流水删除成功');
+    } catch (e) {} finally {}
   };
 </script>
 
@@ -369,10 +402,12 @@
 .custom-scrollbar::-webkit-scrollbar {
   width: 4px;
 }
+
 .custom-scrollbar::-webkit-scrollbar-thumb {
   background-color: #cbd5e1;
   border-radius: 2px;
 }
+
 .dark .custom-scrollbar::-webkit-scrollbar-thumb {
   background-color: #475569;
 }
@@ -381,6 +416,7 @@
 .custom-date-input {
   color-scheme: light dark;
 }
+
 .custom-date-input::-webkit-calendar-picker-indicator {
   position: absolute;
   top: 0;

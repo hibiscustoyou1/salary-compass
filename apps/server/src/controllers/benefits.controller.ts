@@ -16,7 +16,8 @@ export const getBenefitsStats = async (req: Request, res: Response) => {
 
     allWages.forEach(w => {
       totalHousingFund += fmt(w.housingFund) * 2;
-      totalAnnuity += fmt(w.corporateAnnuity) * 2;
+      // [修复 Bug] 企业年金配比为 公司4:个人1，总计应当为个人缴纳的 5 倍
+      totalAnnuity += fmt(w.corporateAnnuity) * 5;
     });
 
     const lastRecord = await prisma.wage.findFirst({
@@ -38,12 +39,22 @@ export const getBenefitsStats = async (req: Request, res: Response) => {
       });
     }
 
-    const monthlyTotal = (latest.housing + latest.pension + latest.medical + latest.unemployment + latest.annuity) * 2;
+    const monthlyTotal = (latest.housing * 2) + (latest.annuity * 5) + latest.pension + latest.medical + latest.unemployment;
 
     const data = {
       providentFundTotal: `¥${totalHousingFund.toLocaleString()}`,
       annuityTotal: `¥${totalAnnuity.toLocaleString()}`,
       monthlyContribution: `¥${monthlyTotal.toLocaleString()}`,
+      // [新增] 下发结构化数值 DTO，替代前端正则解析
+      raw: {
+        providentFundTotal: totalHousingFund,
+        annuityTotal: totalAnnuity
+      },
+      monthlyBreakdown: {
+        provident: latest.housing * 2,
+        annuity: latest.annuity * 5,
+        pension: latest.pension
+      },
       details: [
         {
           title: '住房公积金',

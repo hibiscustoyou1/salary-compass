@@ -56,7 +56,7 @@
                 ]">
             <td class="px-6 py-4 font-medium" :class="selectedSalary === record ? 'text-primary dark:text-blue-400' : 'text-text-main-light dark:text-white'">{{ record.period }}</td>
             <td class="px-6 py-4 text-right text-text-secondary-light dark:text-text-secondary-dark">{{ masked(record.gross) }}</td>
-            <td class="px-6 py-4 text-right text-red-custom hidden md:table-cell">{{ privacyMode ? '****' : '-' + record.deduction }}</td>
+            <td class="px-6 py-4 text-right text-red-custom hidden md:table-cell">{{ uiStore.isPrivacyMode ? '****' : '-' + record.deduction }}</td>
             <td class="px-6 py-4 text-right font-bold text-emerald-custom text-base">{{ masked(record.net) }}</td>
           </tr>
           </tbody>
@@ -98,7 +98,7 @@
               :gross="selectedSalary.gross"
               :deductions="selectedSalary.details.deductions"
               :net="selectedSalary.net"
-              :privacy-mode="privacyMode"
+              :privacy-mode="uiStore.isPrivacyMode"
             />
           </div>
         </div>
@@ -134,7 +134,7 @@
               </div>
               <div v-else v-for="(amount, label) in selectedSalary.details.deductions" :key="label" class="flex justify-between items-center text-sm">
                 <span class="text-text-secondary-light dark:text-text-secondary-dark">{{ label }}</span>
-                <span class="font-semibold text-text-main-light dark:text-white">{{ privacyMode ? '****' : '-' + amount }}</span>
+                <span class="font-semibold text-text-main-light dark:text-white">{{ uiStore.isPrivacyMode ? '****' : '-' + amount }}</span>
               </div>
               <div class="border-t border-border-light dark:border-border-dark my-2 pt-2 flex justify-between items-center mt-auto">
                 <span class="font-medium text-text-main-light dark:text-white">扣款合计</span>
@@ -158,22 +158,20 @@
 <script setup lang="ts">
   import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
   import { useWageStore } from '@/stores/wage.store';
-  import type { SalaryRecord } from '@/api/wage'; // [修复] 修正类型导入路径，确保准确
+  import { useUIStore } from '@/stores/ui.store'; // [新增] 引入 UI 全局状态
+  import type { SalaryRecord } from '@/api/wage';
   import SalaryWaterfall from '@/components/charts/SalaryWaterfall.vue';
 
-  const props = defineProps<{
-    isActive: boolean;
-    privacyMode: boolean;
-  }>();
+  defineProps<{ isActive: boolean; }>();
 
   const store = useWageStore();
+  const uiStore = useUIStore(); // [新增] 实例化 UI Store
   const selectedYear = ref(new Date().getFullYear().toString());
   const isYearDropdownOpen = ref(false);
   const yearDropdownRef = ref<HTMLElement | null>(null);
   const selectedSalary = ref<SalaryRecord | null>(null);
 
   onMounted(() => {
-    // [修复] initData 已重构为 fetchHistory
     store.fetchHistory();
     document.addEventListener('click', handleClickOutside);
   });
@@ -213,7 +211,8 @@
     if (firstInYear) selectedSalary.value = firstInYear;
   };
 
-  const masked = (val: string) => props.privacyMode ? '****' : val;
+  // [核心修复] 脱敏函数彻底绑定到全局 uiStore 大脑，不再受限于 prop
+  const masked = (val: string) => uiStore.isPrivacyMode ? '****' : val;
 
   const handleClickOutside = (e: MouseEvent) => {
     if (yearDropdownRef.value && !yearDropdownRef.value.contains(e.target as Node)) {

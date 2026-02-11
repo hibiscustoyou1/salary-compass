@@ -7,9 +7,11 @@ export enum ApiCode {
 }
 
 export interface ApiResponse<T = any> {
-  code: ApiCode;
-  data?: T;
+  code?: ApiCode;
+  success?: boolean; // 兼容现有代码
+  data: T;
   msg?: string;
+  error?: string;
 }
 
 // 定义 Hello 接口的具体返回数据

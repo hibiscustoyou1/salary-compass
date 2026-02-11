@@ -7,6 +7,8 @@ export const useBenefitsStore = defineStore('benefits', () => {
     providentFundTotal: '¥0',
     annuityTotal: '¥0',
     monthlyContribution: '¥0',
+    raw: { providentFundTotal: 0, annuityTotal: 0 },
+    monthlyBreakdown: { provident: 0, annuity: 0, pension: 0 },
     details: []
   });
 
