@@ -1,5 +1,8 @@
 <template>
   <div class="max-w-[1400px] mx-auto flex flex-col gap-6" v-if="isActive">
+    <!-- [新增] 独立年份选择器 -->
+    <DashboardHeader />
+
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
       <div class="bg-card-light dark:bg-card-dark rounded-xl p-6 border border-border-light dark:border-border-dark shadow-soft flex flex-col justify-between h-36">
         <div class="flex items-start justify-between">
@@ -78,7 +81,7 @@
           <span class="material-symbols-outlined text-primary">tips_and_updates</span>
           <h3 class="font-bold text-text-main-light dark:text-white">税务优化建议</h3>
         </div>
-        <div class="flex flex-col gap-3 relative z-10">
+        <div class="flex flex-col gap-3 relative z-10" v-if="!privacyMode">
           <div class="flex gap-3 items-start p-3 bg-white dark:bg-slate-800/50 rounded-lg border border-blue-100 dark:border-slate-700/50 shadow-sm transition-all hover:shadow-md">
             <span class="material-symbols-outlined text-amber-500 text-[20px] shrink-0">warning</span>
             <p class="text-sm text-text-secondary-light dark:text-text-secondary-dark">
@@ -92,6 +95,14 @@
             </p>
           </div>
         </div>
+        
+        <!-- [新增] 隐私模式占位 -->
+        <div class="flex flex-col gap-3 relative z-10" v-else>
+          <div class="flex gap-3 items-center justify-center h-24 bg-white/50 dark:bg-slate-800/30 rounded-lg border border-dashed border-slate-300 dark:border-slate-600">
+             <span class="material-symbols-outlined text-slate-400">visibility_off</span>
+             <span class="text-slate-500 text-sm">隐私模式下建议已隐藏</span>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -102,6 +113,7 @@
   // [修改] 引用新的 store
   import { useDashboardStore } from '@/stores/dashboard.store';
   import TaxBracketChart from '@/components/charts/TaxBracketChart.vue';
+  import DashboardHeader from '@/views/dashboard/components/DashboardHeader.vue';
 
   const props = defineProps<{
     isActive: boolean;
