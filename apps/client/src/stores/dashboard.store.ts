@@ -273,6 +273,164 @@ export const useDashboardStore = defineStore('dashboard', () => {
       };
     });
 
+    // [新增] 生成税务优化建议 (专家级 - 奖金择优算法)
+    const suggestions: Array<{ type: 'warning' | 'success'; icon: string; segments: Array<{ text: string; bold?: boolean; color?: string }> }> = [];
+
+    // 定义个税计算辅助函数 (根据 2019 新个税法)
+    const TAX_TABLE = [
+      { max: 36000, rate: 0.03, deduct: 0 },
+      { max: 144000, rate: 0.10, deduct: 2520 },
+      { max: 300000, rate: 0.20, deduct: 16920 },
+      { max: 420000, rate: 0.25, deduct: 31920 },
+      { max: 660000, rate: 0.30, deduct: 52920 },
+      { max: 960000, rate: 0.35, deduct: 85920 },
+      { max: Infinity, rate: 0.45, deduct: 181920 }
+    ];
+
+    const getTaxBracket = (income: number) => {
+      return TAX_TABLE.find(b => income <= b.max) || TAX_TABLE[TAX_TABLE.length - 1]!;
+    };
+
+    const calcTax = (income: number) => {
+      const bracket = getTaxBracket(income);
+      return income * bracket.rate - bracket.deduct;
+    };
+
+    // 全年一次性奖金计税 (除以12找税率)
+    const calcBonusTax = (bonus: number) => {
+      if (bonus <= 0) return 0;
+      const monthAmount = bonus / 12;
+      const bracket = getTaxBracket(monthAmount);
+      return bonus * bracket.rate - bracket.deduct;
+    };
+
+    // 1. 识别潜在奖金月份 (人才奖 talentBonus 或 年终奖 annualBonus > 0)
+    const bonusCandidates = thisYearRecords
+      .map(r => {
+        const talent = parse(r.details.income.talentBonus);
+        const annual = parse(r.details.income.annualBonus);
+        return {
+          month: r.period.split('-')[1] + '月',
+          amount: talent + annual,
+          rawRecord: r
+        };
+      })
+      .filter(b => b.amount > 5000); // 忽略小额奖金
+
+    // 2. 只有当存在至少一笔奖金时，才进行筹划
+    if (bonusCandidates.length > 0) {
+      // 基础信息：全年总累计信息 (不含任何奖金的各种扣除后基数)
+      // 注意：这里需要重新从原始数据聚合，扣除掉 bonusCandidates 里的金额，因为我们要模拟
+      // 简化逻辑：我们假设 thisYearRecords 里的 gross 包含了这些奖金。
+      // 全年综合所得应纳税所得额 (默认所有奖金都并入) = lastMonth.accumulated (大致)
+      // 准确做法：
+      const totalGross = thisYearRecords.reduce((sum, r) => sum + r.raw.gross + parse(r.details.income.mealAllowance), 0);
+      const totalDeductions = thisYearRecords.reduce((sum, r) => {
+        const d = r.details.deductions;
+        return sum + parse(d.pension) + parse(d.medicalInsurance) + parse(d.unemploymentIns) + parse(d.housingFund)
+          + parse(d.corporateAnnuity) + parse(d.rentDeduction) + parse(d.childCareDeduction); // 简化取最后一条的累计? 不，应该取年度有效扣除
+        // 注意：store 上面的 trend 计算里 Deductions 是累加的，但 SpecialAdd 是取 max。
+        // 这里为简化模拟，直接取 trend 最后一个月的 accumulated 作为 "在此之前的默认计税基数" 
+        // 但 accumulated 已经是 (Gross - Deductions - 60000)，即"综合所得应纳税所得额"
+      }, 0);
+
+      // 我们用一种更直接的方法：
+      // BaseTaxable = 最后一个月的 accumulated (假设它包含了所有奖金并入的情况)
+      const lastMonthTrend = trend[trend.length - 1]; // 12月的
+      // 如果还没到12月，取当前最新的
+      const currentTrend = trend.find(t => t.month === bonusCandidates[bonusCandidates.length - 1]?.month) || trend[trend.length - 1];
+
+      // 实际上，trend[11].accumulated 就是 "全年综合所得应纳税所得额" (假设所有都并入)
+      // 我们以此为基准：TotalTaxableWithAllMerged = trend[11].accumulated
+      const baseTaxable = trend[11]?.accumulated || 0;
+
+      // 模拟场景列表
+      const scenarios = bonusCandidates.map(candidate => {
+        // 场景：将 candidate 这一笔奖金单独计税
+        const bonusPart = candidate.amount;
+        const taxForBonus = calcBonusTax(bonusPart);
+
+        // 剩余综合所得 = 原综合所得 - 该笔奖金
+        const remainingTaxable = Math.max(0, baseTaxable - bonusPart);
+        const taxForComprehensive = calcTax(remainingTaxable);
+
+        return {
+          month: candidate.month,
+          selectedBonus: bonusPart,
+          totalTax: taxForBonus + taxForComprehensive,
+          label: `${candidate.month}单独计税`
+        };
+      });
+
+      // 对照组：全部并入综合所得 (即当前状态)
+      const defaultTax = calcTax(baseTaxable);
+      scenarios.push({
+        month: '全部并入',
+        selectedBonus: 0,
+        totalTax: defaultTax,
+        label: '全部并入综合所得'
+      });
+
+      // 找最优解
+      scenarios.sort((a, b) => a.totalTax - b.totalTax);
+      const best = scenarios[0];
+      const worst = scenarios[scenarios.length - 1];
+      const saved = (worst && best) ? (worst.totalTax - best.totalTax) : 0;
+
+      // 构建明细字符串 (例如 "5月(¥80,000)、12月(¥30,000)")
+      const detailStr = bonusCandidates.map(c => `${c.month}(¥${c.amount.toLocaleString()})`).join('、');
+
+      if (saved > 100 && best && best.month !== '全部并入') {
+        suggestions.push({
+          type: 'success',
+          icon: 'stars',
+          segments: [
+            { text: `检测到 ${bonusCandidates.length} 笔大额奖金：` },
+            { text: detailStr, bold: true },
+            { text: '。建议选择 ' },
+            { text: best.month, bold: true, color: 'text-emerald-700 dark:text-emerald-400' },
+            { text: ` 申报全年一次性奖金。预计比最差方案节省税金 ` },
+            { text: `¥${Math.floor(saved).toLocaleString()}`, bold: true, color: 'text-red-500' },
+            { text: '。' }
+          ]
+        });
+      } else if (best && best.month === '全部并入') { // bonusCandidates.length > 0 is implied
+        suggestions.push({
+          type: 'success',
+          icon: 'info',
+          segments: [
+            { text: '经测算，将所有奖金 ' },
+            { text: detailStr, bold: true },
+            { text: ' 并入综合所得', bold: true },
+            { text: ' 计税最划算（您的日常税率可能低于奖金单独税率）。' }
+          ]
+        });
+      }
+    }
+
+    if (deductionSavings === 0 && totalGrossVal > 60000 && parseFloat(effectiveRate) > 0) {
+      suggestions.push({
+        type: 'warning',
+        icon: 'notifications_active',
+        segments: [
+          { text: '未检测到 ' },
+          { text: '专项附加扣除', bold: true },
+          { text: '，申报租金/房贷/子女教育等可直接抵扣个税。' }
+        ]
+      });
+    }
+
+    // 4. 默认提示 (如果没有其他建议)
+    if (suggestions.length === 0) {
+      suggestions.push({
+        type: 'success',
+        icon: 'verified',
+        segments: [
+          { text: '当前税负结构良好，暂无优化建议。' }
+        ]
+      });
+    }
+
     return {
       trend: trend,
       kpi: {
@@ -280,7 +438,8 @@ export const useDashboardStore = defineStore('dashboard', () => {
         totalTaxTrend: '+4.2%',
         effectiveRate: effectiveRate,
         deductionSavings: `¥${Math.floor(deductionSavings).toLocaleString()}`
-      }
+      },
+      suggestions: suggestions
     };
   });
 

@@ -82,16 +82,27 @@
           <h3 class="font-bold text-text-main-light dark:text-white">税务优化建议</h3>
         </div>
         <div class="flex flex-col gap-3 relative z-10" v-if="!privacyMode">
-          <div class="flex gap-3 items-start p-3 bg-white dark:bg-slate-800/50 rounded-lg border border-blue-100 dark:border-slate-700/50 shadow-sm transition-all hover:shadow-md">
-            <span class="material-symbols-outlined text-amber-500 text-[20px] shrink-0">warning</span>
+          <div 
+            v-for="(suggestion, idx) in dashboardStore.taxAnalysis.suggestions" 
+            :key="idx"
+            class="flex gap-3 items-start p-3 rounded-lg border shadow-sm transition-all hover:shadow-md"
+            :class="suggestion.type === 'warning' 
+              ? 'bg-white dark:bg-slate-800/50 border-blue-100 dark:border-slate-700/50' 
+              : 'bg-emerald-custom/5 dark:bg-emerald-900/20 border-emerald-custom/20'"
+          >
+            <span 
+              class="material-symbols-outlined text-[20px] shrink-0"
+              :class="suggestion.type === 'warning' ? 'text-amber-500' : 'text-emerald-custom'"
+            >{{ suggestion.icon }}</span>
             <p class="text-sm text-text-secondary-light dark:text-text-secondary-dark">
-              预计将在 <span class="font-bold text-text-main-light dark:text-white">10月</span> 触达20%税率档位。
-            </p>
-          </div>
-          <div class="flex gap-3 items-start p-3 bg-emerald-custom/5 dark:bg-emerald-900/20 rounded-lg border border-emerald-custom/20 shadow-sm transition-all hover:shadow-md">
-            <span class="material-symbols-outlined text-emerald-custom text-[20px] shrink-0">check_circle</span>
-            <p class="text-sm text-text-secondary-light dark:text-text-secondary-dark">
-              建议将 <span class="font-bold text-emerald-700 dark:text-emerald-400">年终奖</span> 调整至次年1月发放。
+              <template v-for="(seg, sIdx) in suggestion.segments" :key="sIdx">
+                <span 
+                  :class="[
+                    seg.bold ? 'font-bold text-text-main-light dark:text-white' : '',
+                    seg.color ? seg.color : ''
+                  ]"
+                >{{ seg.text }}</span>
+              </template>
             </p>
           </div>
         </div>

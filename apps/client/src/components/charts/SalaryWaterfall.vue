@@ -7,6 +7,7 @@
 <script setup lang="ts">
   import { computed, ref, onMounted, onUnmounted } from 'vue';
   import BaseEChart from '@/components/charts/BaseEChart.vue';
+  import { DEDUCTION_LABELS } from '@repo/shared';
 
   const props = defineProps<{
     gross: string;
@@ -20,10 +21,7 @@
   let observer: MutationObserver | null = null;
 
   onMounted(() => {
-    // 初始化
     isDark.value = document.documentElement.classList.contains('dark');
-
-    // 监听 html class 变化
     observer = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
         if (mutation.attributeName === 'class') {
@@ -31,11 +29,7 @@
         }
       });
     });
-
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ['class']
-    });
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
   });
 
   onUnmounted(() => {
@@ -46,24 +40,6 @@
   const parse = (v: string) => parseFloat(String(v).replace(/[^0-9.-]+/g, "")) || 0;
 
   const chartOptions = computed(() => {
-    // 1. Privacy Mode Logic
-    if (props.privacyMode) {
-      return {
-        backgroundColor: 'transparent', // Fix background
-        graphic: {
-          type: 'text',
-          left: 'center',
-          top: 'center',
-          style: {
-            text: '****\n数据已隐藏',
-            font: 'bold 24px sans-serif',
-            fill: isDark.value ? '#94a3b8' : '#cbd5e1', // Adapt text color
-            textAlign: 'center'
-          }
-        }
-      };
-    }
-
     const grossVal = parse(props.gross);
     const netVal = parse(props.net);
 
@@ -74,9 +50,15 @@
     let currentHeight = grossVal;
     const placeholderData = [0];
 
+    // [逻辑修正] 过滤掉仅用于计税的专项附加扣除
+    const IGNORED_DEDUCTIONS = ['rentDeduction', 'childCareDeduction'];
+
     Object.entries(props.deductions).forEach(([key, valStr]) => {
+      if (IGNORED_DEDUCTIONS.includes(key)) return;
+
       const val = parse(valStr);
-      categories.push(key);
+      // [修复] 中文转义
+      categories.push(DEDUCTION_LABELS[key] || key);
       values.push(val);
       types.push('deduction');
 
@@ -90,19 +72,23 @@
     placeholderData.push(0);
 
     return {
-      backgroundColor: 'transparent', // Fix: Force transparent background
+      backgroundColor: 'transparent',
       tooltip: {
         trigger: 'axis',
         axisPointer: { type: 'shadow' },
         formatter: (params: any) => {
-          const item = params[1];
+          const item = params[1]; // Index 1 is the actual bar, Index 0 is placeholder
           if (!item) return '';
+
           const val = item.value;
           const name = item.name;
           const prefix = types[item.dataIndex] === 'deduction' ? '-' : '';
-          return `${name}<br/><b>${prefix}¥${val.toLocaleString()}</b>`;
+          
+          // [修复] Privacy Mode: Tooltip 脱敏
+          const displayVal = props.privacyMode ? '****' : `¥${val.toLocaleString()}`;
+          
+          return `${name}<br/><b>${prefix}${displayVal}</b>`;
         },
-        // Ensure tooltip looks good in both modes (optional, echarts default is usually okay)
         backgroundColor: isDark.value ? 'rgba(30, 41, 59, 0.9)' : 'rgba(255, 255, 255, 0.9)',
         borderColor: isDark.value ? '#334155' : '#e2e8f0',
         textStyle: {
@@ -113,16 +99,23 @@
         left: '3%', right: '4%', bottom: '3%', top: '10%', containLabel: true
       },
       xAxis: {
+        show: true, // 显式确保显示
         type: 'category',
         data: categories,
         splitLine: { show: false },
-        axisLabel: { interval: 0, fontSize: 11, color: isDark.value ? '#94a3b8' : '#64748b' },
+        axisLabel: { 
+          interval: 0, 
+          fontSize: 10,
+          rotate: 30, // 保持旋转
+          color: isDark.value ? '#94a3b8' : '#64748b',
+          hideOverlap: false
+        },
         axisTick: { show: false },
         axisLine: { show: false }
       },
       yAxis: {
-        type: 'value',
-        show: false
+        show: false, // Y 轴隐藏
+        type: 'value'
       },
       series: [
         {
@@ -145,11 +138,13 @@
           label: {
             show: true,
             position: 'top',
-            color: isDark.value ? '#e2e8f0' : '#334155', // Adapt label color
+            color: isDark.value ? '#e2e8f0' : '#334155',
             formatter: (p: any) => {
+              // [修复] Privacy Mode: 标签脱敏
+              if (props.privacyMode) return '****';
+
               const t = types[p.dataIndex];
               const prefix = t === 'deduction' ? '-' : '';
-              // Show all labels for clarity, or filter if crowded
               return prefix + (p.value/1000).toFixed(1) + 'k';
             }
           },
@@ -163,6 +158,18 @@
             borderRadius: [4, 4, 4, 4]
           },
           data: values
+        }
+      ],
+      graphic: [
+        {
+          type: 'text',
+          right: 10,
+          top: 10,
+          style: {
+            text: '',
+            font: '12px sans-serif',
+            fill: isDark.value ? '#64748b' : '#94a3b8'
+          }
         }
       ]
     };

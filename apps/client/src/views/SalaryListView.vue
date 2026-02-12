@@ -72,10 +72,10 @@
     <div class="flex-1 w-full xl:flex-[1.2] bg-card-light dark:bg-card-dark rounded-xl shadow-soft border border-border-light dark:border-border-dark flex flex-col relative overflow-hidden transition-colors duration-200">
       <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-primary to-blue-400"></div>
 
-      <div v-if="selectedSalary" class="p-6 md:p-8 flex flex-col h-full overflow-y-auto custom-scrollbar">
+      <div v-if="currentSalaryDisplay" class="p-6 md:p-8 flex flex-col h-full overflow-y-auto custom-scrollbar">
         <div class="flex justify-between items-start mb-6 shrink-0">
           <div>
-            <p class="text-sm font-semibold text-text-secondary-light dark:text-text-secondary-dark uppercase tracking-wider">{{ selectedSalary.period }}</p>
+            <p class="text-sm font-semibold text-text-secondary-light dark:text-text-secondary-dark uppercase tracking-wider">{{ currentSalaryDisplay.period }}</p>
             <h3 class="text-xl font-bold text-text-main-light dark:text-white mt-1">电子工资单</h3>
           </div>
           <div class="w-10 h-10 rounded-full bg-blue-50 dark:bg-slate-700 flex items-center justify-center text-primary dark:text-blue-400 shadow-sm">
@@ -85,7 +85,7 @@
 
         <div class="mb-8 text-center bg-emerald-custom/5 dark:bg-emerald-custom/10 py-6 rounded-2xl border border-emerald-custom/20 shrink-0">
           <p class="text-sm text-text-secondary-light dark:text-text-secondary-dark mb-1">实发合计 (Net Pay)</p>
-          <div class="text-4xl font-extrabold text-emerald-custom tracking-tight">{{ masked(selectedSalary.net) }}</div>
+          <div class="text-4xl font-extrabold text-emerald-custom tracking-tight">{{ masked(currentSalaryDisplay.net) }}</div>
         </div>
 
         <div class="mb-8 shrink-0">
@@ -95,9 +95,9 @@
           </h3>
           <div class="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-4 border border-border-light dark:border-border-dark">
             <SalaryWaterfall
-              :gross="selectedSalary.gross"
-              :deductions="selectedSalary.details.deductions"
-              :net="selectedSalary.net"
+              :gross="currentSalaryDisplay.gross"
+              :deductions="currentSalaryDisplay.details.deductions"
+              :net="currentSalaryDisplay.net"
               :privacy-mode="uiStore.isPrivacyMode"
             />
           </div>
@@ -110,16 +110,16 @@
               <h4 class="font-bold text-text-main-light dark:text-white">收入项目</h4>
             </div>
             <div class="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-4 space-y-3 flex-1 flex flex-col border border-border-light dark:border-border-dark">
-              <div v-if="Object.keys(selectedSalary.details.income).length === 0" class="flex-1 flex items-center justify-center text-xs text-text-secondary-light p-4">
+              <div v-if="Object.keys(currentSalaryDisplay.details.income).length === 0" class="flex-1 flex items-center justify-center text-xs text-text-secondary-light p-4">
                 暂无明细
               </div>
-              <div v-else v-for="(amount, label) in selectedSalary.details.income" :key="label" class="flex justify-between items-center text-sm">
-                <span class="text-text-secondary-light dark:text-text-secondary-dark">{{ label }}</span>
+              <div v-else v-for="(amount, label) in currentSalaryDisplay.details.income" :key="label" class="flex justify-between items-center text-sm">
+                <span class="text-text-secondary-light dark:text-text-secondary-dark">{{ INCOME_LABELS[label] || label }}</span>
                 <span class="font-semibold text-text-main-light dark:text-white">{{ masked(amount) }}</span>
               </div>
               <div class="border-t border-border-light dark:border-border-dark my-2 pt-2 flex justify-between items-center mt-auto">
                 <span class="font-medium text-text-main-light dark:text-white">应发合计</span>
-                <span class="font-bold text-primary dark:text-blue-400">{{ masked(selectedSalary.gross) }}</span>
+                <span class="font-bold text-primary dark:text-blue-400">{{ masked(currentSalaryDisplay.gross) }}</span>
               </div>
             </div>
           </div>
@@ -129,16 +129,16 @@
               <h4 class="font-bold text-text-main-light dark:text-white">扣除项目</h4>
             </div>
             <div class="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-4 space-y-3 flex-1 flex flex-col border border-border-light dark:border-border-dark">
-              <div v-if="Object.keys(selectedSalary.details.deductions).length === 0" class="flex-1 flex items-center justify-center text-xs text-text-secondary-light p-4">
+              <div v-if="Object.keys(currentSalaryDisplay.details.deductions).length === 0" class="flex-1 flex items-center justify-center text-xs text-text-secondary-light p-4">
                 暂无明细
               </div>
-              <div v-else v-for="(amount, label) in selectedSalary.details.deductions" :key="label" class="flex justify-between items-center text-sm">
-                <span class="text-text-secondary-light dark:text-text-secondary-dark">{{ label }}</span>
+              <div v-else v-for="(amount, label) in currentSalaryDisplay.details.deductions" :key="label" class="flex justify-between items-center text-sm">
+                <span class="text-text-secondary-light dark:text-text-secondary-dark">{{ DEDUCTION_LABELS[label] || label }}</span>
                 <span class="font-semibold text-text-main-light dark:text-white">{{ uiStore.isPrivacyMode ? '****' : '-' + amount }}</span>
               </div>
               <div class="border-t border-border-light dark:border-border-dark my-2 pt-2 flex justify-between items-center mt-auto">
                 <span class="font-medium text-text-main-light dark:text-white">扣款合计</span>
-                <span class="font-bold text-red-custom">{{ masked(selectedSalary.deduction) }}</span>
+                <span class="font-bold text-red-custom">{{ masked(currentSalaryDisplay.deduction) }}</span>
               </div>
             </div>
           </div>
@@ -158,9 +158,10 @@
 <script setup lang="ts">
   import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
   import { useWageStore } from '@/stores/wage.store';
-  import { useUIStore } from '@/stores/ui.store'; // [新增] 引入 UI 全局状态
+  import { useUIStore } from '@/stores/ui.store';
   import type { SalaryRecord } from '@/api/wage';
   import SalaryWaterfall from '@/components/charts/SalaryWaterfall.vue';
+  import { INCOME_LABELS, DEDUCTION_LABELS } from '@repo/shared';
 
   defineProps<{ isActive: boolean; }>();
 
@@ -202,6 +203,44 @@
 
   const filteredSalaryHistory = computed(() => {
     return store.salaryHistory.filter(item => item.year === Number(selectedYear.value));
+  });
+
+  // [核心修复] 前端视图层数据修正
+  const currentSalaryDisplay = computed(() => {
+    if (!selectedSalary.value) return null;
+    const s = selectedSalary.value;
+    const income = s.details.income || {};
+    const deductions = s.details.deductions || {};
+
+    const parse = (v: string | number) => parseFloat(String(v).replace(/[^0-9.-]+/g, "")) || 0;
+
+    // 1. 修正应发合计: 数据库 gross + 伙食补贴
+    const meal = parse(income.mealAllowance || '0');
+    const dbGross = parse(s.gross);
+    // 注意：如果数据库 gross 已经包含了 meal，这里会重复。
+    // 但根据用户反馈 "伙食补贴只是没有并入数据库中的应发合计"，所以需要加。
+    const displayGross = dbGross + meal;
+
+    // 2. 修正扣除项目: 剔除专项附加扣除
+    const ignoredDeductions = ['rentDeduction', 'childCareDeduction'];
+    const filteredDeductions: Record<string, string> = {};
+    let displayDeduction = 0;
+
+    Object.entries(deductions).forEach(([k, v]) => {
+      if (ignoredDeductions.includes(k)) return;
+      filteredDeductions[k] = v;
+      displayDeduction += parse(v);
+    });
+
+    return {
+      ...s,
+      gross: displayGross.toFixed(2),
+      deduction: displayDeduction.toFixed(2),
+      details: {
+        ...s.details,
+        deductions: filteredDeductions
+      }
+    };
   });
 
   const selectYear = (year: number) => {
