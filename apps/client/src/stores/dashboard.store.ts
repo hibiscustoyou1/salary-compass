@@ -204,11 +204,40 @@ export const useDashboardStore = defineStore('dashboard', () => {
     });
     const deductionSavings = maxRent + maxChild;
 
-    const trend = thisYearRecords.map(record => ({
-      month: record.period.split('-')[1] + '月',
-      accumulated: record.raw.gross,
-      currentRate: 0
-    }));
+    // [修正] 生成完整 12 个月的趋势数据 (Cumulative)
+    const trend = Array.from({ length: 12 }, (_, i) => {
+      const monthIndex = i + 1; // 1-12
+      const monthKey = monthIndex.toString().padStart(2, '0'); // "01", "02"...
+
+      // 查找该月的记录
+      const record = thisYearRecords.find(r => r.period.endsWith(`-${monthKey}`));
+
+      // 计算截止到该月的累计收入 (Cumulative Gross)
+      // 注意：这里需要计算"年初至今"的累计，不仅仅是当月
+      // 如果当月没有记录，但之前有，累计值应该保持？或者如果未来月份，累计值为0？
+      // 通常个税是按"累计预扣法"，所以我们应该显示"截至该月的累计收入"
+      let accumulated = 0;
+      if (record) {
+        // 如果该月有记录，计算从年初到该月的总和
+        accumulated = thisYearRecords
+          .filter(r => r.period <= record.period)
+          .reduce((sum, r) => sum + r.raw.gross, 0);
+      } else {
+        // 如果该月无记录（未来或缺失），为了图表连续性：
+        // 1. 如果是未来月份（大于当前数据最大月份），设为 0 或 null
+        // 2. 如果是中间缺失，保持上月？
+        // 这里简单处理：无记录则为 0。ECharts 会显示为低点。
+        // 或者，为了 X 轴完整，我们保留 0。
+        accumulated = 0;
+      }
+
+      return {
+        month: `${monthIndex}月`,
+        accumulated: accumulated,
+        // 这里 currentRate 前端暂时很难精确计算（需要复杂个税公式），先置 0 或后续由后端返回
+        currentRate: 0
+      };
+    });
 
     return {
       trend: trend,

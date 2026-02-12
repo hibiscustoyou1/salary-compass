@@ -7,7 +7,7 @@
       <div class="bg-card-light dark:bg-card-dark rounded-xl p-6 border border-border-light dark:border-border-dark shadow-soft flex flex-col justify-between h-36">
         <div class="flex items-start justify-between">
           <p class="text-text-secondary-light dark:text-text-secondary-dark text-sm font-medium">年度累计个税</p>
-          <div class="bg-red-50 dark:bg-red-900/20 p-1.5 rounded-md">
+          <div class="bg-red-50 dark:bg-red-900/20 w-8 h-8 flex items-center justify-center rounded-md">
             <span class="material-symbols-outlined text-red-custom text-[20px]">money_off</span>
           </div>
         </div>
@@ -23,7 +23,7 @@
       <div class="bg-card-light dark:bg-card-dark rounded-xl p-6 border border-border-light dark:border-border-dark shadow-soft flex flex-col justify-between h-36 relative overflow-hidden">
         <div class="flex items-start justify-between z-10 relative">
           <p class="text-text-secondary-light dark:text-text-secondary-dark text-sm font-medium">综合税负率</p>
-          <div class="bg-blue-50 dark:bg-blue-900/20 p-1.5 rounded-md">
+          <div class="bg-blue-50 dark:bg-blue-900/20 w-8 h-8 flex items-center justify-center rounded-md">
             <span class="material-symbols-outlined text-primary text-[20px]">percent</span>
           </div>
         </div>
@@ -51,7 +51,7 @@
       <div class="bg-card-light dark:bg-card-dark rounded-xl p-6 border border-border-light dark:border-border-dark shadow-soft flex flex-col justify-between h-36">
         <div class="flex items-start justify-between">
           <p class="text-text-secondary-light dark:text-text-secondary-dark text-sm font-medium">专项附加扣除抵税</p>
-          <div class="bg-emerald-custom/10 p-1.5 rounded-md">
+          <div class="bg-emerald-custom/10 w-8 h-8 flex items-center justify-center rounded-md">
             <span class="material-symbols-outlined text-emerald-custom text-[20px]">savings</span>
           </div>
         </div>
@@ -70,7 +70,7 @@
           <h3 class="font-bold text-text-main-light dark:text-white">个税跳档趋势</h3>
           <span class="text-xs text-text-secondary-light dark:text-text-secondary-dark">临界点预警</span>
         </div>
-        <TaxBracketChart :data="dashboardStore.taxAnalysis.trend" :privacy-mode="privacyMode" />
+        <TaxBracketChart :data="dashboardStore.taxAnalysis.trend" />
       </div>
 
       <div class="bg-gradient-to-br from-blue-50 to-white dark:from-slate-800 dark:to-slate-900 rounded-xl border border-blue-100 dark:border-slate-700 shadow-soft p-6 relative overflow-hidden flex flex-col justify-center">
@@ -109,22 +109,25 @@
 </template>
 
 <script setup lang="ts">
-  import { onMounted } from 'vue';
-  // [修改] 引用新的 store
+  import { onMounted, computed } from 'vue';
   import { useDashboardStore } from '@/stores/dashboard.store';
+  import { useUIStore } from '@/stores/ui.store';
   import TaxBracketChart from '@/components/charts/TaxBracketChart.vue';
   import DashboardHeader from '@/views/dashboard/components/DashboardHeader.vue';
 
   const props = defineProps<{
     isActive: boolean;
-    privacyMode: boolean;
   }>();
 
   const dashboardStore = useDashboardStore();
+  const uiStore = useUIStore();
+  
+  // 使用计算属性确保响应性
+  const privacyMode = computed(() => uiStore.isPrivacyMode);
 
   onMounted(() => {
     dashboardStore.initDashboard();
   });
 
-  const masked = (val: string) => props.privacyMode ? '****' : val;
+  const masked = (val: string) => privacyMode.value ? '****' : val;
 </script>
