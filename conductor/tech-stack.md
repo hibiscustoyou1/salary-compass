@@ -1,12 +1,16 @@
 # 技术栈背景 (Tech Stack Context)
 
-## 系统架构 (Architecture)
--   **Monorepo**: 使用 `pnpm workspaces` 管理。
-    -   `apps/client`: 前端应用
-    -   `apps/server`: 后端服务
-    -   `packages/shared`: 前后端共享类型定义与工具库
+## 1. 项目全景与架构 (Project Architecture)
+本项目采用 Monorepo 架构（`pnpm workspaces`），核心工作区划分如下：
 
-## 核心依赖 (Core Dependencies)
+-   **`apps/client` (前端)**：
+    Vue 3 + Vite + TypeScript + Tailwind CSS + Pinia + ECharts。
+-   **`apps/server` (后端)**：
+    Node.js + Express + TypeScript + Prisma ORM + MySQL。
+-   **`packages/shared` (共享)**：
+    前后端共用的 TS 类型定义与 Node 工具函数，确保契约一致性。
+
+## 2. 核心依赖锁定 (Core Dependencies)
 
 ### 前端 (`apps/client`)
 -   **框架**: Vue 3.5.24 + Vite (Rolldown)
@@ -23,11 +27,7 @@
 -   **数据库**: MySQL
 -   **构建**: tsup
 
-## 开发环境 (Environment)
+## 3. 开发环境 (Environment)
 -   **包管理器**: pnpm 10.21.0
 -   **规范检查**: ESLint / Prettier (根目录配置)
 
-## 关键架构决策 (Architectural Decisions)
-1.  **拒绝隐式 Any**: 开启严格的 TypeScript 配置，禁止 `any` 蔓延。
-2.  **数据库原生聚合**: 所有涉及金额汇总（Sum）、平均值（Avg）的计算，**必须**使用 Prisma Aggregate (`groupBy`, `aggregate`) 下推至 MySQL 执行。严禁在 Node.js 内存中遍历全表数据。
-3.  **DTO 共享**: 所有 API 的请求/响应接口定义，必须统一存放于 `@repo/shared`，确保前后端契约一致。
