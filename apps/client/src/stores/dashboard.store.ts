@@ -167,14 +167,14 @@ export const useDashboardStore = defineStore('dashboard', () => {
     return wageStore.salaryHistory
       .slice()
       .sort((a, b) => a.period.localeCompare(b.period))
-      .map(r => parse(r.details.deductions['住房公积金']) * 2);
+      .map(r => parse(r.details.deductions.housingFund) * 2);
   });
 
   const annuityTrend = computed(() => {
     return wageStore.salaryHistory
       .slice()
       .sort((a, b) => a.period.localeCompare(b.period))
-      .map(r => parse(r.details.deductions['企业年金']) * 5);
+      .map(r => parse(r.details.deductions.corporateAnnuity) * 5);
   });
 
   const taxAnalysis = computed(() => {
@@ -188,54 +188,88 @@ export const useDashboardStore = defineStore('dashboard', () => {
     const effectiveRate = totalGrossVal > 0 ? ((totalTaxVal / totalGrossVal) * 100).toFixed(1) : '0.0';
 
     // [新增] 计算专项附加扣除 (取本年度最大累计值)
-    // 逻辑：遍历本年度所有记录，分别找到 '累计住房租金' 和 '累计婴幼儿照护' 的最大值，然后相加
-    // 之前逻辑是用 reduce 累加，但是这两个字段本身是 cumulative (累计) 的，但在后端返回时已被处理为单条记录的值 (controller 也是 max 逻辑?)
-    // 修正：后端 controller 对 groupedMap 用了 Math.max，说明返回给前端的每条 record (如果是一条) 里的这个字段已经是该时间段(month)的累计值
-    // 但前端拿到的是 list (salaryHistory)，每个月可能都有这个字段。
-    // 如果是"累计值"概念，那么"全年累计"应该就是"12月"(或最新月份)的那条记录里的值。
-    // 为了保险起见，我们在前端也取 Math.max，确保不错漏。
     let maxRent = 0;
     let maxChild = 0;
     thisYearRecords.forEach(r => {
-      const rent = parse(r.details.deductions['累计住房租金']);
-      const child = parse(r.details.deductions['累计婴幼儿照护']);
+      const rent = parse(r.details.deductions.rentDeduction);
+      const child = parse(r.details.deductions.childCareDeduction);
       if (rent > maxRent) maxRent = rent;
       if (child > maxChild) maxChild = child;
     });
     const deductionSavings = maxRent + maxChild;
 
-    // [修正] 生成完整 12 个月的趋势数据 (Cumulative)
+    // [修正] 生成完整 12 个月的趋势数据 (Cumulative Taxable Income)
     const trend = Array.from({ length: 12 }, (_, i) => {
       const monthIndex = i + 1; // 1-12
       const monthKey = monthIndex.toString().padStart(2, '0'); // "01", "02"...
+      const periodKey = `${targetYear}-${monthKey}`;
 
-      // 查找该月的记录
-      const record = thisYearRecords.find(r => r.period.endsWith(`-${monthKey}`));
+      // 截止到该月的所有记录 (用于计算累计值)
+      const recordsUntilNow = thisYearRecords.filter(r => r.period <= periodKey);
 
-      // 计算截止到该月的累计收入 (Cumulative Gross)
-      // 注意：这里需要计算"年初至今"的累计，不仅仅是当月
-      // 如果当月没有记录，但之前有，累计值应该保持？或者如果未来月份，累计值为0？
-      // 通常个税是按"累计预扣法"，所以我们应该显示"截至该月的累计收入"
-      let accumulated = 0;
-      if (record) {
-        // 如果该月有记录，计算从年初到该月的总和
-        accumulated = thisYearRecords
-          .filter(r => r.period <= record.period)
-          .reduce((sum, r) => sum + r.raw.gross, 0);
-      } else {
-        // 如果该月无记录（未来或缺失），为了图表连续性：
-        // 1. 如果是未来月份（大于当前数据最大月份），设为 0 或 null
-        // 2. 如果是中间缺失，保持上月？
-        // 这里简单处理：无记录则为 0。ECharts 会显示为低点。
-        // 或者，为了 X 轴完整，我们保留 0。
-        accumulated = 0;
+      // 如果截止到该月没有任何记录，为了图表连续性，显示为 0
+      if (recordsUntilNow.length === 0) {
+        return {
+          month: `${monthIndex}月`,
+          accumulated: 0,
+          currentRate: 0
+        };
       }
+
+      // 1. 累计计税基数 (cumTaxableBase) = 累计应发 + 累计伙食补贴
+      // AGENT.md: taxableBase = grossTotal + mealAllowance
+      const cumTaxableBase = recordsUntilNow.reduce((sum, r) => {
+        // r.raw.gross 已经是 grossTotal
+        // 额外的 mealAllowance 在 details.income['伙食补贴'] 中
+        return sum + r.raw.gross + parse(r.details.income.mealAllowance);
+      }, 0);
+
+      // 2. 累计专项扣除 (cumDeduction) = 养老 + 医疗 + 失业 + 公积金
+      const cumDeduction = recordsUntilNow.reduce((sum, r) => {
+        const d = r.details.deductions;
+        return sum + parse(d.pension) + parse(d.medicalInsurance) + parse(d.unemploymentIns) + parse(d.housingFund);
+      }, 0);
+
+      // 3. 累计其他扣除 (cumOtherDeduction) = 企业年金
+      const cumOtherDeduction = recordsUntilNow.reduce((sum, r) => {
+        return sum + parse(r.details.deductions.corporateAnnuity);
+      }, 0);
+
+      // 4. 累计专项附加扣除 (cumSpecialAddDeduction)
+      // 取截止当月记录中的最新一条记录的累计值
+      // 假设后端返回的 detached '累计xxx' 字段已经是截止该月的年度累计值
+      const lastRecord = recordsUntilNow[recordsUntilNow.length - 1];
+      // lastRecord 肯定存在，因为上面已经 check 了 recordsUntilNow.length === 0
+      const currentMonthRent = lastRecord ? parse(lastRecord.details.deductions.rentDeduction) : 0;
+      const currentMonthChild = lastRecord ? parse(lastRecord.details.deductions.childCareDeduction) : 0;
+      const cumSpecialAddDeduction = currentMonthRent + currentMonthChild;
+
+      // 5. 累计减除费用 (cumExemption) = 5000 * 当前月份数
+      // 注意：应该是 * (当前月份索引)，即 1月*1, 2月*2...
+      // 但实际上个税系统是看你的任职受雇月份数，这里简化假设为从年初开始
+      const cumExemption = 5000 * monthIndex;
+
+      // 6. 累计应纳税所得额 (cumTaxableIncome)
+      // AGENT.md: cumTaxableIncome = Σ(taxableBase) - cumDeduction - cumSpecialAddDeduction - cumExemption - cumOtherDeduction
+      const calculatedIncome = cumTaxableBase - cumDeduction - cumSpecialAddDeduction - cumExemption - cumOtherDeduction;
+      const accumulated = Math.max(0, calculatedIncome);
+
+      // 计算当前适用税率 (仅用于图表展示)
+      // 简单根据 accumulated 查表，不做精确推导
+      // 0-36000: 3%, 36000-144000: 10%, ...
+      let currentRate = 0;
+      if (accumulated <= 36000) currentRate = 3;
+      else if (accumulated <= 144000) currentRate = 10;
+      else if (accumulated <= 300000) currentRate = 20;
+      else if (accumulated <= 420000) currentRate = 25;
+      else if (accumulated <= 660000) currentRate = 30;
+      else if (accumulated <= 960000) currentRate = 35;
+      else currentRate = 45;
 
       return {
         month: `${monthIndex}月`,
         accumulated: accumulated,
-        // 这里 currentRate 前端暂时很难精确计算（需要复杂个税公式），先置 0 或后续由后端返回
-        currentRate: 0
+        currentRate: currentRate
       };
     });
 
@@ -258,10 +292,10 @@ export const useDashboardStore = defineStore('dashboard', () => {
 
     thisYearRecords.forEach(record => {
       const inc = record.details.income;
-      const f = parse(inc['岗位工资']) + parse(inc['月度绩效']) + parse(inc['综合补贴']);
-      const p = parse(inc['季度绩效']) + parse(inc['年度绩效']);
-      const s = parse(inc['人才特区奖金']) + parse(inc['专项激励']);
-      const sub = parse(inc['防暑降温']) + parse(inc['伙食补贴']) + parse(inc['其他工资']);
+      const f = parse(inc.baseSalary) + parse(inc.meritPay) + parse(inc.subsidy);
+      const p = parse(inc.quarterlyBonus) + parse(inc.annualBonus);
+      const s = parse(inc.talentBonus) + parse(inc.specialIncentive);
+      const sub = parse(inc.heatSubsidy) + parse(inc.mealAllowance) + parse(inc.otherWage);
       fixed += f; performance += p; special += s; subsidies += sub;
       total += (f + p + s + sub);
     });
@@ -278,7 +312,7 @@ export const useDashboardStore = defineStore('dashboard', () => {
   const totalAnnualGross = computed(() => {
     const targetYear = dashboardYear.value;
     const records = wageStore.salaryHistory.filter(r => r.year === targetYear);
-    const total = records.reduce((sum, r) => sum + r.raw.gross + parseFloat(r.details.income['伙食补贴'] || '0'), 0);
+    const total = records.reduce((sum, r) => sum + r.raw.gross + parseFloat(r.details.income.mealAllowance || '0'), 0);
     return `¥${total.toLocaleString()}`;
   });
 

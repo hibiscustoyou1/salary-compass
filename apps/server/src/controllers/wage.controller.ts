@@ -103,28 +103,28 @@ export const getSalaryHistory = async (req: Request, res: Response) => {
       status: '已发放',
       details: {
         income: {
-          '岗位工资': fmtStr(w.baseSalary),
-          '月度绩效': fmtStr(w.meritPay),
-          '综合补贴': fmtStr(w.subsidy),
-          '人才特区奖金': fmtStr(w.talentBonus),
-          '季度绩效': fmtStr(w.quarterlyBonus),
-          '年度绩效': fmtStr(w.annualBonus),
-          '防暑降温': fmtStr(w.heatSubsidy),
-          '专项激励': fmtStr(w.specialIncentive),
-          '其他工资': fmtStr(w.otherWage),
-          '伙食补贴': fmtStr(w.mealAllowance)
+          baseSalary: fmtStr(w.baseSalary),
+          meritPay: fmtStr(w.meritPay),
+          subsidy: fmtStr(w.subsidy),
+          talentBonus: fmtStr(w.talentBonus),
+          quarterlyBonus: fmtStr(w.quarterlyBonus),
+          annualBonus: fmtStr(w.annualBonus),
+          heatSubsidy: fmtStr(w.heatSubsidy),
+          specialIncentive: fmtStr(w.specialIncentive),
+          otherWage: fmtStr(w.otherWage),
+          mealAllowance: fmtStr(w.mealAllowance)
         } as Record<string, string>,
         deductions: {
-          '基本养老': fmtStr(w.pension),
-          '基本医疗': fmtStr(w.medicalInsurance),
-          '失业保险': fmtStr(w.unemploymentIns),
-          '住房公积金': fmtStr(w.housingFund),
-          '企业年金': fmtStr(w.corporateAnnuity),
-          '工会费': fmtStr(w.unionFee),
-          '个人所得税': fmtStr(w.taxAmount),
+          pension: fmtStr(w.pension),
+          medicalInsurance: fmtStr(w.medicalInsurance),
+          unemploymentIns: fmtStr(w.unemploymentIns),
+          housingFund: fmtStr(w.housingFund),
+          corporateAnnuity: fmtStr(w.corporateAnnuity),
+          unionFee: fmtStr(w.unionFee),
+          taxAmount: fmtStr(w.taxAmount),
           // [新增] 专项附加扣除
-          '累计住房租金': fmtStr(w.rentDeduction),
-          '累计婴幼儿照护': fmtStr(w.childCareDeduction)
+          rentDeduction: fmtStr(w.rentDeduction),
+          childCareDeduction: fmtStr(w.childCareDeduction)
         } as Record<string, string>
       },
       raw: {
