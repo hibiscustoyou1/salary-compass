@@ -8,13 +8,15 @@
   import { computed, ref, onMounted, onUnmounted } from 'vue';
   import BaseEChart from '@/components/charts/BaseEChart.vue';
   import { DEDUCTION_LABELS } from '@repo/shared';
+  import { useUIStore } from '@/stores/ui.store';
 
   const props = defineProps<{
     gross: string;
     deductions: Record<string, string>;
     net: string;
-    privacyMode: boolean;
   }>();
+
+  const uiStore = useUIStore();
 
   // --- Fix: Make isDark reactive to DOM changes ---
   const isDark = ref(document.documentElement.classList.contains('dark'));
@@ -40,6 +42,9 @@
   const parse = (v: string) => parseFloat(String(v).replace(/[^0-9.-]+/g, "")) || 0;
 
   const chartOptions = computed(() => {
+    // [修复] 显式读取以确保 reactive 依赖追踪
+    const isPrivacy = uiStore.isPrivacyMode;
+
     const grossVal = parse(props.gross);
     const netVal = parse(props.net);
 
@@ -85,7 +90,7 @@
           const prefix = types[item.dataIndex] === 'deduction' ? '-' : '';
           
           // [修复] Privacy Mode: Tooltip 脱敏
-          const displayVal = props.privacyMode ? '****' : `¥${val.toLocaleString()}`;
+          const displayVal = isPrivacy ? '****' : `¥${val.toLocaleString()}`;
           
           return `${name}<br/><b>${prefix}${displayVal}</b>`;
         },
@@ -141,7 +146,7 @@
             color: isDark.value ? '#e2e8f0' : '#334155',
             formatter: (p: any) => {
               // [修复] Privacy Mode: 标签脱敏
-              if (props.privacyMode) return '****';
+              if (isPrivacy) return '****';
 
               const t = types[p.dataIndex];
               const prefix = t === 'deduction' ? '-' : '';

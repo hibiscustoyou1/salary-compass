@@ -98,7 +98,6 @@
               :gross="currentSalaryDisplay.gross"
               :deductions="currentSalaryDisplay.details.deductions"
               :net="currentSalaryDisplay.net"
-              :privacy-mode="uiStore.isPrivacyMode"
             />
           </div>
         </div>
