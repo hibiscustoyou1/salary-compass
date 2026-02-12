@@ -1,14 +1,14 @@
 # 技术栈背景 (Tech Stack Context)
 
 ## 1. 项目全景与架构 (Project Architecture)
-本项目采用 Monorepo 架构（`pnpm workspaces`），核心工作区划分如下：
+本项目采用 Monorepo 架构（`pnpm workspaces`）：
 
 -   **`apps/client` (前端)**：
     Vue 3 + Vite + TypeScript + Tailwind CSS + Pinia + ECharts。
 -   **`apps/server` (后端)**：
     Node.js + Express + TypeScript + Prisma ORM + MySQL。
 -   **`packages/shared` (共享)**：
-    前后端共用的 TS 类型定义与 Node 工具函数，确保契约一致性。
+    前后端共用的 TS 类型定义与 Node 工具函数。
 
 ## 2. 核心依赖锁定 (Core Dependencies)
 

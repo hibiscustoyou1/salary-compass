@@ -19,6 +19,8 @@
     处理历史薪资聚合时，**必须**使用 Prisma 的数据库原生聚合（如 `groupBy`, `aggregate`）。
 3.  **API 契约**：
     所有响应统一使用 `packages/shared` 中的接口结构。
+4.  **常量管理**：
+    个税起征点（5000）必须定义在 `packages/shared` 的常量文件中。
 
 ## 3. 前端开发铁律与 UI 一致性 (Frontend & Design Rules)
 1.  **Vue 文件结构**：

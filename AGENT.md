@@ -17,7 +17,7 @@
 ## 3. 核心业务规则 (Core Business Logic) - ⚠️ 严禁篡改
 在处理任何数据统计、图表展示或逻辑计算时，必须严格应用以下财务逻辑（括号内为 Prisma 模型字段）：
 
-### 3.1 核心计算公式
+### 3.1 基础薪资计算
 1. **月度工资 (monthlyBase)**：
    `monthlyBase = baseSalary(岗位工资) + meritPay(月度绩效奖金) + subsidy(综合补贴) + otherWage(其他工资)`
 2. **当月额外收入 (extraIncome)**：
@@ -28,10 +28,23 @@
    `deductionTotal = unionFee(代扣工会费) + pension(养老保险) + medicalInsurance(医疗保险) + unemploymentIns(失业保险) + housingFund(住房公积金) + corporateAnnuity(企业年金) + taxAmount(本次扣税)`
 5. **实发合计 (netTotal)**：
    `netTotal = grossTotal - deductionTotal`
-6. **计税总额 (taxableBase)**：
+6. **当月计税基数 (taxableBase)**：
    `taxableBase = grossTotal + mealAllowance(伙食补贴)`
 
-### 3.2 资产与福利特殊逻辑
+### 3.2 年度累计计税逻辑 (Cumulative Tax Logic)
+*注意：Σ 表示该年度内从 1 月至当前期间的累加值。*
+7. **累计专项扣除 (cumDeduction)**：
+   `cumDeduction = Σ[pension + medicalInsurance + unemploymentIns + housingFund]`
+8. **累计专项附加扣除 (cumSpecialAddDeduction)**：
+   `cumSpecialAddDeduction = rentDeduction(累计住房租金专项扣除) + childCareDeduction(累计婴幼儿照护专项扣除)`
+9. **累计减除费用 (cumExemption)**：
+   `TAX_THRESHOLD = 5000; cumExemption = TAX_THRESHOLD * period(当前月份/期间)`
+10. **累计其他扣除 (cumOtherDeduction)**：
+    `cumOtherDeduction = Σ(corporateAnnuity)`
+11. **累计应纳税所得额 (cumTaxableIncome)**：
+    `cumTaxableIncome = Σ(taxableBase) - cumDeduction - cumSpecialAddDeduction - cumExemption - cumOtherDeduction`
+
+### 3.3 资产与福利特殊逻辑
 - **五险二金双边推算**：
   - **企业年金**：个人交 1 企业交 4，即 `年金总额 = corporateAnnuity * 5`。
   - **公积金**：必须按双边计算，即 `housingFund * 2`。
@@ -41,6 +54,7 @@
 1. **前置查阅机制**：编写查询前，**必须使用文件读取工具查阅 `apps/server/prisma/schema.prisma`**。严禁凭空猜测映射字段。
 2. **拒绝内存硬计算**：处理历史薪资聚合时，**必须**使用 Prisma 的数据库原生聚合（如 `groupBy`, `aggregate`）。
 3. **API 契约**：所有响应统一使用 `packages/shared` 中的接口结构。
+4. **常量管理**：个税起征点（5000）必须定义在 `packages/shared` 的常量文件中。
 
 ## 5. 前端开发铁律与 UI 一致性 (Frontend & Design Rules)
 1. **Vue 文件结构**：严格遵守 `<template>` -> `<script setup lang="ts">` -> `<style>` 的顺序。
