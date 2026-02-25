@@ -1,6 +1,6 @@
 # 任务追踪 (Track Registry)
 
 ## 进行中 (Active Tracks)
-- [x] auth-login-refactor: 重构 LoginView，消除英文文案与不当光效，打造纯净、高级的本土化财务管理沉浸体验。
+- [x] auth-logout-animation: 修复退出登录二次确认弹窗出现时，底层网页变模糊阶段过渡生硬的问题。
 
 ## 待办 (Backlog)

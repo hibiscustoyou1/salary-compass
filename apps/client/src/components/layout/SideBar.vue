@@ -45,17 +45,74 @@
           </div>
         </div>
 
-        <button @click="handleLogout" class="flex w-full items-center justify-center gap-2 rounded-xl h-10 px-4 border border-border-light dark:border-border-dark text-text-secondary-light dark:text-text-secondary-dark hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-red-custom transition-colors text-sm font-semibold">
+        <button @click="showLogoutModal = true" class="flex w-full items-center justify-center gap-2 rounded-xl h-10 px-4 border border-border-light dark:border-border-dark text-text-secondary-light dark:text-text-secondary-dark hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-red-custom transition-colors text-sm font-semibold">
           <span class="material-symbols-outlined text-lg overflow-hidden w-5 h-5 select-none text-center">logout</span>
           <span>退出登录</span>
         </button>
       </div>
     </div>
   </aside>
+
+  <!-- 高质感退出登录二次确认模态框 -->
+  <Teleport to="body">
+    <Transition name="modal-fade">
+      <div v-if="showLogoutModal" class="fixed inset-0 z-[100] flex items-center justify-center pointer-events-auto">
+        <!-- 模糊遮罩 (优化了模糊进入的过渡) -->
+        <Transition
+          enter-active-class="transition-all duration-300 ease-out"
+          leave-active-class="transition-all duration-300 ease-in"
+          enter-from-class="opacity-0 backdrop-blur-none"
+          enter-to-class="opacity-100 backdrop-blur-sm"
+          leave-from-class="opacity-100 backdrop-blur-sm"
+          leave-to-class="opacity-0 backdrop-blur-none"
+        >
+          <div v-if="showLogoutModal" class="absolute inset-0 bg-slate-900/40 dark:bg-black/60" @click="showLogoutModal = false"></div>
+        </Transition>
+        
+        <!-- 卡片主体 -->
+        <div class="relative bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl shadow-2xl shadow-black/20 w-full max-w-[340px] overflow-hidden transform transition-all">
+          
+          <div class="p-6">
+            <div class="flex items-center gap-4 mb-4">
+              <div class="flex-shrink-0 w-12 h-12 rounded-full bg-red-50 dark:bg-red-500/10 flex items-center justify-center">
+                <span class="material-symbols-outlined text-red-500 text-2xl">logout</span>
+              </div>
+              <div>
+                <h3 class="text-lg font-bold text-slate-900 dark:text-zinc-100">退出系统</h3>
+                <p class="text-xs text-slate-500 dark:text-zinc-400 mt-1">确认要注销当前访问凭证吗？</p>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 底部操作栏 -->
+          <div class="px-6 py-4 bg-slate-50 dark:bg-zinc-950/50 flex items-center justify-end gap-3 rounded-b-2xl border-t border-slate-100 dark:border-zinc-800">
+            <button 
+              @click="showLogoutModal = false" 
+              :disabled="isLoggingOut"
+              class="px-4 py-2 rounded-lg text-sm font-medium text-slate-600 dark:text-zinc-300 hover:bg-slate-200 dark:hover:bg-zinc-800 transition-colors tracking-wide disabled:opacity-50"
+            >
+              保持登录
+            </button>
+            <button 
+              @click="confirmLogout" 
+              :disabled="isLoggingOut"
+              class="relative flex items-center justify-center min-w-[88px] px-4 py-2 rounded-lg text-sm font-medium text-white bg-red-500 hover:bg-red-600 focus:ring-4 focus:ring-red-500/20 transition-all tracking-wide disabled:bg-red-400"
+            >
+              <span v-if="isLoggingOut" class="absolute inset-x-0 flex items-center justify-center">
+                <span class="animate-spin w-4 h-4 border-2 border-white/40 border-t-white rounded-full"></span>
+              </span>
+              <span :class="{ 'opacity-0': isLoggingOut }">确认退出</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </Transition>
+  </Teleport>
 </template>
 
 <script setup lang="ts">
-  import { computed } from 'vue';
+  import { computed, ref } from 'vue';
   import { useRouter, useRoute } from 'vue-router';
   import { useAuthStore } from '@/stores/auth.store'; // [新增] 引入 auth store
 
@@ -67,9 +124,20 @@
   const route = useRoute();
   const authStore = useAuthStore(); // [新增] 初始化 auth store
 
-  // 登出处理
-  const handleLogout = () => {
+  // 登出弹窗状态
+  const showLogoutModal = ref(false);
+  const isLoggingOut = ref(false);
+
+  // 确认登出处理
+  const confirmLogout = async () => {
+    isLoggingOut.value = true;
+    
+    // 增加一个极短的视觉缓冲延迟，增强安全退出的“卸载感”
+    await new Promise(resolve => setTimeout(resolve, 600));
+    
     authStore.logoutAction();
+    showLogoutModal.value = false;
+    isLoggingOut.value = false;
     router.push('/login');
   };
 
@@ -94,3 +162,20 @@
     }
   };
 </script>
+
+<style scoped>
+/* 模态框极简平滑进出动画 */
+.modal-fade-enter-active,
+.modal-fade-leave-active {
+  transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), backdrop-filter 0.3s ease;
+}
+.modal-fade-enter-from,
+.modal-fade-leave-to {
+  opacity: 0;
+  backdrop-filter: blur(0px);
+}
+.modal-fade-enter-from .relative,
+.modal-fade-leave-to .relative {
+  transform: scale(0.96) translateY(10px);
+}
+</style>
