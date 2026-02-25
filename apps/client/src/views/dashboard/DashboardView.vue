@@ -1,5 +1,5 @@
 <template>
-  <div class="max-w-[1400px] mx-auto flex flex-col gap-6" v-if="isActive">
+  <div class="max-w-[1400px] mx-auto flex flex-col gap-6">
 
     <ProvidentFundModal />
 
@@ -39,9 +39,10 @@
   import IncomeTrendSection from './components/IncomeTrendSection.vue';
   import IncomeStructureSection from './components/IncomeStructureSection.vue';
 
-  defineProps<{
-    isActive: boolean;
-  }>();
+  // 移除作为路由视图时不再需要的 isActive Prop
+  // defineProps<{
+  //   isActive: boolean;
+  // }>();
 
   const dashboardStore = useDashboardStore();
 

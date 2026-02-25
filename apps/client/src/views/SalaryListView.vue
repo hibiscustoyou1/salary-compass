@@ -162,7 +162,7 @@
   import SalaryWaterfall from '@/components/charts/SalaryWaterfall.vue';
   import { INCOME_LABELS, DEDUCTION_LABELS } from '@repo/shared';
 
-  defineProps<{ isActive: boolean; }>();
+  // defineProps<{ isActive: boolean; }>();
 
   const store = useWageStore();
   const uiStore = useUIStore(); // [新增] 实例化 UI Store

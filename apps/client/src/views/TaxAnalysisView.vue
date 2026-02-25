@@ -1,5 +1,5 @@
 <template>
-  <div class="max-w-[1400px] mx-auto flex flex-col gap-6" v-if="isActive">
+  <div class="max-w-[1400px] mx-auto flex flex-col gap-6">
     <!-- [新增] 独立年份选择器 -->
     <DashboardHeader />
 
@@ -126,9 +126,10 @@
   import TaxBracketChart from '@/components/charts/TaxBracketChart.vue';
   import DashboardHeader from '@/views/dashboard/components/DashboardHeader.vue';
 
-  const props = defineProps<{
-    isActive: boolean;
-  }>();
+  // 移除不再需要的 isActive Prop
+  // const props = defineProps<{
+  //   isActive: boolean;
+  // }>();
 
   const dashboardStore = useDashboardStore();
   const uiStore = useUIStore();

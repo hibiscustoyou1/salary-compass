@@ -1,6 +1,6 @@
 <template>
   <div class="flex h-screen w-full bg-background-light dark:bg-background-dark overflow-hidden font-sans text-text-main-light dark:text-text-main-dark transition-colors duration-200">
-    <Sidebar :model-value="currentTab" :privacy-mode="uiStore.isPrivacyMode" class="hidden lg:flex" />
+    <Sidebar :privacy-mode="uiStore.isPrivacyMode" class="hidden lg:flex" />
 
     <main class="flex-1 flex flex-col h-full overflow-hidden relative">
       <header class="sticky top-0 z-10 bg-card-light/80 dark:bg-card-dark/80 backdrop-blur-md px-4 lg:px-8 py-4 border-b border-border-light dark:border-border-dark flex justify-between items-center shrink-0 gap-4">
@@ -27,11 +27,7 @@
       </header>
 
       <div class="flex-1 overflow-y-auto p-4 md:p-8 scroll-smooth">
-        <router-view v-slot="{ Component }">
-          <transition name="fade" mode="out-in">
-            <component :is="Component" :is-active="true" />
-          </transition>
-        </router-view>
+        <slot />
       </div>
     </main>
   </div>
@@ -46,9 +42,6 @@
 
   const route = useRoute();
   const uiStore = useUIStore();
-
-  // 根据路由名称确定当前 Tab
-  const currentTab = computed(() => (route.name as string) || 'dashboard');
 
   // 根据路由 Meta 获取标题
   const currentTitle = computed(() => {

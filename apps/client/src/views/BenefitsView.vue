@@ -1,5 +1,5 @@
 <template>
-  <div class="max-w-[1200px] mx-auto flex flex-col gap-6 pb-10" v-if="isActive">
+  <div class="max-w-[1200px] mx-auto flex flex-col gap-6 pb-10">
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
       <div class="flex flex-col justify-between gap-4 rounded-xl border border-border-light dark:border-border-dark bg-card-light dark:bg-card-dark p-5 shadow-soft">
         <div class="flex items-center justify-between">
@@ -87,12 +87,13 @@
 <script setup lang="ts">
   import { ref, onMounted, computed } from 'vue';
   import { useBenefitsStore } from '@/stores/benefits.store';
+  import { useUIStore } from '@/stores/ui.store';
   import AssetGrowthChart from '@/components/charts/AssetGrowthChart.vue';
 
-  const props = defineProps<{
-    isActive: boolean;
-    privacyMode: boolean;
-  }>();
+  const uiStore = useUIStore();
+  const privacyMode = computed(() => uiStore.isPrivacyMode);
+
+
 
   const benefitsStore = useBenefitsStore();
   const returnRate = ref(4.5);
@@ -102,7 +103,7 @@
     benefitsStore.initBenefits();
   });
 
-  const masked = (val: string) => props.privacyMode ? '****' : val;
+  const masked = (val: string) => privacyMode.value ? '****' : val;
 
   // [优雅重构] 直接从后端数据模型取值，保证唯一真实数据源
   const currentMonthly = computed(() => {

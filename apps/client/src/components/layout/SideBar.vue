@@ -18,17 +18,16 @@
       </div>
 
       <nav class="flex flex-col gap-2 flex-1 overflow-y-auto">
-        <a v-for="tab in tabs" :key="tab.id" href="#"
-           @click.prevent="navigateTo(tab.id)"
-           :class="[
-             modelValue === tab.id
-             ? 'bg-primary text-white shadow-md shadow-primary/20'
-             : 'text-text-secondary-light dark:text-text-secondary-dark hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-primary dark:hover:text-blue-400',
-             'flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group'
-           ]">
-          <span class="material-symbols-outlined group-hover:scale-110 transition-transform overflow-hidden w-6 h-6 select-none text-center">{{ tab.icon }}</span>
-          <span class="text-sm font-medium">{{ tab.label }}</span>
-        </a>
+          <a v-for="tab in tabs" :key="tab.id" @click.prevent="handleNavigation(tab.id)"
+            :class="[
+                route.name === tab.id
+                ? 'bg-primary text-white shadow-md shadow-primary/20'
+                : 'text-text-secondary-light dark:text-text-secondary-dark hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-primary dark:hover:text-blue-400',
+                'flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group cursor-pointer'
+            ]">
+            <span class="material-symbols-outlined group-hover:scale-110 transition-transform overflow-hidden w-6 h-6 select-none text-center">{{ tab.icon }}</span>
+            <span class="text-sm font-medium">{{ tab.label }}</span>
+          </a>
       </nav>
 
       <div class="flex flex-col gap-4 mt-auto flex-shrink-0">
@@ -56,24 +55,34 @@
 </template>
 
 <script setup lang="ts">
-  import { useRouter } from 'vue-router';
+  import { computed } from 'vue';
+  import { useRouter, useRoute } from 'vue-router';
 
   defineProps<{
-    modelValue: string;
     privacyMode: boolean;
   }>();
-  // 此时不再需要 emit 'update:modelValue'，因为状态由 URL 驱动
 
   const router = useRouter();
+  const route = useRoute();
 
-  const tabs = [
-    { id: 'dashboard', label: '概览', icon: 'dashboard' },
-    { id: 'salary', label: '薪资详情', icon: 'payments' },
-    { id: 'tax', label: '税务分析', icon: 'account_balance' },
-    { id: 'benefits', label: '福利预测', icon: 'trending_up' }
-  ];
+  // 动态生成菜单项 (适应扁平化路由)
+  const tabs = computed(() => {
+    // 直接遍历所有路由，筛选出配置了 menuOrder 的项
+    return router.options.routes
+      .filter(r => r.meta && !r.meta.hidden && r.meta.menuOrder)
+      .sort((a, b) => (Number(a.meta?.menuOrder) || 0) - (Number(b.meta?.menuOrder) || 0))
+      .map(r => ({
+        id: r.name as string,
+        label: r.meta?.title as string,
+        icon: r.meta?.icon as string,
+        path: r.path
+      }));
+  });
 
-  const navigateTo = (name: string) => {
-    router.push({ name });
+  // 处理编程式导航
+  const handleNavigation = (name: string) => {
+    if (route.name !== name) {
+      router.push({ name });
+    }
   };
 </script>
