@@ -1,7 +1,5 @@
 <template>
   <div class="max-w-[1400px] mx-auto flex flex-col gap-6">
-    <!-- [新增] 独立年份选择器 -->
-    <DashboardHeader />
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
       <div class="bg-card-light dark:bg-card-dark rounded-xl p-6 border border-border-light dark:border-border-dark shadow-soft flex flex-col justify-between h-36">
@@ -124,7 +122,6 @@
   import { useDashboardStore } from '@/stores/dashboard.store';
   import { useUIStore } from '@/stores/ui.store';
   import TaxBracketChart from '@/components/charts/TaxBracketChart.vue';
-  import DashboardHeader from '@/views/dashboard/components/DashboardHeader.vue';
 
   // 移除不再需要的 isActive Prop
   // const props = defineProps<{

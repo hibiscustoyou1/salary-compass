@@ -3,8 +3,6 @@
 
     <ProvidentFundModal />
 
-    <DashboardHeader />
-
     <div v-if="dashboardStore.isLoading" class="flex justify-center py-20">
       <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
     </div>
@@ -31,7 +29,6 @@
 
   // 引入子组件
   import ProvidentFundModal from '@/views/dashboard/components/ProvidentFundModal.vue';
-  import DashboardHeader from './components/DashboardHeader.vue';
   import StatCardNetIncome from './components/StatCardNetIncome.vue';
   import StatCardTax from './components/StatCardTax.vue';
   import StatCardProvident from './components/StatCardProvident.vue';

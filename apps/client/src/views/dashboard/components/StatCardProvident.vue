@@ -15,7 +15,7 @@
     </div>
     <h3 class="text-2xl font-bold text-text-main-light dark:text-white mb-1">{{ masked(store.providentFundBalance) }}</h3>
     <div class="flex items-center gap-2">
-      <span class="text-xs text-emerald-custom bg-emerald-custom/10 px-1.5 py-0.5 rounded font-medium">+{{ store.lastYearInterest }}</span>
+      <span class="text-xs text-emerald-custom bg-emerald-custom/10 px-1.5 py-0.5 rounded font-medium">{{ store.lastYearInterest }}</span>
       <span class="text-text-secondary-light dark:text-text-secondary-dark text-xs">上年度结息</span>
     </div>
     <div class="h-10 mt-3 w-full opacity-50 group-hover:opacity-100 transition-opacity">
