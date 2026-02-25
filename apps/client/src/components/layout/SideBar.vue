@@ -45,7 +45,7 @@
           </div>
         </div>
 
-        <button class="flex w-full items-center justify-center gap-2 rounded-xl h-10 px-4 border border-border-light dark:border-border-dark text-text-secondary-light dark:text-text-secondary-dark hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-red-custom transition-colors text-sm font-semibold">
+        <button @click="handleLogout" class="flex w-full items-center justify-center gap-2 rounded-xl h-10 px-4 border border-border-light dark:border-border-dark text-text-secondary-light dark:text-text-secondary-dark hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-red-custom transition-colors text-sm font-semibold">
           <span class="material-symbols-outlined text-lg overflow-hidden w-5 h-5 select-none text-center">logout</span>
           <span>退出登录</span>
         </button>
@@ -57,6 +57,7 @@
 <script setup lang="ts">
   import { computed } from 'vue';
   import { useRouter, useRoute } from 'vue-router';
+  import { useAuthStore } from '@/stores/auth.store'; // [新增] 引入 auth store
 
   defineProps<{
     privacyMode: boolean;
@@ -64,6 +65,13 @@
 
   const router = useRouter();
   const route = useRoute();
+  const authStore = useAuthStore(); // [新增] 初始化 auth store
+
+  // 登出处理
+  const handleLogout = () => {
+    authStore.logoutAction();
+    router.push('/login');
+  };
 
   // 动态生成菜单项 (适应扁平化路由)
   const tabs = computed(() => {

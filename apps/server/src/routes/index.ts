@@ -1,11 +1,17 @@
 import { Router, Express } from 'express';
 import { assetRouter } from './asset.routes';
-import { wageRouter } from './wage.routes'; // [新增]
+import { wageRouter } from './wage.routes';
+import { authRouter } from './auth.routes';
+import { verifyToken } from '../middlewares/auth.middleware';
 
 const routes = Router();
 
-routes.use('/api/assets', assetRouter);
-routes.use('/api/wage', wageRouter); // [新增]
+// 对外暴露的鉴权路由（不需要 token 即可访问）
+routes.use('/api/auth', authRouter);
+
+// 受保护的业务路由
+routes.use('/api/assets', verifyToken, assetRouter);
+routes.use('/api/wage', verifyToken, wageRouter);
 
 export const initRoutes = (app: Express) => {
   app.use(routes);

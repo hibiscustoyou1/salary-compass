@@ -9,14 +9,35 @@ const http: AxiosInstance = axios.create({
   },
 });
 
+// 请求拦截器
+http.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
 // 响应拦截器
 http.interceptors.response.use(
   (response: AxiosResponse<ApiResponse>) => {
-    // 直接返回响应体 (包含 success, data 等)
-    return response.data as any; // 返回拦截器拆包后的数据
+    return response.data as any;
   },
   (error) => {
     console.error('Request Failed:', error);
+    if (error.response?.status === 401) {
+      // Token 无效或过期，清除后跳回登录页
+      localStorage.removeItem('token');
+      // 由于这里处于非 Vue 组件环境，直接使用 window.location.href 重定向更稳妥，或者通过全局导入 router 实例
+      if (window.location.pathname !== '/login') {
+        window.location.href = '/login';
+      }
+    }
     return Promise.reject(error);
   }
 );
