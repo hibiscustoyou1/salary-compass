@@ -13,14 +13,39 @@
         <h2 class="text-xl font-bold tracking-tight text-primary dark:text-blue-400">WealthTrack</h2>
       </div>
 
+      <!-- 高级精致个人信息卡片 -->
       <div
-        class="flex items-center gap-3 px-3 py-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-border-light dark:border-border-dark flex-shrink-0">
-        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Alex" alt="Avatar"
-          class="w-10 h-10 rounded-full border-2 border-white dark:border-slate-600 shadow-sm bg-white">
-        <div class="flex flex-col overflow-hidden">
-          <span class="text-sm font-bold truncate text-text-main-light dark:text-text-main-dark">Alex Morgan</span>
-          <span class="text-xs text-text-secondary-light dark:text-text-secondary-dark truncate">高级合伙人</span>
+        class="relative flex items-center gap-3 px-4 py-3.5 bg-gradient-to-br from-slate-50 to-white dark:from-slate-800/60 dark:to-slate-900/40 rounded-2xl border border-slate-200/60 dark:border-slate-700/50 shadow-sm hover:shadow-md hover:border-primary/30 dark:hover:border-primary/40 transition-all duration-300 cursor-pointer group flex-shrink-0 overflow-hidden">
+        <!-- 悬停时光效点缀 -->
+        <div
+          class="absolute -right-4 -top-4 w-16 h-16 bg-primary/5 dark:bg-primary/10 rounded-full blur-xl group-hover:bg-primary/10 dark:group-hover:bg-primary/20 transition-colors duration-500">
         </div>
+
+        <!-- 头像与微互动指示器 -->
+        <div class="relative flex-shrink-0">
+          <img src="/avatar.jpg" alt="User Avatar"
+            class="w-11 h-11 rounded-full border-2 border-white dark:border-slate-700 shadow-sm bg-white object-cover transform group-hover:scale-105 transition-transform duration-300 relative z-10">
+          <!-- 在线状态点 -->
+          <span
+            class="absolute bottom-0 right-0 w-3 h-3 bg-emerald-400 border-2 border-white dark:border-slate-800 rounded-full z-20"></span>
+        </div>
+
+        <!-- 卡片信息区 -->
+        <div class="flex flex-col flex-1 overflow-hidden z-10 gap-0.5">
+          <div class="flex items-center gap-1.5">
+            <span class="text-sm font-bold truncate text-slate-800 dark:text-slate-100 tracking-wide">zxt</span>
+            <!-- 蓝V认证徽章 -->
+            <span class="material-symbols-outlined text-[14px] text-blue-500 select-none"
+              title="Verified Member">verified</span>
+          </div>
+          <!-- 极简身份副标 -->
+          <span class="text-[11px] text-slate-400 dark:text-slate-500 font-medium tracking-wider uppercase">Workspace
+            Pro</span>
+        </div>
+
+        <!-- 悬浮唤起的侧边交互箭头 -->
+        <span
+          class="material-symbols-outlined text-slate-300 dark:text-slate-600 group-hover:text-primary transition-all duration-300 text-lg opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 z-10">chevron_right</span>
       </div>
 
       <nav class="flex flex-col gap-2 flex-1 overflow-y-auto">
