@@ -70,7 +70,7 @@
     </div>
 
     <div class="flex-1 w-full xl:flex-[1.2] bg-card-light dark:bg-card-dark rounded-xl shadow-soft border border-border-light dark:border-border-dark flex flex-col relative overflow-hidden transition-colors duration-200">
-      <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-primary to-blue-400"></div>
+      <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-primary to-blue-400 z-10"></div>
 
       <div v-if="currentSalaryDisplay" class="p-6 md:p-8 flex flex-col h-full overflow-y-auto custom-scrollbar">
         <div class="flex justify-between items-start mb-6 shrink-0">

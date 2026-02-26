@@ -13,8 +13,6 @@ COPY apps/server/package.json apps/server/package.json
 COPY packages/shared/package.json packages/shared/package.json
 COPY packages/tsconfig/package.json packages/tsconfig/package.json
 
-RUN #pnpm config set registry https://registry.npmmirror.com/
-
 RUN pnpm install
 
 COPY . .
