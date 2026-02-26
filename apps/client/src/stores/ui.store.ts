@@ -5,6 +5,7 @@ export const useUIStore = defineStore('ui', () => {
   // === State (Init from localStorage) ===
   const isDarkMode = ref(localStorage.getItem('theme') === 'dark');
   const isPrivacyMode = ref(localStorage.getItem('privacyMode') === 'true');
+  const isMobileMenuOpen = ref(false); // [移动端专用] 控制折叠菜单状态
 
   // === Actions ===
   const toggleTheme = () => {
@@ -13,6 +14,14 @@ export const useUIStore = defineStore('ui', () => {
 
   const togglePrivacy = () => {
     isPrivacyMode.value = !isPrivacyMode.value;
+  };
+
+  const toggleMobileMenu = () => {
+    isMobileMenuOpen.value = !isMobileMenuOpen.value;
+  };
+
+  const closeMobileMenu = () => {
+    isMobileMenuOpen.value = false;
   };
 
   // === Persistence & Side Effects ===
@@ -37,7 +46,10 @@ export const useUIStore = defineStore('ui', () => {
   return {
     isDarkMode,
     isPrivacyMode,
+    isMobileMenuOpen,
     toggleTheme,
-    togglePrivacy
+    togglePrivacy,
+    toggleMobileMenu,
+    closeMobileMenu
   };
 });
