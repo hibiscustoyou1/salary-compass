@@ -1,5 +1,6 @@
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-3.0.x"]
 }
 
 datasource db {
@@ -10,25 +11,25 @@ datasource db {
 model Wage {
   // === 基础信息 ===
   // [匹配] BIGINT UNSIGNED NOT NULL AUTO_INCREMENT
-  id         BigInt  @id @default(autoincrement()) @db.UnsignedBigInt
+  id BigInt @id @default(autoincrement()) @db.UnsignedBigInt
 
   // [匹配] VARCHAR(50)
   payoutDate String? @map("发放日期") @db.VarChar(50)
 
   // [匹配] INT
-  year       Int?    @map("年度")
-  period     Int?    @map("期间")
+  year   Int? @map("年度")
+  period Int? @map("期间")
 
   // [匹配] VARCHAR(50) / VARCHAR(100)
   personCode String? @map("人员编码") @db.VarChar(50)
   name       String? @map("姓名") @db.VarChar(100)
 
   // === 收入项 (Gross) ===
-  grossTotal       Decimal? @default(0.00) @map("应发合计") @db.Decimal(14, 2)
-  baseSalary       Decimal? @default(0.00) @map("岗位工资") @db.Decimal(14, 2)
-  meritPay         Decimal? @default(0.00) @map("月度绩效奖金") @db.Decimal(14, 2)
-  subsidy          Decimal? @default(0.00) @map("综合补贴") @db.Decimal(14, 2)
-  otherWage        Decimal? @default(0.00) @map("其他工资") @db.Decimal(14, 2)
+  grossTotal Decimal? @default(0.00) @map("应发合计") @db.Decimal(14, 2)
+  baseSalary Decimal? @default(0.00) @map("岗位工资") @db.Decimal(14, 2)
+  meritPay   Decimal? @default(0.00) @map("月度绩效奖金") @db.Decimal(14, 2)
+  subsidy    Decimal? @default(0.00) @map("综合补贴") @db.Decimal(14, 2)
+  otherWage  Decimal? @default(0.00) @map("其他工资") @db.Decimal(14, 2)
 
   // 奖金与激励
   talentBonus      Decimal? @default(0.00) @map("人才特区专项奖金") @db.Decimal(14, 2)
@@ -37,13 +38,13 @@ model Wage {
   specialIncentive Decimal? @default(0.00) @map("专项激励") @db.Decimal(14, 2)
 
   // 补贴
-  heatSubsidy      Decimal? @default(0.00) @map("防暑降温费") @db.Decimal(14, 2)
+  heatSubsidy   Decimal? @default(0.00) @map("防暑降温费") @db.Decimal(14, 2)
   // [映射回长列名]
-  mealAllowance    Decimal? @default(0.00) @map("伙食补贴（翼支付发放，合并工资计税）") @db.Decimal(14, 2)
+  mealAllowance Decimal? @default(0.00) @map("伙食补贴（翼支付发放，合并工资计税）") @db.Decimal(14, 2)
 
   // === 扣除项 (Deductions) ===
-  deductionTotal   Decimal? @default(0.00) @map("扣款合计") @db.Decimal(14, 2)
-  unionFee         Decimal? @default(0.00) @map("代扣工会费") @db.Decimal(14, 2)
+  deductionTotal Decimal? @default(0.00) @map("扣款合计") @db.Decimal(14, 2)
+  unionFee       Decimal? @default(0.00) @map("代扣工会费") @db.Decimal(14, 2)
 
   // [映射回长列名]
   pension          Decimal? @default(0.00) @map("基本养老保险（个人扣款）") @db.Decimal(14, 2)
@@ -56,31 +57,31 @@ model Wage {
   rentDeduction      Decimal? @default(0.00) @map("累计住房租金专项扣除额") @db.Decimal(14, 2)
   childCareDeduction Decimal? @default(0.00) @map("累计婴幼儿照护专项扣除额") @db.Decimal(14, 2)
 
-  taxableIncome      Decimal? @default(0.00) @map("累计应纳税额") @db.Decimal(14, 2)
-  taxAmount          Decimal? @default(0.00) @map("本次扣税") @db.Decimal(14, 2)
+  taxableIncome Decimal? @default(0.00) @map("累计应纳税额") @db.Decimal(14, 2)
+  taxAmount     Decimal? @default(0.00) @map("本次扣税") @db.Decimal(14, 2)
 
   // === 实发 ===
-  netTotal           Decimal? @default(0.00) @map("实发合计") @db.Decimal(14, 2)
+  netTotal Decimal? @default(0.00) @map("实发合计") @db.Decimal(14, 2)
 
-  @@map("mywage")
   // 索引建议
   @@index([year, period])
   @@index([name])
+  @@map("mywage")
 }
 
 // 新增模型：公积金/资产变动记录
 model AssetEvent {
-  id          BigInt   @id @default(autoincrement()) @db.UnsignedBigInt
-  type        String
-  category    String?
-  amount      Decimal  @db.Decimal(14, 2)
+  id       BigInt  @id @default(autoincrement()) @db.UnsignedBigInt
+  type     String
+  category String?
+  amount   Decimal @db.Decimal(14, 2)
 
   // [修改点] 删除了 @map("发生时间")，现在它对应数据库里的 `occurredAt` 列
-  occurredAt  DateTime
+  occurredAt DateTime
 
-  note        String?  @db.VarChar(200)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  note      String?  @db.VarChar(200)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("asset_events")
 }
