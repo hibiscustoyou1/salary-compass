@@ -16,7 +16,15 @@ export const getDashboardStats = async (req: Request, res: Response) => {
 
     // 1. 获取基础薪资数据
     const thisYearData = await prisma.wage.findMany({ where: { year: targetYear } });
-    const lastYearData = await prisma.wage.findMany({ where: { year: targetYear - 1 } });
+    const lastComparablePeriod = thisYearData.reduce((max, wage) => {
+      return wage.period && wage.period > max ? wage.period : max;
+    }, 0);
+    const lastYearData = await prisma.wage.findMany({
+      where: {
+        year: targetYear - 1,
+        ...(lastComparablePeriod > 0 ? { period: { lte: lastComparablePeriod } } : {})
+      }
+    });
 
     // 2. 计算常规 Dashboard 指标 (净收入/个税)
     let netIncomeYTD = 0;
