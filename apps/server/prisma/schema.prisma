@@ -1,8 +1,6 @@
 generator client {
   provider      = "prisma-client-js"
-  // "native" 保证本地(Mac/Win)能跑
-  // "linux-musl-openssl-3.0.x" 保证 Node 20/22 Alpine 能跑
-  binaryTargets = ["native", "linux-musl-openssl-3.0.x", "debian-openssl-3.0.x"]
+  binaryTargets = ["native", "debian-openssl-3.0.x"]
 }
 
 datasource db {
@@ -11,50 +9,79 @@ datasource db {
 }
 
 model Wage {
-  // 基础信息
-  paymentDate String? @map("发放日期") // 建议后续清洗为 Date 类型，目前保持 text
-  year        Float   @map("年度")
-  month       Float   @map("期间") // 将"期间"映射为更直观的 month
-  employeeId  Float   @map("人员编码")
-  name        String? @map("姓名")
+  // === 基础信息 ===
+  // [匹配] BIGINT UNSIGNED NOT NULL AUTO_INCREMENT
+  id BigInt @id @default(autoincrement()) @db.UnsignedBigInt
 
-  // 核心收入
-  grossPay   Float? @map("应发合计")
-  baseSalary Float? @map("岗位工资")
-  meritPay   Float? @map("月度绩效奖金")
-  subsidy    Float? @map("综合补贴")
-  otherBonus Float? @map("其他工资")
+  // [匹配] VARCHAR(50)
+  payoutDate String? @map("发放日期") @db.VarChar(50)
 
-  // 奖金类
-  talentBonus      Float? @map("人才特区专项奖金")
-  quarterlyBonus   Float? @map("季度绩效奖金")
-  annualBonus      Float? @map("年度绩效奖金")
-  specialIncentive Float? @map("专项激励")
+  // [匹配] INT
+  year   Int? @map("年度")
+  period Int? @map("期间")
 
-  // 扣减类
-  deductionTotal Float? @map("扣款合计")
-  unionFee       Float? @map("代扣工会费")
+  // [匹配] VARCHAR(50) / VARCHAR(100)
+  personCode String? @map("人员编码") @db.VarChar(50)
+  name       String? @map("姓名") @db.VarChar(100)
 
-  // 五险一金 (个人部分)
-  pension      Float? @map("基本养老保险（个人扣款）")
-  medical      Float? @map("基本医疗保险（个人扣款）")
-  unemployment Float? @map("失业保险（个人扣款）")
-  housingFund  Float? @map("住房公积金（个人扣款）")
-  annuity      Float? @map("企业年金（个人扣款）")
+  // === 收入项 (Gross) ===
+  grossTotal Decimal? @default(0.00) @map("应发合计") @db.Decimal(14, 2)
+  baseSalary Decimal? @default(0.00) @map("岗位工资") @db.Decimal(14, 2)
+  meritPay   Decimal? @default(0.00) @map("月度绩效奖金") @db.Decimal(14, 2)
+  subsidy    Decimal? @default(0.00) @map("综合补贴") @db.Decimal(14, 2)
+  otherWage  Decimal? @default(0.00) @map("其他工资") @db.Decimal(14, 2)
 
-  // 税务相关
-  taxableIncome Float? @map("累计应纳税额")
-  tax           Float? @map("本次扣税")
+  // 奖金与激励
+  talentBonus      Decimal? @default(0.00) @map("人才特区专项奖金") @db.Decimal(14, 2)
+  quarterlyBonus   Decimal? @default(0.00) @map("季度绩效奖金") @db.Decimal(14, 2)
+  annualBonus      Decimal? @default(0.00) @map("年度绩效奖金") @db.Decimal(14, 2)
+  specialIncentive Decimal? @default(0.00) @map("专项激励") @db.Decimal(14, 2)
 
-  // 专项附加扣除 (用于分析避税情况)
-  deductRent  Float? @map("累计住房租金专项扣除额")
-  deductChild Float? @map("累计婴幼儿照护专项扣除额")
+  // 补贴
+  heatSubsidy   Decimal? @default(0.00) @map("防暑降温费") @db.Decimal(14, 2)
+  // [映射回长列名]
+  mealAllowance Decimal? @default(0.00) @map("伙食补贴（翼支付发放，合并工资计税）") @db.Decimal(14, 2)
 
-  // 最终到手
-  netPay Float? @map("实发合计")
+  // === 扣除项 (Deductions) ===
+  deductionTotal Decimal? @default(0.00) @map("扣款合计") @db.Decimal(14, 2)
+  unionFee       Decimal? @default(0.00) @map("代扣工会费") @db.Decimal(14, 2)
 
-  // 设置联合主键，确保每人每月只有一条记录
-  @@id([year, month, employeeId])
-  // 映射表名
+  // [映射回长列名]
+  pension          Decimal? @default(0.00) @map("基本养老保险（个人扣款）") @db.Decimal(14, 2)
+  medicalInsurance Decimal? @default(0.00) @map("基本医疗保险（个人扣款）") @db.Decimal(14, 2)
+  unemploymentIns  Decimal? @default(0.00) @map("失业保险（个人扣款）") @db.Decimal(14, 2)
+  housingFund      Decimal? @default(0.00) @map("住房公积金（个人扣款）") @db.Decimal(14, 2)
+  corporateAnnuity Decimal? @default(0.00) @map("企业年金（个人扣款）") @db.Decimal(14, 2)
+
+  // === 税务与专项扣除 ===
+  rentDeduction      Decimal? @default(0.00) @map("累计住房租金专项扣除额") @db.Decimal(14, 2)
+  childCareDeduction Decimal? @default(0.00) @map("累计婴幼儿照护专项扣除额") @db.Decimal(14, 2)
+
+  taxableIncome Decimal? @default(0.00) @map("累计应纳税额") @db.Decimal(14, 2)
+  taxAmount     Decimal? @default(0.00) @map("本次扣税") @db.Decimal(14, 2)
+
+  // === 实发 ===
+  netTotal Decimal? @default(0.00) @map("实发合计") @db.Decimal(14, 2)
+
+  // 索引建议
+  @@index([year, period])
+  @@index([name])
   @@map("mywage")
+}
+
+// 新增模型：公积金/资产变动记录
+model AssetEvent {
+  id       BigInt  @id @default(autoincrement()) @db.UnsignedBigInt
+  type     String
+  category String?
+  amount   Decimal @db.Decimal(14, 2)
+
+  // [修改点] 删除了 @map("发生时间")，现在它对应数据库里的 `occurredAt` 列
+  occurredAt DateTime
+
+  note      String?  @db.VarChar(200)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("asset_events")
 }

@@ -1,26 +1,26 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-import { Result } from '@/utils/result';
-import { ApiCode } from '@repo/shared';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'salary-compass-secret-key-change-me';
+export const verifyToken = (req: Request, res: Response, next: NextFunction) => {
+  const authHeader = req.headers.authorization;
 
-export const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
-  // 获取标准 Authorization 头
-  const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1]; // 格式: "Bearer <token>"
-  
-  if (!token) {
-    // 如果没有 Token，直接拒绝
-    return Result.fail(res, '请先登录', ApiCode.UNAUTHORIZED, 401);
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({ success: false, error: '未授权访问，缺失或无效的 Token 格式' });
   }
-  
-  jwt.verify(token, JWT_SECRET, (err) => {
-    if (err) {
-      // Token 过期或无效
-      return Result.fail(res, '凭证已过期，请重新登录', ApiCode.UNAUTHORIZED, 401);
-    }
-    // 验证通过
+
+  const token = authHeader.split(' ')[1];
+  const secret = process.env.JWT_SECRET;
+
+  if (!secret) {
+    console.error('[Auth Middleware] JWT_SECRET 未配置在环境变量中');
+    return res.status(500).json({ success: false, error: '服务器配置错误' });
+  }
+
+  try {
+    const decoded = jwt.verify(token, secret);
+    // (req as any).user = decoded; // 此处仅用于单用户鉴权拦截，暂不需要注入用户上下文
     next();
-  });
+  } catch (error) {
+    return res.status(401).json({ success: false, error: 'Token 无效或已过期，请重新登录' });
+  }
 };

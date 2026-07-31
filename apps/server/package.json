@@ -19,15 +19,10 @@
     "@repo/shared": "workspace:*",
     "@repo/tsconfig": "workspace:*",
     "cors": "^2.8.5",
-    "dotenv": "^17.2.3",
     "express": "^5.1.0",
-    "jsonwebtoken": "^9.0.3",
-    "prisma": "^5.22.0",
-    "winston": "^3.19.0",
-    "winston-daily-rotate-file": "^5.0.0"
+    "jsonwebtoken": "^9.0.3"
   },
   "devDependencies": {
-    "@dotenvx/dotenvx": "^1.51.1",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.5",
     "@types/jsonwebtoken": "^9.0.10",

@@ -1,15 +1,17 @@
 import { Router } from 'express';
-import { getWages } from '@/controllers/wage.controller';
-import { verifyLogin } from '@/controllers/auth.controller';
-import { authMiddleware } from '@/middlewares/auth.middleware';
+import * as wageController from '../controllers/wage.controller';
+import * as dashboardController from '../controllers/dashboard.controller';
+import * as benefitsController from '../controllers/benefits.controller';
 
 const router = Router();
 
-// ✅ 正确写法：
-// 1. 公开接口放前面 (不需要 authMiddleware)
-router.post('/verify', verifyLogin);
+// 工资条历史
+router.get('/salary/history', wageController.getSalaryHistory);
 
-// 2. 受保护接口放后面 (加上 authMiddleware)
-router.get('/wages', authMiddleware, getWages);
+// 仪表盘数据
+router.get('/dashboard/stats', dashboardController.getDashboardStats);
+
+// 福利概览数据
+router.get('/benefits/stats', benefitsController.getBenefitsStats);
 
 export const wageRouter = router;

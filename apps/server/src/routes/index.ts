@@ -1,18 +1,22 @@
-import { Express, Router } from 'express';
+import { Router, Express } from 'express';
+import { assetRouter } from './asset.routes';
 import { wageRouter } from './wage.routes';
-import { Result } from '@/utils/result';
-import { ApiCode } from '@repo/shared';
+import { authRouter } from './auth.routes';
+import { verifyToken } from '../middlewares/auth.middleware';
 
 const routes = Router();
 
-routes.use('/api', wageRouter);
+// 对外暴露的鉴权路由（不需要 token 即可访问）
+routes.use('/api/auth', authRouter);
+
+// 受保护的业务路由
+routes.use('/api/assets', verifyToken, assetRouter);
+routes.use('/api/wage', verifyToken, wageRouter);
 
 export const initRoutes = (app: Express) => {
   app.use(routes);
-  
-  // 全局 404 处理
   app.all(/^\/api\/.*$/, (req, res) => {
     console.warn(`⚠️ API 404: ${req.path}`);
-    Result.fail(res, `接口不存在: ${req.path}`, ApiCode.NOT_FOUND, 404);
+    res.status(404).json({ success: false, error: '未找到API端点' });
   });
 };
