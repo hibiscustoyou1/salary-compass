@@ -20,10 +20,6 @@ model Wage {
   year   Int? @map("年度")
   period Int? @map("期间")
 
-  // [匹配] VARCHAR(50) / VARCHAR(100)
-  personCode String? @map("人员编码") @db.VarChar(50)
-  name       String? @map("姓名") @db.VarChar(100)
-
   // === 收入项 (Gross) ===
   grossTotal Decimal? @default(0.00) @map("应发合计") @db.Decimal(14, 2)
   baseSalary Decimal? @default(0.00) @map("岗位工资") @db.Decimal(14, 2)
